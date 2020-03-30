@@ -6,7 +6,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="https://wushanchi.cn/"/>
-  <updated>2020-03-30T07:39:07.805Z</updated>
+  <updated>2020-03-30T08:24:52.549Z</updated>
   <id>https://wushanchi.cn/</id>
   
   <author>
@@ -15,6 +15,20 @@
   </author>
   
   <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>test article</title>
+    <link href="https://wushanchi.cn/2020/03/30/test-article/"/>
+    <id>https://wushanchi.cn/2020/03/30/test-article/</id>
+    <published>2020-03-30T08:24:52.000Z</published>
+    <updated>2020-03-30T08:24:52.549Z</updated>
+    
+    <summary type="html">
+    
+    </summary>
+    
+    
+  </entry>
   
   <entry>
     <title>十大经典排序算法整理汇总（附代码）</title>
