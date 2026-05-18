@@ -213,7 +213,29 @@
       .detail-panel.visible { transform: translateY(0); }
       .card-content { grid-template-columns: 1fr; }
     }
-  </style>
+  
+    /* Code blocks */
+    .code-block {
+        background: var(--bg-primary);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 16px;
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 11px;
+        line-height: 1.5;
+        color: var(--text-secondary);
+        overflow-x: auto;
+        white-space: pre-wrap;
+        word-break: break-word;
+        max-height: 400px;
+        overflow-y: auto;
+    }
+    .code-block .keyword { color: var(--accent-pink); }
+    .code-block .string { color: var(--accent-green); }
+    .code-block .comment { color: var(--text-muted); font-style: italic; }
+    .code-block .function { color: var(--accent-yellow); }
+
+</style>
 </head>
 <body>
   <section class="hero">
@@ -864,10 +886,414 @@
     </div>
   </section>
 
+  <!-- PyTorch Code Explanation -->
+  <section>
+    <div class="container">
+      <div class="section-header">
+        <div class="section-label">Code</div>
+        <h2 class="section-title">PyTorch 实现详解</h2>
+      </div>
+
+      <!-- Module 1: Input Encoding -->
+      <div class="module-card blue">
+        <div class="card-header">
+          <div class="card-icon">📥</div>
+          <div>
+            <div class="card-title">1. 输入编码 (Embedding + Positional Encoding)</div>
+            <div class="card-subtitle">Input Embedding & Positional Encoding</div>
+          </div>
+        </div>
+        <div class="card-content">
+          <div class="card-text">
+            <p><strong>工作原理</strong>: 将离散的 token ID 通过查表方式映射为连续的 d_model 维向量，然后注入位置信息。</p>
+            <p><strong>维度变化</strong>: <code>[B, L] → [B, L, D] → [B, L, D]</code></p>
+            <p><strong>位置编码公式</strong>:</p>
+            <p>偶数维度: <code>PE(pos, 2i) = sin(pos / 10000^(2i/D))</code></p>
+            <p>奇数维度: <code>PE(pos, 2i+1) = cos(pos / 10000^(2i/D))</code></p>
+            <p><strong>为什么用 sin/cos?</strong> 可以让模型学习相对位置（因为 sin(α+β) 和 cos(α+β) 可以表达位置差）。</p>
+          </div>
+          <div class="tensor-flow">
+            <div class="tensor-flow-title">PyTorch 实现</div>
+            <pre class="code-block">class InputEmbedding(nn.Module):
+    def __init__(self, vocab_size, d_model):
+        super().__init__()
+        self.embedding = nn.Embedding(vocab_size, d_model)
+        self.d_model = d_model
+    
+    def forward(self, x):
+        # x: [B, L] → [B, L, D]
+        return self.embedding(x) * math.sqrt(self.d_model)
+
+class PositionalEncoding(nn.Module):
+    def __init__(self, d_model, max_len=5000):
+        pe = torch.zeros(max_len, d_model)
+        position = torch.arange(0, max_len).unsqueeze(1)
+        div_term = torch.exp(
+            torch.arange(0, d_model, 2) * (-math.log(10000.0) / d_model)
+        )
+        pe[:, 0::2] = torch.sin(position * div_term)
+        pe[:, 1::2] = torch.cos(position * div_term)
+        pe = pe.unsqueeze(0)  # [1, max_len, d_model]
+        self.register_buffer('pe', pe)
+    
+    def forward(self, x):
+        # x: [B, L, D] → 加位置编码 → [B, L, D]
+        return x + self.pe[:, :x.size(1), :]</pre>
+          </div>
+        </div>
+      </div>
+
+      <!-- Module 2: Multi-Head Self-Attention -->
+      <div class="module-card orange">
+        <div class="card-header">
+          <div class="card-icon">🔍</div>
+          <div>
+            <div class="card-title">2. 多头自注意力 (Multi-Head Self-Attention)</div>
+            <div class="card-subtitle">Multi-Head Self-Attention Mechanism</div>
+          </div>
+        </div>
+        <div class="card-content">
+          <div class="card-text">
+            <p><strong>核心公式</strong>: <code>Attention(Q,K,V) = softmax(QK^T / √d_k) · V</code></p>
+            <p><strong>维度变化</strong>:</p>
+            <p><code>[B, L, D] → 分 h 头 → [B, h, L, d_k] → 注意力 → [B, h, L, d_k] → concat → [B, L, D]</code></p>
+            <p><strong>为什么多头?</strong> 不同头可学习不同类型的依赖关系（语法、语义、指代等）。</p>
+            <p><strong>残差连接</strong>: 主路径与子层输出相加，梯度可直传，避免深层网络梯度消失。</p>
+          </div>
+          <div class="tensor-flow">
+            <div class="tensor-flow-title">维度计算</div>
+            <div class="tensor-row"><span class="tensor-name">D</span><span class="tensor-arrow">=</span><span class="tensor-dims">512 (模型维度)</span></div>
+            <div class="tensor-row"><span class="tensor-name">h</span><span class="tensor-arrow">=</span><span class="tensor-dims">8 (头数)</span></div>
+            <div class="tensor-row"><span class="tensor-name">d_k</span><span class="tensor-arrow">=</span><span class="tensor-dims">64 (每头维度 = D/h)</span></div>
+            <div class="tensor-row"><span class="tensor-name">QK^T</span><span class="tensor-arrow">=</span><span class="tensor-dims">[B,h,L,d_k] @ [B,h,d_k,L] = [B,h,L,L]</span></div>
+            <div class="tensor-row"><span class="tensor-name">输出</span><span class="tensor-arrow">=</span><span class="tensor-dims">拼接8个64维→512维</span></div>
+            <div class="tensor-flow-title">PyTorch 实现</div>
+            <pre class="code-block">class MultiHeadAttention(nn.Module):
+    def __init__(self, d_model, num_heads):
+        super().__init__()
+        self.d_k = d_model // num_heads
+        self.W_q = nn.Linear(d_model, d_model)
+        self.W_k = nn.Linear(d_model, d_model)
+        self.W_v = nn.Linear(d_model, d_model)
+        self.W_o = nn.Linear(d_model, d_model)
+    
+    def forward(self, query, key, value, mask=None):
+        B, L, D = query.shape
+        h = self.d_k
+        
+        # 线性投影
+        Q = self.W_q(query).view(B, L, h, d_k).transpose(1,2)
+        K = self.W_k(key).view(B, -1, h, d_k).transpose(1,2)
+        V = self.W_v(value).view(B, -1, h, d_k).transpose(1,2)
+        
+        # 注意力分数: QK^T / √d_k
+        scores = torch.matmul(Q, K.transpose(-2,-1)) / math.sqrt(d_k)
+        if mask: scores = scores.masked_fill(mask==0, float('-inf'))
+        
+        # Softmax → 加权求和
+        attn = F.softmax(scores, dim=-1)
+        context = torch.matmul(attn, V)  # [B,h,L,d_k]
+        
+        # 合并多头 → 线性投影
+        context = context.transpose(1,2).contiguous().view(B, L, D)
+        return self.W_o(context)</pre>
+          </div>
+        </div>
+      </div>
+
+      <!-- Module 3: FFN -->
+      <div class="module-card purple">
+        <div class="card-header">
+          <div class="card-icon">⚡</div>
+          <div>
+            <div class="card-title">3. 前馈神经网络 (Feed Forward Network)</div>
+            <div class="card-subtitle">Position-wise FFN</div>
+          </div>
+        </div>
+        <div class="card-content">
+          <div class="card-text">
+            <p><strong>公式</strong>: <code>FFN(x) = max(0, xW₁+b₁)W₂+b₂</code></p>
+            <p><strong>维度变化</strong>: <code>[B, L, 512] → [B, L, 2048] → [B, L, 512]</code></p>
+            <p><strong>为什么扩展 4 倍?</strong> 更大的隐藏层维度让模型有更多容量学习复杂的非线性变换。</p>
+            <p><strong>逐位置 (Position-wise)</strong>: 对序列中每个位置的向量独立应用相同变换。</p>
+            <p><strong>Attention vs FFN</strong>: Attention 负责"谁该关注谁"（信息流动），FFN 负责"如何表示"（信息变换）。</p>
+          </div>
+          <div class="tensor-flow">
+            <div class="tensor-flow-title">维度变化详解</div>
+            <div class="tensor-row"><span class="tensor-name">输入</span><span class="tensor-arrow">→</span><span class="tensor-dims">[B, L, 512]</span></div>
+            <div class="tensor-row"><span class="tensor-name">W1</span><span class="tensor-arrow">→</span><span class="tensor-dims">[512, 2048] → [B,L,2048]</span></div>
+            <div class="tensor-row"><span class="tensor-name">ReLU</span><span class="tensor-arrow">→</span><span class="tensor-dims">[B, L, 2048]</span></div>
+            <div class="tensor-row"><span class="tensor-name">W2</span><span class="tensor-arrow">→</span><span class="tensor-dims">[2048, 512] → [B,L,512]</span></div>
+            <div class="tensor-flow-title">PyTorch 实现</div>
+            <pre class="code-block">class FeedForward(nn.Module):
+    def __init__(self, d_model, d_ff):
+        super().__init__()
+        self.fc1 = nn.Linear(d_model, d_ff)   # [D, d_ff]
+        self.fc2 = nn.Linear(d_ff, d_model)     # [d_ff, D]
+    
+    def forward(self, x):
+        # x: [B, L, D] → [B, L, d_ff] → [B, L, D]
+        return self.fc2(F.relu(self.fc1(x)))</pre>
+          </div>
+        </div>
+      </div>
+
+      <!-- Module 4: LayerNorm & Add -->
+      <div class="module-card cyan">
+        <div class="card-header">
+          <div class="card-icon">📊</div>
+          <div>
+            <div class="card-title">4. 层归一化 & 残差连接 (LayerNorm & Add)</div>
+            <div class="card-subtitle">Add & LayerNorm</div>
+          </div>
+        </div>
+        <div class="card-content">
+          <div class="card-text">
+            <p><strong>LayerNorm 公式</strong>: <code>LN(x) = γ ⊙ (x - μ) / √(σ² + ε) + β</code></p>
+            <p><strong>归一化维度</strong>: 在特征维度 D 上归一化，对每个样本、每个位置独立处理。</p>
+            <p><strong>与 BatchNorm 区别</strong>: BatchNorm 在 batch 维度归一化，LayerNorm 在特征维度归一化。</p>
+            <p><strong>残差连接</strong>: <code>output = LayerNorm(x + Sublayer(x))</code></p>
+            <p><strong>残差好处</strong>: 梯度可以直接回传，避免深层网络梯度消失；让网络更容易学习恒等映射。</p>
+          </div>
+          <div class="tensor-flow">
+            <div class="tensor-flow-title">维度变化</div>
+            <div class="tensor-row"><span class="tensor-name">x</span><span class="tensor-arrow">→</span><span class="tensor-dims">[B, L, D]</span></div>
+            <div class="tensor-row"><span class="tensor-name">Sublayer</span><span class="tensor-arrow">→</span><span class="tensor-dims">[B, L, D]</span></div>
+            <div class="tensor-row"><span class="tensor-name">x + Sub</span><span class="tensor-arrow">→</span><span class="tensor-dims">[B, L, D]</span></div>
+            <div class="tensor-row"><span class="tensor-name">LN</span><span class="tensor-arrow">→</span><span class="tensor-dims">[B, L, D]</span></div>
+            <div class="tensor-flow-title">PyTorch 实现</div>
+            <pre class="code-block">class LayerNorm(nn.Module):
+    def __init__(self, d_model, eps=1e-6):
+        super().__init__()
+        self.gamma = nn.Parameter(torch.ones(d_model))
+        self.beta = nn.Parameter(torch.zeros(d_model))
+        self.eps = eps
+    
+    def forward(self, x):
+        mean = x.mean(dim=-1, keepdim=True)
+        std = x.std(dim=-1, keepdim=True)
+        return self.gamma * (x - mean) / (std + self.eps) + self.beta
+
+class AddAndNorm(nn.Module):
+    def __init__(self, sublayer, d_model):
+        super().__init__()
+        self.layernorm = LayerNorm(d_model)
+    
+    def forward(self, x, sublayer_output):
+        return self.layernorm(x + sublayer_output)</pre>
+          </div>
+        </div>
+      </div>
+
+      <!-- Module 5: Causal Mask -->
+      <div class="module-card orange">
+        <div class="card-header">
+          <div class="card-icon">🎭</div>
+          <div>
+            <div class="card-title">5. 因果掩码 (Causal Mask)</div>
+            <div class="card-subtitle">Decoder Masked Self-Attention</div>
+          </div>
+        </div>
+        <div class="card-content">
+          <div class="card-text">
+            <p><strong>作用</strong>: 确保 Decoder 在预测第 t 个 token 时，只能看到位置 1 到 t-1 的信息。</p>
+            <p><strong>实现</strong>: 在 softmax 前，将上三角位置设为 <code>-∞</code></p>
+            <p><strong>效果</strong>: <code>softmax(-∞) = 0</code>，这些位置的注意力权重变为 0，实现因果（causal）特性。</p>
+            <p><strong>为什么需要?</strong>: 训练时如果能看到未来 token，模型会"作弊"；推理时未来 token 还不存在。</p>
+          </div>
+          <div class="tensor-flow">
+            <div class="tensor-flow-title">因果 Mask 示例 (L=4)</div>
+            <div class="tensor-row"><span class="tensor-name">位置0</span><span class="tensor-arrow">→</span><span class="tensor-dims">可见 [0,1,2,3]</span></div>
+            <div class="tensor-row"><span class="tensor-name">位置1</span><span class="tensor-arrow">→</span><span class="tensor-dims">可见 [0,1,2,3]</span></div>
+            <div class="tensor-row"><span class="tensor-name">位置2</span><span class="tensor-arrow">→</span><span class="tensor-dims">遮蔽 [0,1,-inf,3]</span></div>
+            <div class="tensor-row"><span class="tensor-name">位置3</span><span class="tensor-arrow">→</span><span class="tensor-dims">遮蔽 [0,1,2,-inf]</span></div>
+            <div class="tensor-flow-title">PyTorch 实现</div>
+            <pre class="code-block">def causal_mask(seq_len):
+    \"\"\"创建上三角遮蔽掩码\"\"\"
+    mask = torch.triu(torch.ones(seq_len, seq_len), diagonal=1)
+    return mask.unsqueeze(0).unsqueeze(0)  # [1,1,L,L]
+
+# 使用时:
+scores = scores.masked_fill(mask == 0, float('-inf'))</pre>
+          </div>
+        </div>
+      </div>
+
+      <!-- Module 6: Encoder Layer -->
+      <div class="module-card blue">
+        <div class="card-header">
+          <div class="card-icon">🏗️</div>
+          <div>
+            <div class="card-title">6. 完整的 Encoder Layer</div>
+            <div class="card-subtitle">Full Encoder Layer with 6 Layers</div>
+          </div>
+        </div>
+        <div class="card-content">
+          <div class="card-text">
+            <p><strong>结构</strong>:</p>
+            <p>1. Multi-Head Self-Attention → Add & LayerNorm</p>
+            <p>2. Feed Forward Network → Add & LayerNorm</p>
+            <p><strong>维度</strong>: 输入 <code>[B, L, 512]</code> → 输出 <code>[B, L, 512]</code>（维度保持不变）</p>
+            <p><strong>堆叠</strong>: 6 个相同的 Encoder Layer 堆叠</p>
+            <p><strong>Encoder 输出</strong>: 每层输出传向下一层，最终层的输出作为 Decoder 的 K、V 来源</p>
+          </div>
+          <div class="tensor-flow">
+            <div class="tensor-flow-title">数据流</div>
+            <div class="tensor-row"><span class="tensor-name">Input</span><span class="tensor-arrow">→</span><span class="tensor-dims">[B, L, 512]</span></div>
+            <div class="tensor-row"><span class="tensor-name">Attn</span><span class="tensor-arrow">→</span><span class="tensor-dims">[B,L,512] → Add&LN → [B,L,512]</span></div>
+            <div class="tensor-row"><span class="tensor-name">FFN</span><span class="tensor-arrow">→</span><span class="tensor-dims">[B,L,512] → Add&LN → [B,L,512]</span></div>
+            <div class="tensor-row"><span class="tensor-name">×6</span><span class="tensor-arrow">→</span><span class="tensor-dims">堆叠6层后输出 [B,L,512]</span></div>
+            <div class="tensor-flow-title">PyTorch 实现</div>
+            <pre class="code-block">class EncoderLayer(nn.Module):
+    def __init__(self, d_model, num_heads, d_ff):
+        super().__init__()
+        self.self_attn = MultiHeadAttention(d_model, num_heads)
+        self.ffn = FeedForward(d_model, d_ff)
+        self.norm1 = LayerNorm(d_model)
+        self.norm2 = LayerNorm(d_model)
+    
+    def forward(self, x, mask=None):
+        # Self-Attention + Add&Norm
+        attn_out = self.self_attn(x, x, x, mask)
+        x = self.norm1(x + attn_out)
+        
+        # FFN + Add&Norm
+        ffn_out = self.ffn(x)
+        x = self.norm2(x + ffn_out)
+        return x
+
+class TransformerEncoder(nn.Module):
+    def __init__(self, num_layers=6, **kwargs):
+        super().__init__()
+        self.layers = nn.ModuleList([
+            EncoderLayer(**kwargs) for _ in range(num_layers)
+        ])
+    
+    def forward(self, x, mask=None):
+        for layer in self.layers:
+            x = layer(x, mask)
+        return x</pre>
+          </div>
+        </div>
+      </div>
+
+      <!-- Module 7: Decoder Layer -->
+      <div class="module-card pink">
+        <div class="card-header">
+          <div class="card-icon">🏛️</div>
+          <div>
+            <div class="card-title">7. 完整的 Decoder Layer</div>
+            <div class="card-subtitle">Full Decoder Layer with Cross Attention</div>
+          </div>
+        </div>
+        <div class="card-content">
+          <div class="card-text">
+            <p><strong>结构</strong>:</p>
+            <p>1. Masked Self-Attention (因果) → Add & LayerNorm</p>
+            <p>2. Cross Attention (Q from decoder, K/V from encoder) → Add & LayerNorm</p>
+            <p>3. Feed Forward Network → Add & LayerNorm</p>
+            <p><strong>Cross Attention</strong>: Q 来自 Decoder，K 和 V 来自 Encoder 输出。让 Decoder 可关注源序列所有位置。</p>
+          </div>
+          <div class="tensor-flow">
+            <div class="tensor-flow-title">数据流</div>
+            <div class="tensor-row"><span class="tensor-name">Input</span><span class="tensor-arrow">→</span><span class="tensor-dims">[B, L_tgt, 512]</span></div>
+            <div class="tensor-row"><span class="tensor-name">MaskAttn</span><span class="tensor-arrow">→</span><span class="tensor-dims">因果遮蔽 → Add&LN</span></div>
+            <div class="tensor-row"><span class="tensor-name">Cross</span><span class="tensor-arrow">→</span><span class="tensor-dims">Q=Dec, K/V=Enc → Add&LN</span></div>
+            <div class="tensor-row"><span class="tensor-name">FFN</span><span class="tensor-arrow">→</span><span class="tensor-dims">→ Add&LN</span></div>
+            <div class="tensor-flow-title">PyTorch 实现</div>
+            <pre class="code-block">class DecoderLayer(nn.Module):
+    def __init__(self, d_model, num_heads, d_ff):
+        super().__init__()
+        self.masked_attn = MultiHeadAttention(d_model, num_heads)
+        self.cross_attn = MultiHeadAttention(d_model, num_heads)
+        self.ffn = FeedForward(d_model, d_ff)
+        self.norm1 = LayerNorm(d_model)
+        self.norm2 = LayerNorm(d_model)
+        self.norm3 = LayerNorm(d_model)
+    
+    def forward(self, x, encoder_output, tgt_mask=None, src_mask=None):
+        # Masked Self-Attention
+        masked_out = self.masked_attn(x, x, x, tgt_mask)
+        x = self.norm1(x + masked_out)
+        
+        # Cross Attention: Q=decoder, K/V=encoder
+        cross_out = self.cross_attn(x, encoder_output, encoder_output, src_mask)
+        x = self.norm2(x + cross_out)
+        
+        # FFN
+        ffn_out = self.ffn(x)
+        x = self.norm3(x + ffn_out)
+        return x</pre>
+          </div>
+        </div>
+      </div>
+
+      <!-- Module 8: Full Transformer -->
+      <div class="module-card green">
+        <div class="card-header">
+          <div class="card-icon">🌐</div>
+          <div>
+            <div class="card-title">8. 完整 Transformer 模型</div>
+            <div class="card-subtitle">Complete Transformer Architecture</div>
+          </div>
+        </div>
+        <div class="card-content">
+          <div class="card-text">
+            <p><strong>Encoder</strong>: 源序列 → N 层 Encoder → 输出（作为 K、V）</p>
+            <p><strong>Decoder</strong>: 目标序列（Shifted Right）→ N 层 Decoder → 输出隐藏状态</p>
+            <p><strong>Output Projection</strong>: 将 512 维隐藏向量映射到词表维度 V</p>
+            <p><strong>训练</strong>: 目标序列右移一位，用交叉熵损失学习生成下一个 token</p>
+            <p><strong>推理</strong>: 逐个预测 token，自回归生成直到 EOS 或最大长度</p>
+          </div>
+          <div class="tensor-flow">
+            <div class="tensor-flow-title">完整数据流</div>
+            <div class="tensor-row"><span class="tensor-name">src</span><span class="tensor-arrow">→</span><span class="tensor-dims">[B, L_src] (源序列)</span></div>
+            <div class="tensor-row"><span class="tensor-name">tgt</span><span class="tensor-arrow">→</span><span class="tensor-dims">[B, L_tgt] (目标序列,右移)</span></div>
+            <div class="tensor-row"><span class="tensor-name">Encoder</span><span class="tensor-arrow">→</span><span class="tensor-dims">[B,L_src,512] (K,V来源)</span></div>
+            <div class="tensor-row"><span class="tensor-name">Decoder</span><span class="tensor-arrow">→</span><span class="tensor-dims">[B,L_tgt,512]</span></div>
+            <div class="tensor-row"><span class="tensor-name">Linear</span><span class="tensor-arrow">→</span><span class="tensor-dims">[B,L_tgt,V] (vocab_size)</span></div>
+            <div class="tensor-flow-title">PyTorch 实现</div>
+            <pre class="code-block">class Transformer(nn.Module):
+    def __init__(self, vocab_size, d_model=512, num_heads=8,
+                 num_layers=6, d_ff=2048):
+        super().__init__()
+        self.encoder = TransformerEncoder(vocab_size, d_model, num_heads, num_layers, d_ff)
+        self.decoder = TransformerDecoder(vocab_size, d_model, num_heads, num_layers, d_ff)
+        self.output_proj = nn.Linear(d_model, vocab_size)
+    
+    def forward(self, src, tgt, src_mask=None, tgt_mask=None):
+        # Encoder
+        encoder_output = self.encoder(src, src_mask)
+        
+        # Decoder
+        decoder_output = self.decoder(tgt, encoder_output, tgt_mask, src_mask)
+        
+        # Output projection
+        logits = self.output_proj(decoder_output)  # [B, L_tgt, V]
+        return logits
+    
+    def generate(self, src, max_len=100):
+        \"\"\"自回归生成示例\"\"\"
+        encoder_output = self.encoder(src)
+        tokens = torch.full((src.size(0), 1), 0)  # 开始符
+        
+        for _ in range(max_len):
+            logits = self.decoder(tokens, encoder_output)
+            next_token = logits[:, -1, :].argmax(dim=-1, keepdim=True)
+            tokens = torch.cat([tokens, next_token], dim=1)
+            if (next_token == 2).all(): break  # EOS
+        return tokens</pre>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
   <footer>
     <div class="container">
       <p>基于 <a href="https://arxiv.org/abs/1706.03762" target="_blank">"Attention Is All You Need"</a> Vaswani et al., NeurIPS 2017</p>
-      <p>Transformer Architecture Explorer</p>
+      <p>Transformer Architecture Explorer | <a href="transformer_explain.py" download>📥 下载 PyTorch 源码 (transformer_explain.py)</a></p>
     </div>
   </footer>
 
