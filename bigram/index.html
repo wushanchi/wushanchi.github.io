@@ -1,0 +1,1000 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bigram 语言模型 | 完整执行流程解析</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Noto+Sans+SC:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-primary: #0d1117;
+      --bg-secondary: #161b22;
+      --bg-tertiary: #21262d;
+      --border: #30363d;
+      --text-primary: #f0f6fc;
+      --text-secondary: #8b949e;
+      --text-muted: #6e7681;
+      --accent-blue: #58a6ff;
+      --accent-green: #3fb950;
+      --accent-purple: #a371f7;
+      --accent-orange: #f0883e;
+      --accent-pink: #f778ba;
+      --accent-yellow: #d29922;
+      --accent-cyan: #39c5cf;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Space Grotesk', 'Noto Sans SC', -apple-system, sans-serif;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background-image:
+        linear-gradient(rgba(48,54,61,0.15) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(48,54,61,0.15) 1px, transparent 1px);
+      background-size: 40px 40px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .container { max-width: 1300px; margin: 0 auto; padding: 0 24px; position: relative; z-index: 1; }
+
+    /* HERO */
+    .hero { padding: 50px 0 20px; text-align: center; }
+    .hero h1 {
+      font-size: clamp(24px, 4vw, 40px);
+      font-weight: 700;
+      background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 10px;
+    }
+    .hero p { color: var(--text-secondary); font-size: 14px; margin-bottom: 6px; }
+    .hero .subtitle { color: var(--text-muted); font-size: 12px; font-family: 'JetBrains Mono', monospace; }
+
+    /* FLOW SECTION */
+    .flow-section { padding: 20px 0; }
+
+    .flow-wrapper {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 24px;
+    }
+
+    /* Module node */
+    .flow-module {
+      display: flex;
+      align-items: stretch;
+      margin-bottom: 16px;
+      position: relative;
+    }
+
+    .flow-module:last-child { margin-bottom: 0; }
+
+    .module-box {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .mod {
+      cursor: pointer;
+      transition: transform 0.15s ease;
+    }
+    .mod:hover { transform: translateY(-2px); }
+
+    .mod-box {
+      background: var(--bg-tertiary);
+      border: 1.5px solid var(--border);
+      border-radius: 12px;
+      padding: 20px;
+      position: relative;
+      overflow: hidden;
+    }
+    .mod-box::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 3px;
+      border-radius: 12px 12px 0 0;
+    }
+    .mod-box.blue::before { background: var(--accent-blue); }
+    .mod-box.orange::before { background: var(--accent-orange); }
+    .mod-box.purple::before { background: var(--accent-purple); }
+    .mod-box.green::before { background: var(--accent-green); }
+    .mod-box.pink::before { background: var(--accent-pink); }
+    .mod-box.cyan::before { background: var(--accent-cyan); }
+    .mod-box.yellow::before { background: var(--accent-yellow); }
+
+    .mod-box:hover { border-color: var(--accent-blue); }
+
+    .module-title {
+      font-size: 16px;
+      font-weight: 600;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .module-title .icon {
+      width: 36px; height: 36px;
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px;
+      flex-shrink: 0;
+    }
+    .blue .icon { background: rgba(88,166,255,0.15); }
+    .orange .icon { background: rgba(240,136,62,0.15); }
+    .purple .icon { background: rgba(163,113,247,0.15); }
+    .green .icon { background: rgba(63,185,80,0.15); }
+    .pink .icon { background: rgba(247,120,186,0.15); }
+    .cyan .icon { background: rgba(57,197,207,0.15); }
+    .yellow .icon { background: rgba(210,153,34,0.15); }
+
+    .module-title .title-text { color: var(--text-primary); }
+    .module-title .subtitle-text {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      color: var(--text-muted);
+      font-weight: 400;
+      margin-top: 2px;
+    }
+
+    .module-content {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-top: 8px;
+    }
+
+    .module-desc {
+      color: var(--text-secondary);
+      font-size: 13px;
+      line-height: 1.7;
+    }
+    .module-desc p { margin-bottom: 6px; }
+    .module-desc strong { color: var(--text-primary); }
+    .module-desc code {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      background: var(--bg-primary);
+      padding: 2px 6px;
+      border-radius: 4px;
+      color: var(--accent-orange);
+    }
+
+    .module-code {
+      background: var(--bg-primary);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 14px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      line-height: 1.6;
+      color: var(--text-secondary);
+      overflow-x: auto;
+      white-space: pre;
+    }
+    .module-code .kw { color: var(--accent-pink); }
+    .module-code .fn { color: var(--accent-yellow); }
+    .module-code .str { color: var(--accent-green); }
+    .module-code .cmt { color: var(--text-muted); font-style: italic; }
+    .module-code .num { color: var(--accent-cyan); }
+
+    .module-flow {
+      background: var(--bg-tertiary);
+      border-radius: 8px;
+      padding: 14px;
+      margin-top: 10px;
+    }
+    .flow-title {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 9px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+    }
+    .flow-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 5px 0;
+      border-bottom: 1px solid var(--border);
+      font-size: 12px;
+    }
+    .flow-row:last-child { border-bottom: none; }
+    .flow-name {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      min-width: 60px;
+      color: var(--text-muted);
+    }
+    .flow-arrow { color: var(--text-muted); }
+    .flow-dims {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      color: var(--accent-blue);
+      background: var(--bg-secondary);
+      padding: 2px 8px;
+      border-radius: 3px;
+    }
+
+    /* Arrow connector */
+    .flow-arrow-connector {
+      text-align: center;
+      padding: 4px 0;
+      color: var(--text-muted);
+      font-size: 14px;
+      position: relative;
+    }
+    .flow-arrow-connector::before {
+      content: '';
+      position: absolute;
+      left: 50%;
+      top: 0;
+      bottom: 0;
+      width: 1.5px;
+      background: var(--border);
+      transform: translateX(-50%);
+    }
+    .flow-arrow-connector span {
+      position: relative;
+      z-index: 1;
+      background: var(--bg-secondary);
+      padding: 0 12px;
+    }
+
+    /* Detail Panel */
+    .detail-panel {
+      position: fixed;
+      right: 24px;
+      top: 50%;
+      transform: translateY(-50%) translateX(calc(100% + 50px));
+      width: 380px;
+      max-height: 82vh;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 24px;
+      overflow-y: auto;
+      transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+      z-index: 100;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+    }
+    .detail-panel.visible { transform: translateY(-50%) translateX(0); }
+
+    .panel-header { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1px solid var(--border); }
+    .panel-icon { width: 44px; height: 44px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 20px; }
+    .panel-title { font-size: 18px; font-weight: 600; }
+    .panel-category { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; }
+
+    .panel-desc { color: var(--text-secondary); font-size: 13px; line-height: 1.7; margin-bottom: 16px; }
+
+    .tensor-box { background: var(--bg-tertiary); border-radius: 8px; padding: 14px; margin-bottom: 10px; }
+    .tensor-label { font-family: 'JetBrains Mono', monospace; font-size: 9px; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); margin-bottom: 6px; }
+    .tensor-shape { font-family: 'JetBrains Mono', monospace; font-size: 14px; color: var(--accent-blue); margin-bottom: 3px; }
+    .tensor-note { font-size: 11px; color: var(--text-muted); }
+
+    .param-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+    .param-table th { font-family: 'JetBrains Mono', monospace; font-size: 9px; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); text-align: left; padding: 8px 0; border-bottom: 1px solid var(--border); }
+    .param-table td { padding: 8px 0; border-bottom: 1px solid var(--border); color: var(--text-secondary); }
+    .param-name { font-family: 'JetBrains Mono', monospace; color: var(--accent-purple); }
+    .param-value { color: var(--accent-orange); }
+
+    .code-section { background: var(--bg-primary); border: 1px solid var(--border); border-radius: 8px; padding: 14px; margin-top: 10px; max-height: 250px; overflow-y: auto; }
+    .code-section pre {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      line-height: 1.6;
+      color: var(--text-secondary);
+      white-space: pre;
+      overflow-x: auto;
+    }
+
+    .close-btn {
+      position: absolute; top: 14px; right: 14px;
+      width: 28px; height: 28px;
+      border: none; background: var(--bg-tertiary);
+      border-radius: 6px; color: var(--text-muted);
+      cursor: pointer; font-size: 18px;
+      transition: all 0.2s;
+    }
+    .close-btn:hover { background: var(--border); color: var(--text-primary); }
+
+    .panel-placeholder { text-align: center; padding: 40px 20px; color: var(--text-muted); }
+    .panel-placeholder svg { width: 48px; height: 48px; margin-bottom: 12px; opacity: 0.4; }
+
+    /* Section header */
+    .section-header { text-align: center; padding: 36px 0 16px; }
+    .section-label { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--accent-blue); text-transform: uppercase; letter-spacing: 2px; margin-bottom: 6px; }
+    .section-title { font-size: clamp(20px, 3vw, 28px); font-weight: 600; }
+
+    /* Architecture overview grid */
+    .arch-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 12px;
+      margin: 20px 0;
+    }
+    .arch-card {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 16px;
+      text-align: center;
+    }
+    .arch-card .big-num {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 28px;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+    .arch-card .big-num.blue { color: var(--accent-blue); }
+    .arch-card .big-num.orange { color: var(--accent-orange); }
+    .arch-card .big-num.purple { color: var(--accent-purple); }
+    .arch-card .big-num.green { color: var(--accent-green); }
+    .arch-card .label { font-size: 12px; color: var(--text-muted); }
+    .arch-card .sub { font-size: 10px; color: var(--text-muted); font-family: 'JetBrains Mono', monospace; }
+
+    /* Code blocks */
+    .code-block {
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 16px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      line-height: 1.6;
+      color: var(--text-secondary);
+      overflow-x: auto;
+      white-space: pre;
+      max-height: 350px;
+      overflow-y: auto;
+    }
+
+    /* Hyperparameters table */
+    .hyper-table {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 10px;
+      margin: 16px 0;
+    }
+    .hyper-item {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 12px 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .hyper-name { font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--text-secondary); }
+    .hyper-value { font-family: 'JetBrains Mono', monospace; font-size: 14px; color: var(--accent-orange); font-weight: 600; }
+
+    /* Section divider */
+    .section-divider {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin: 32px 0 24px;
+    }
+    .section-divider::before, .section-divider::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+    .section-divider span {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      white-space: nowrap;
+    }
+
+    footer { text-align: center; padding: 30px 0; border-top: 1px solid var(--border); margin-top: 30px; }
+    footer a { color: var(--accent-blue); text-decoration: none; }
+    footer p { color: var(--text-muted); font-size: 12px; margin-top: 6px; }
+
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: var(--bg-secondary); }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+    @media (max-width: 1100px) {
+      .detail-panel {
+        position: fixed; bottom: 0; left: 0; right: 0; top: auto;
+        transform: translateY(100%);
+        width: 100%; max-height: 70vh;
+        border-radius: 20px 20px 0 0;
+      }
+      .detail-panel.visible { transform: translateY(0); }
+      .module-content { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <section class="hero">
+    <div class="container">
+      <h1>Bigram 语言模型 | 完整执行流程解析</h1>
+      <p>基于 Karpathy 的 char-rnn 简洁实现，逐一拆解每个模块的维度变换与 PyTorch 代码</p>
+      <p class="subtitle">batch_size=32 | block_size=8 | vocab_size=65 | embedding=65×65</p>
+    </div>
+  </section>
+
+  <!-- Architecture overview -->
+  <section class="flow-section">
+    <div class="container">
+      <div class="section-header">
+        <div class="section-label">Overview</div>
+        <h2 class="section-title">模型参数一览</h2>
+      </div>
+      <div class="arch-grid">
+        <div class="arch-card">
+          <div class="big-num blue">65</div>
+          <div class="label">词表大小 (vocab_size)</div>
+          <div class="sub">tinyshakespeare 字符种类</div>
+        </div>
+        <div class="arch-card">
+          <div class="big-num orange">65×65</div>
+          <div class="label">Embedding 参数量</div>
+          <div class="sub">整个模型仅有一个层</div>
+        </div>
+        <div class="arch-card">
+          <div class="big-num purple">32</div>
+          <div class="label">Batch Size</div>
+          <div class="sub">并行处理的序列数</div>
+        </div>
+        <div class="arch-card">
+          <div class="big-num green">8</div>
+          <div class="label">Block Size (Context)</div>
+          <div class="sub">每个序列的 token 数</div>
+        </div>
+      </div>
+
+      <!-- Hyperparameters -->
+      <div class="hyper-table">
+        <div class="hyper-item"><span class="hyper-name">max_iters</span><span class="hyper-value">3000</span></div>
+        <div class="hyper-item"><span class="hyper-name">learning_rate</span><span class="hyper-value">1e-2</span></div>
+        <div class="hyper-item"><span class="hyper-name">eval_interval</span><span class="hyper-value">300</span></div>
+        <div class="hyper-item"><span class="hyper-name">eval_iters</span><span class="hyper-value">200</span></div>
+        <div class="hyper-item"><span class="hyper-name">device</span><span class="hyper-value">cpu</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Main Flow Diagram -->
+  <section class="flow-section">
+    <div class="container">
+      <div class="section-header">
+        <div class="section-label">Flow</div>
+        <h2 class="section-title">执行流程详解</h2>
+      </div>
+
+      <div class="flow-wrapper">
+
+        <!-- Step 0: Data Input -->
+        <div class="flow-module" id="step-data">
+          <div class="module-box" style="flex:1">
+            <div class="mod" data-mod="data">
+              <div class="mod-box blue">
+                <div class="module-title">
+                  <div class="icon">📥</div>
+                  <div>
+                    <div class="title-text">0. 数据准备 (Data Preparation)</div>
+                    <div class="subtitle-text">字符级编码 / 输入输出分割</div>
+                  </div>
+                </div>
+                <div class="module-content">
+                  <div class="module-desc">
+                    <p><strong>文本 → 字符ID序列</strong>：将字符映射为整数 ID，构建词表。</p>
+                    <p><strong>Train / Val 分割</strong>：90% 训练集，10% 验证集。</p>
+                    <p><strong>get_batch()</strong>：随机采样 B 个序列，每个长度为 T，输出 x (输入) 和 y (目标, 右移一位)。</p>
+                  </div>
+                  <div class="module-code"><span class="cmt"># vocab 构建</span>
+<span class="kw">with</span> <span class="fn">open</span>(<span class="str">'input.txt'</span>) <span class="kw">as</span> f:
+    text = f.<span class="fn">read</span>()
+chars = <span class="fn">sorted</span>(<span class="fn">list</span>(<span class="fn">set</span>(text)))
+vocab_size = <span class="fn">len</span>(chars)  <span class="cmt"># 65</span>
+
+<span class="cmt"># get_batch 输出</span>
+<span class="kw">def</span> <span class="fn">get_batch</span>(split):
+    ix = torch.<span class="fn">randint</span>(len(data)-block_size, (batch_size,))
+    x = torch.<span class="fn">stack</span>([data[i:i+block_size] <span class="kw">for</span> i <span class="kw">in</span> ix])
+    y = torch.<span class="fn">stack</span>([data[i+1:i+block_size+1] <span class="kw">for</span> i <span class="kw">in</span> ix])
+    <span class="kw">return</span> x, y  <span class="cmt"># x:[B,T] y:[B,T]</span></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="flow-arrow-connector"><span>↓</span></div>
+
+        <!-- Step 1: Embedding -->
+        <div class="flow-module" id="step-embedding">
+          <div class="module-box" style="flex:1">
+            <div class="mod" data-mod="embedding">
+              <div class="mod-box orange">
+                <div class="module-title">
+                  <div class="icon">🔢</div>
+                  <div>
+                    <div class="title-text">1. Token Embedding Table</div>
+                    <div class="subtitle-text">nn.Embedding(vocab_size, vocab_size)</div>
+                  </div>
+                </div>
+                <div class="module-content">
+                  <div class="module-desc">
+                    <p><strong>核心模型</strong>：Bigram 模型仅有一个 lookup table，形状为 <code>[vocab_size, vocab_size]</code> = <code>[65, 65]</code>。</p>
+                    <p><strong>前向传播</strong>：输入 token IDs [B, T]，查表得到 logits [B, T, C]，C=vocab_size=65。</p>
+                    <p><strong>生成方式</strong>：每次取最后一个时间步的 logits，softmax 后采样下一个 token，自回归生成。</p>
+                  </div>
+                  <div class="module-code"><span class="kw">class</span> <span class="fn">BigramLanguageModel</span>(nn.Module):
+    <span class="kw">def</span> <span class="fn">__init__</span>(<span class="kw">self</span>, vocab_size):
+        <span class="kw">super</span>().__init__()
+        <span class="kw">self</span>.token_embedding_table = nn.<span class="fn">Embedding</span>(
+            vocab_size, vocab_size  <span class="cmt"># [65, 65]</span>
+        )
+    <span class="kw">def</span> <span class="fn">forward</span>(<span class="kw">self</span>, idx, targets=<span class="kw">None</span>):
+        logits = <span class="kw">self</span>.token_embedding_table(idx)
+        <span class="cmt"># idx: [B, T] → logits: [B, T, C]</span>
+        <span class="kw">if</span> targets <span class="kw">is not None</span>:
+            B, T, C = logits.shape
+            logits = logits.<span class="fn">view</span>(B*T, C)
+            targets = targets.<span class="fn">view</span>(B*T)
+            loss = F.<span class="fn">cross_entropy</span>(logits, targets)
+        <span class="kw">return</span> logits, loss</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="flow-arrow-connector"><span>↓</span></div>
+
+        <!-- Step 2: Forward & Loss -->
+        <div class="flow-module" id="step-forward">
+          <div class="module-box" style="flex:1">
+            <div class="mod" data-mod="forward">
+              <div class="mod-box purple">
+                <div class="module-title">
+                  <div class="icon">⚡</div>
+                  <div>
+                    <div class="title-text">2. Forward & Loss 计算</div>
+                    <div class="subtitle-text">交叉熵损失 / 梯度反向传播</div>
+                  </div>
+                </div>
+                <div class="module-content">
+                  <div class="module-desc">
+                    <p><strong>维度变化</strong>：<code>[B, T, C] → [B*T, C]</code>，view 操作不复制数据，只改变形状语义。</p>
+                    <p><strong>Cross Entropy</strong>：<code>loss = -log(prob_of_correct_token)</code>，衡量模型对正确 token 的预测概率。</p>
+                    <p><strong>训练循环</strong>：<code>optimizer.zero_grad() → loss.backward() → optimizer.step()</code></p>
+                  </div>
+                  <div class="module-code"><span class="cmt"># 训练循环</span>
+<span class="kw">for</span> iter <span class="kw">in</span> <span class="fn">range</span>(max_iters):
+    xb, yb = <span class="fn">get_batch</span>(<span class="str">'train'</span>)
+    logits, loss = <span class="fn">model</span>(xb, yb)
+    optimizer.<span class="fn">zero_grad</span>(set_to_none=<span class="kw">True</span>)
+    loss.<span class="fn">backward</span>()
+    optimizer.<span class="fn">step</span>()
+
+<span class="cmt"># 维度追踪</span>
+<span class="cmt"># xb: [32, 8]  yb: [32, 8]</span>
+<span class="cmt"># logits: [32, 8, 65] → [256, 65]</span>
+<span class="cmt"># targets: [32, 8] → [256]</span>
+<span class="cmt"># loss = cross_entropy([256,65], [256])</span></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="flow-arrow-connector"><span>↓</span></div>
+
+        <!-- Step 3: Generate -->
+        <div class="flow-module" id="step-generate">
+          <div class="module-box" style="flex:1">
+            <div class="mod" data-mod="generate">
+              <div class="mod-box pink">
+                <div class="module-title">
+                  <div class="icon">🎤</div>
+                  <div>
+                    <div class="title-text">3. 自回归生成 (Generation)</div>
+                    <div class="subtitle-text">Softmax → 采样 → 自回归</div>
+                  </div>
+                </div>
+                <div class="module-content">
+                  <div class="module-desc">
+                    <p><strong>自回归</strong>：每步生成一个 token，将输出追加到输入序列，循环直到达到最大长度。</p>
+                    <p><strong>采样</strong>：<code>torch.multinomial(probs, num_samples=1)</code> 从概率分布中采样，而不是直接取 argmax。</p>
+                    <p><strong>只取最后一个时间步</strong>：<code>logits[:, -1, :]</code> 提取最后一个位置的预测，这是 Transformer 中每个位置预测下一个 token 的简化版。</p>
+                  </div>
+                  <div class="module-code"><span class="kw">def</span> <span class="fn">generate</span>(<span class="kw">self</span>, idx, max_new_tokens):
+    <span class="cmt"># idx: [B, T] 当前上下文</span>
+    <span class="kw">for</span> _ <span class="kw">in</span> <span class="fn">range</span>(max_new_tokens):
+        logits, _ = <span class="fn">model</span>(idx)       <span class="cmt"># [B, T, C]</span>
+        logits = logits[:, -1, :]        <span class="cmt"># [B, C] 只取最后一个</span>
+        probs = F.<span class="fn">softmax</span>(logits, dim=-1) <span class="cmt"># [B, C]</span>
+        idx_next = torch.<span class="fn">multinomial</span>(probs, num_samples=1) <span class="cmt"># [B, 1]</span>
+        idx = torch.<span class="fn">cat</span>((idx, idx_next), dim=1) <span class="cmt"># [B, T+1]</span>
+    <span class="kw">return</span> idx</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- Dimension Flow Section -->
+  <section>
+    <div class="container">
+      <div class="section-divider"><span>维度追踪</span></div>
+
+      <div class="flow-wrapper" style="padding: 28px;">
+        <h3 style="font-size: 18px; margin-bottom: 20px; text-align: center;">完整数据流维度变化</h3>
+        <div style="display: flex; flex-direction: column; gap: 12px;">
+
+          <div class="flow-row">
+            <span style="font-family: 'JetBrains Mono'; color: var(--accent-blue); font-size: 12px; min-width: 120px;">原始文本</span>
+            <span style="color: var(--text-muted);">→</span>
+            <span style="font-family: 'JetBrains Mono'; font-size: 11px;">"FAREWELL.."</span>
+            <span style="color: var(--text-muted); margin-left: auto;">字符序列，示例</span>
+          </div>
+          <div class="flow-row">
+            <span style="font-family: 'JetBrains Mono'; color: var(--accent-blue); font-size: 12px; min-width: 120px;">encode(text)</span>
+            <span style="color: var(--text-muted);">→</span>
+            <span style="font-family: 'JetBrains Mono'; font-size: 11px;">[18, 27, 43, 42, 22, 35, ...]</span>
+            <span style="color: var(--text-muted); margin-left: auto;">[len] 整数ID列表</span>
+          </div>
+          <div class="flow-row">
+            <span style="font-family: 'JetBrains Mono'; color: var(--accent-blue); font-size: 12px; min-width: 120px;">data tensor</span>
+            <span style="color: var(--text-muted);">→</span>
+            <span class="flow-dims">[len]</span>
+            <span style="color: var(--text-muted); margin-left: auto;">len ≈ 字符总数 (~1M)</span>
+          </div>
+          <div class="flow-row">
+            <span style="font-family: 'JetBrains Mono'; color: var(--accent-blue); font-size: 12px; min-width: 120px;">get_batch()</span>
+            <span style="color: var(--text-muted);">→</span>
+            <span class="flow-dims">[B, T] = [32, 8]</span>
+            <span style="color: var(--text-muted); margin-left: auto;">x 和 y 各一个 batch</span>
+          </div>
+          <div class="flow-row">
+            <span style="font-family: 'JetBrains Mono'; color: var(--accent-orange); font-size: 12px; min-width: 120px;">Embedding(idx)</span>
+            <span style="color: var(--text-muted);">→</span>
+            <span class="flow-dims">[B, T, C] = [32, 8, 65]</span>
+            <span style="color: var(--text-muted); margin-left: auto;">查表：每个 ID → 65维 one-hot 向量</span>
+          </div>
+          <div class="flow-row">
+            <span style="font-family: 'JetBrains Mono'; color: var(--accent-purple); font-size: 12px; min-width: 120px;">view(...)</span>
+            <span style="color: var(--text-muted);">→</span>
+            <span class="flow-dims">[B*T, C] = [256, 65]</span>
+            <span style="color: var(--text-muted); margin-left: auto;">展平用于交叉熵计算</span>
+          </div>
+          <div class="flow-row">
+            <span style="font-family: 'JetBrains Mono'; color: var(--accent-purple); font-size: 12px; min-width: 120px;">cross_entropy</span>
+            <span style="color: var(--text-muted);">→</span>
+            <span class="flow-dims">[] (scalar)</span>
+            <span style="color: var(--text-muted); margin-left: auto;">标量损失，反向传播起点</span>
+          </div>
+          <div class="flow-row">
+            <span style="font-family: 'JetBrains Mono'; color: var(--accent-pink); font-size: 12px; min-width: 120px;">generate()</span>
+            <span style="color: var(--text-muted);">→</span>
+            <span class="flow-dims">[1, 1] → [1, N]</span>
+            <span style="color: var(--text-muted); margin-left: auto;">从 [B=1, T=1] 开始，自回归扩展到 N tokens</span>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PyTorch Code Section -->
+  <section>
+    <div class="container">
+      <div class="section-divider"><span>PyTorch 完整代码</span></div>
+
+      <div class="flow-wrapper">
+        <h3 style="font-size: 16px; margin-bottom: 16px; text-align: center;">bigram.py — 完整可运行代码</h3>
+        <div class="code-block">import torch
+import torch.nn as nn
+from torch.nn import functional as F
+
+# ========== 超参数 ==========
+batch_size = 32   <span class="cmt"># 并行处理的序列数</span>
+block_size = 8    <span class="cmt"># 每个序列的最大上下文长度</span>
+max_iters = 3000  <span class="cmt"># 训练迭代次数</span>
+eval_interval = 300
+learning_rate = 1e-2
+device = 'cuda' if torch.cuda.is_available() else 'cpu'
+eval_iters = 200
+
+torch.manual_seed(1337)
+
+# ========== 数据准备 ==========
+<span class="cmt"># 下载: wget https://raw.githubusercontent.com/karpathy/char-rnn/master/data/tinyshakespeare/input.txt</span>
+with open('input.txt', 'r', encoding='utf-8') as f:
+    text = f.read()
+
+chars = sorted(list(set(text)))           <span class="cmt"># 所有唯一字符</span>
+vocab_size = len(chars)                   <span class="cmt"># 65</span>
+
+stoi = { ch:i for i,ch in enumerate(chars) }
+itos = { i:ch for i,ch in enumerate(chars) }
+encode = lambda s: [stoi[c] for c in s]
+decode = lambda l: ''.join([itos[i] for i in l])
+
+data = torch.tensor(encode(text), dtype=torch.long)
+n = int(0.9 * len(data))
+train_data = data[:n]
+val_data = data[n:]
+
+def get_batch(split):
+    data = train_data if split == 'train' else val_data
+    ix = torch.randint(len(data) - block_size, (batch_size,))
+    x = torch.stack([data[i:i+block_size] for i in ix])
+    y = torch.stack([data[i+1:i+block_size+1] for i in ix])
+    return x.to(device), y.to(device)
+
+@torch.no_grad()
+def estimate_loss():
+    out = {}
+    model.eval()
+    for split in ['train', 'val']:
+        losses = torch.zeros(eval_iters)
+        for k in range(eval_iters):
+            X, Y = get_batch(split)
+            _, loss = model(X, Y)
+            losses[k] = loss.item()
+        out[split] = losses.mean()
+    model.train()
+    return out
+
+# ========== Bigram 语言模型 ==========
+class BigramLanguageModel(nn.Module):
+    def __init__(self, vocab_size):
+        super().__init__()
+        <span class="cmt"># 整个模型只有一个 Embedding 层 [vocab_size, vocab_size]</span>
+        self.token_embedding_table = nn.Embedding(vocab_size, vocab_size)
+
+    def forward(self, idx, targets=None):
+        logits = self.token_embedding_table(idx)  <span class="cmt"># [B, T, C]</span>
+        if targets is None:
+            return logits, None
+        B, T, C = logits.shape
+        logits = logits.view(B*T, C)              <span class="cmt"># [B*T, C]</span>
+        targets = targets.view(B*T)                <span class="cmt"># [B*T]</span>
+        loss = F.cross_entropy(logits, targets)
+        return logits, loss
+
+    def generate(self, idx, max_new_tokens):
+        for _ in range(max_new_tokens):
+            logits, _ = self(idx)                   <span class="cmt"># [B, T, C]</span>
+            logits = logits[:, -1, :]              <span class="cmt"># [B, C] 只取最后位置</span>
+            probs = F.softmax(logits, dim=-1)      <span class="cmt"># [B, C]</span>
+            idx_next = torch.multinomial(probs, num_samples=1)  <span class="cmt"># [B, 1]</span>
+            idx = torch.cat((idx, idx_next), dim=1)  <span class="cmt"># [B, T+1]</span>
+        return idx
+
+# ========== 训练 ==========
+model = BigramLanguageModel(vocab_size).to(device)
+optimizer = torch.optim.AdamW(model.parameters(), lr=learning_rate)
+
+for iter in range(max_iters):
+    if iter % eval_interval == 0:
+        losses = estimate_loss()
+        print(f"step {iter}: train loss {losses['train']:.4f}, val loss {losses['val']:.4f}")
+
+    xb, yb = get_batch('train')
+    logits, loss = model(xb, yb)
+    optimizer.zero_grad(set_to_none=True)
+    loss.backward()
+    optimizer.step()
+
+# ========== 生成文本 ==========
+context = torch.zeros((1, 1), dtype=torch.long, device=device)
+print(decode(model.generate(context, max_new_tokens=500)[0].tolist()))</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Comparison with Transformer -->
+  <section>
+    <div class="container">
+      <div class="section-divider"><span">vs Transformer</span></div>
+
+      <div class="flow-wrapper" style="padding: 28px;">
+        <h3 style="font-size: 16px; margin-bottom: 20px; text-align: center;">Bigram vs Transformer 架构对比</h3>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+          <div style="background: var(--bg-tertiary); border-radius: 10px; padding: 20px;">
+            <h4 style="color: var(--accent-orange); margin-bottom: 12px; font-size: 14px;">Bigram 模型</h4>
+            <div style="display: flex; flex-direction: column; gap: 8px;">
+              <div><span style="color: var(--accent-blue); font-family: 'JetBrains Mono'; font-size: 11px;">模型层数:</span> <span style="color: var(--text-secondary);">仅 1 层（Embedding）</span></div>
+              <div><span style="color: var(--accent-blue); font-family: 'JetBrains Mono'; font-size: 11px;">注意力机制:</span> <span style="color: var(--text-secondary);">无，每 token 只看当前</span></div>
+              <div><span style="color: var(--accent-blue); font-family: 'JetBrains Mono'; font-size: 11px;">位置编码:</span> <span style="color: var(--text-secondary);">无，不感知位置</span></div>
+              <div><span style="color: var(--accent-blue); font-family: 'JetBrains Mono'; font-size: 11px;">上下文:</span> <span style="color: var(--text-secondary);">只看当前 token，不看上下文</span></div>
+              <div><span style="color: var(--accent-blue); font-family: 'JetBrains Mono'; font-size: 11px;">FFN:</span> <span style="color: var(--text-secondary);">无</span></div>
+              <div><span style="color: var(--accent-blue); font-family: 'JetBrains Mono'; font-size: 11px;">参数量:</span> <span style="color: var(--text-secondary);">65 × 65 = 4,225</span></div>
+              <div><span style="color: var(--accent-blue); font-family: 'JetBrains Mono'; font-size: 11px;">预测方式:</span> <span style="color: var(--text-secondary);">每个位置直接输出下一个 token 的 logit</span></div>
+            </div>
+          </div>
+          <div style="background: var(--bg-tertiary); border-radius: 10px; padding: 20px;">
+            <h4 style="color: var(--accent-green); margin-bottom: 12px; font-size: 14px;">Transformer 模型</h4>
+            <div style="display: flex; flex-direction: column; gap: 8px;">
+              <div><span style="color: var(--accent-blue); font-family: 'JetBrains Mono'; font-size: 11px;">模型层数:</span> <span style="color: var(--text-secondary);">6 层 Encoder + 6 层 Decoder</span></div>
+              <div><span style="color: var(--accent-blue); font-family: 'JetBrains Mono'; font-size: 11px;">注意力机制:</span> <span style="color: var(--text-secondary);">Multi-Head Self-Attention + Cross-Attention</span></div>
+              <div><span style="color: var(--accent-blue); font-family: 'JetBrains Mono'; font-size: 11px;">位置编码:</span> <span style="color: var(--text-secondary);">Sin/Cos 位置编码，注入序列顺序</span></div>
+              <div><span style="color: var(--accent-blue); font-family: 'JetBrains Mono'; font-size: 11px;">上下文:</span> <span style="color: var(--text-secondary);">每个位置可关注序列中所有其他位置</span></div>
+              <div><span style="color: var(--accent-blue); font-family: 'JetBrains Mono'; font-size: 11px;">FFN:</span> <span style="color: var(--text-secondary);">512 → 2048 → 512，每层都有</span></div>
+              <div><span style="color: var(--accent-blue); font-family: 'JetBrains Mono'; font-size: 11px;">参数量:</span> <span style="color: var(--text-secondary);">约 60M</span></div>
+              <div><span style="color: var(--accent-blue); font-family: 'JetBrains Mono'; font-size: 11px;">预测方式:</span> <span style="color: var(--text-secondary);">Decoder 自回归，每步预测下一个 token</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="container">
+      <p>基于 <a href="https://github.com/karpathy/ng-video-lecture" target="_blank">Karpathy "Neural Networks: Zero to Hero"</a></p>
+      <p>Bigram Language Model | <a href="bigram.py" download>📥 下载 bigram.py 源码</a></p>
+    </div>
+  </footer>
+
+  <!-- Detail Panel -->
+  <div class="detail-panel" id="detailPanel">
+    <button class="close-btn" onclick="closePanel()">×</button>
+    <div class="panel-placeholder" id="panelPlaceholder">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+        <circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/>
+      </svg>
+      <p>点击上方任意模块<br>查看详细说明与代码</p>
+    </div>
+    <div id="panelContent" style="display: none;"></div>
+  </div>
+
+  <script>
+    const moduleData = {
+      'data': {
+        title: '0. 数据准备', category: 'Input', icon: '📥', color: '#58a6ff',
+        desc: '将原始文本转为字符 ID 序列，构建词表 (vocab_size=65)，按 9:1 分割训练/验证集。get_batch() 随机采样 B=32 个序列，每个长度 T=8。',
+        input: { shape: '[len]', note: '原始文本字符串' },
+        output: { shape: '[B, T]=[32, 8]', note: 'x 和 y 各一个 batch' },
+        params: [
+          {name: 'vocab_size', value: '65 (字符种类)'},
+          {name: 'batch_size', value: '32'},
+          {name: 'block_size', value: '8'},
+          {name: 'train/val', value: '9:1 分割'}
+        ],
+        code: `def get_batch(split):
+    data = train_data if split == 'train' else val_data
+    ix = torch.randint(len(data) - block_size, (batch_size,))
+    x = torch.stack([data[i:i+block_size] for i in ix])
+    y = torch.stack([data[i+1:i+block_size+1] for i in ix])
+    return x, y  # x:[B,T], y:[B,T]`
+
+      },
+      'embedding': {
+        title: '1. Token Embedding Table', category: 'Model', icon: '🔢', color: '#f0883e',
+        desc: 'Bigram 模型的核心：仅有一个 nn.Embedding 层，形状 [vocab_size, vocab_size] = [65, 65]，共 4,225 个参数。输入 token IDs，查表得到每个位置的 one-hot 风格的 logit 向量。',
+        input: { shape: '[B, T]', note: 'Token ID 序列 [32, 8]' },
+        output: { shape: '[B, T, C]=[32, 8, 65]', note: '每个位置的 65 维 logit 向量' },
+        params: [
+          {name: 'vocab_size', value: '65'},
+          {name: 'embedding_dim', value: '65'},
+          {name: '参数量', value: '65 × 65 = 4,225'},
+          {name: '层数', value: '1 (整个模型)'}
+        ],
+        code: `class BigramLanguageModel(nn.Module):
+    def __init__(self, vocab_size):
+        super().__init__()
+        self.token_embedding_table = nn.Embedding(
+            vocab_size, vocab_size  # [65, 65]
+        )
+    
+    def forward(self, idx, targets=None):
+        logits = self.token_embedding_table(idx)  # [B,T,C]
+        # ...`
+
+      },
+      'forward': {
+        title: '2. Forward & Loss', category: 'Training', icon: '⚡', color: '#a371f7',
+        desc: '前向传播 + 损失计算：logits [B,T,C] → view [B*T,C]，交叉熵损失。反向传播计算梯度，AdamW 更新参数。训练循环：get_batch → forward → zero_grad → backward → step。',
+        input: { shape: '[B, T, C]=[32, 8, 65]', note: 'Embedding 输出' },
+        output: { shape: '[] (scalar)', note: '交叉熵损失标量' },
+        params: [
+          {name: 'loss', value: 'cross_entropy(logits, targets)'},
+          {name: 'learning_rate', value: '1e-2'},
+          {name: 'optimizer', value: 'AdamW'},
+          {name: 'batch_size', value: '32'}
+        ],
+        code: `logits, loss = model(xb, yb)  # [B,T,C], scalar
+optimizer.zero_grad(set_to_none=True)
+loss.backward()  # 反向传播
+optimizer.step()  # 更新参数`
+
+      },
+      'generate': {
+        title: '3. 自回归生成', category: 'Inference', icon: '🎤', color: '#f778ba',
+        desc: '自回归生成：每步取最后一个时间步的 logits → softmax → multinomial 采样 → 追加到序列 → 重复。生成文本时从 [1,1]（开始符）开始，自回归扩展到 N tokens。',
+        input: { shape: '[B, T]', note: '初始 [1,1]，自回归扩展' },
+        output: { shape: '[B, T+N]', note: '生成的 token ID 序列' },
+        params: [
+          {name: 'max_new_tokens', value: '500'},
+          {name: 'temperature', value: '1 (直接 softmax)'},
+          {name: '采样方式', value: 'torch.multinomial'},
+          {name: '自回归步数', value: 'N (生成 token 数)'}
+        ],
+        code: `def generate(self, idx, max_new_tokens):
+    for _ in range(max_new_tokens):
+        logits, _ = self(idx)  # [B,T,C]
+        logits = logits[:, -1, :]  # [B,C] 只取最后
+        probs = F.softmax(logits, dim=-1)  # [B,C]
+        idx_next = torch.multinomial(probs, num_samples=1)  # [B,1]
+        idx = torch.cat((idx, idx_next), dim=1)  # [B,T+1]
+    return idx`
+
+      }
+    };
+
+    const panel = document.getElementById('detailPanel');
+    const placeholder = document.getElementById('panelPlaceholder');
+    const content = document.getElementById('panelContent');
+    const modules = document.querySelectorAll('.mod');
+
+    function closePanel() { panel.classList.remove('visible'); }
+
+    modules.forEach(m => {
+      m.addEventListener('click', () => {
+        const data = moduleData[m.dataset.mod];
+        if (data) showPanel(data);
+      });
+    });
+
+    function showPanel(data) {
+      placeholder.style.display = 'none';
+      content.style.display = 'block';
+
+      const paramsHTML = data.params.length ? `
+        <div class="tensor-box">
+          <div class="tensor-label">关键参数</div>
+          <table class="param-table"><thead><tr><th>参数</th><th>值</th></tr></thead><tbody>
+            ${data.params.map(p => `<tr><td class="param-name">${p.name}</td><td class="param-value">${p.value}</td></tr>`).join('')}
+          </tbody></table>
+        </div>
+      ` : '';
+
+      const codeHTML = data.code ? `<div class="code-section"><pre>${data.code}</pre></div>` : '';
+
+      content.innerHTML = `
+        <div class="panel-header">
+          <div class="panel-icon" style="background:${data.color}22;border:2px solid ${data.color}">${data.icon}</div>
+          <div><div class="panel-title">${data.title}</div><div class="panel-category">${data.category}</div></div>
+        </div>
+        <p class="panel-desc">${data.desc}</p>
+        <div class="tensor-box"><div class="tensor-label">输入张量</div><div class="tensor-shape">${data.input.shape}</div><div class="tensor-note">${data.input.note}</div></div>
+        <div class="tensor-box"><div class="tensor-label">输出张量</div><div class="tensor-shape">${data.output.shape}</div><div class="tensor-note">${data.output.note}</div></div>
+        ${paramsHTML}
+        ${codeHTML}
+      `;
+      panel.classList.add('visible');
+    }
+  </script>
+</body>
+</html>
