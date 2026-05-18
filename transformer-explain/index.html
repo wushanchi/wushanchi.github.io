@@ -6,7 +6,7 @@
   <title>Transformer 架构解析 | Architecture Explorer</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Noto+Sans+SC:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
   <style>
     :root {
       --bg-primary: #0d1117;
@@ -29,187 +29,101 @@
     html { scroll-behavior: smooth; }
 
     body {
-      font-family: 'Space Grotesk', -apple-system, sans-serif;
+      font-family: 'Space Grotesk', 'Noto Sans SC', -apple-system, sans-serif;
       background: var(--bg-primary);
       color: var(--text-primary);
       min-height: 100vh;
       overflow-x: hidden;
     }
 
-    /* Background grid pattern */
     body::before {
       content: '';
       position: fixed;
       top: 0; left: 0;
       width: 100%; height: 100%;
       background-image:
-        linear-gradient(rgba(48,54,61,0.3) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(48,54,61,0.3) 1px, transparent 1px);
-      background-size: 60px 60px;
+        linear-gradient(rgba(48,54,61,0.2) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(48,54,61,0.2) 1px, transparent 1px);
+      background-size: 40px 40px;
       pointer-events: none;
       z-index: 0;
     }
 
     .container { max-width: 1600px; margin: 0 auto; padding: 0 24px; position: relative; z-index: 1; }
 
-    /* ========== HERO ========== */
-    .hero {
-      padding: 60px 0 20px;
-      text-align: center;
-    }
+    /* HERO */
+    .hero { padding: 50px 0 30px; text-align: center; }
     .hero h1 {
-      font-size: clamp(32px, 5vw, 56px);
+      font-size: clamp(28px, 4vw, 48px);
       font-weight: 700;
-      background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple), var(--accent-pink));
+      background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
-      margin-bottom: 16px;
-      letter-spacing: -0.02em;
+      margin-bottom: 12px;
     }
-    .hero p {
-      color: var(--text-secondary);
-      font-size: 18px;
-      max-width: 600px;
-      margin: 0 auto;
+    .hero p { color: var(--text-secondary); font-size: 16px; }
+
+    /* MAIN DIAGRAM */
+    .diagram-section { padding: 30px 0; }
+
+    .diagram-wrapper {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 24px;
+      overflow: hidden;
     }
 
-    /* ========== MAIN DIAGRAM ========== */
-    .diagram-container {
-      position: relative;
-      padding: 40px 0;
-    }
+    .main-svg { width: 100%; height: auto; display: block; }
 
-    .main-svg {
-      width: 100%;
-      height: auto;
-      display: block;
-    }
+    /* Module hover effects - no jitter */
+    .mod { cursor: pointer; }
+    .mod:hover .mod-bg { filter: brightness(1.2); }
+    .mod:hover .mod-glow { opacity: 0.5; }
 
-    /* Module groups */
-    .module-group { cursor: pointer; transition: transform 0.2s ease; }
-    .module-group:hover { transform: scale(1.02); }
-    .module-group:hover .module-bg { filter: brightness(1.3); }
-    .module-group:hover .module-glow { opacity: 0.6; }
+    .mod-bg { transition: filter 0.15s ease; }
+    .mod-glow { opacity: 0; transition: opacity 0.15s ease; }
 
-    .module-bg { transition: all 0.2s ease; }
-    .module-glow { opacity: 0; transition: opacity 0.2s ease; }
-
-    /* Animated flow particles */
-    @keyframes flowRight {
-      0% { stroke-dashoffset: 40; }
-      100% { stroke-dashoffset: 0; }
-    }
-    @keyframes flowDown {
-      0% { stroke-dashoffset: 20; }
-      100% { stroke-dashoffset: 0; }
-    }
-    .flow-particle {
-      stroke-dasharray: 8 12;
-      animation: flowRight 0.8s linear infinite;
-    }
-    .flow-particle-v {
-      stroke-dasharray: 6 8;
-      animation: flowDown 0.6s linear infinite;
-    }
-
-    /* ========== INTERACTIVE PANEL ========== */
+    /* Detail Panel */
     .detail-panel {
       position: fixed;
       right: 24px;
       top: 50%;
-      transform: translateY(-50%) translateX(calc(100% + 40px));
-      width: 380px;
-      max-height: 75vh;
+      transform: translateY(-50%) translateX(calc(100% + 50px));
+      width: 360px;
+      max-height: 80vh;
       background: var(--bg-secondary);
       border: 1px solid var(--border);
       border-radius: 16px;
       padding: 24px;
       overflow-y: auto;
-      transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
       z-index: 100;
       box-shadow: 0 20px 60px rgba(0,0,0,0.5);
     }
     .detail-panel.visible { transform: translateY(-50%) translateX(0); }
 
-    .panel-header {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      margin-bottom: 20px;
-      padding-bottom: 16px;
-      border-bottom: 1px solid var(--border);
-    }
-    .panel-icon {
-      width: 44px; height: 44px;
-      border-radius: 10px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 20px;
-    }
-    .panel-title { font-size: 20px; font-weight: 600; }
-    .panel-category {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 10px;
-      color: var(--text-muted);
-      text-transform: uppercase;
-      letter-spacing: 1px;
-    }
+    .panel-header { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1px solid var(--border); }
+    .panel-icon { width: 44px; height: 44px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 20px; }
+    .panel-title { font-size: 18px; font-weight: 600; }
+    .panel-category { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; }
 
-    .panel-desc {
-      color: var(--text-secondary);
-      font-size: 14px;
-      line-height: 1.7;
-      margin-bottom: 24px;
-    }
+    .panel-desc { color: var(--text-secondary); font-size: 13px; line-height: 1.7; margin-bottom: 16px; }
 
-    .tensor-block {
-      background: var(--bg-tertiary);
-      border-radius: 10px;
-      padding: 16px;
-      margin-bottom: 12px;
-    }
-    .tensor-label {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 10px;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-      color: var(--text-muted);
-      margin-bottom: 8px;
-    }
-    .tensor-value {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 15px;
-      color: var(--accent-blue);
-      margin-bottom: 4px;
-    }
-    .tensor-note {
-      font-size: 12px;
-      color: var(--text-muted);
-    }
+    .tensor-box { background: var(--bg-tertiary); border-radius: 8px; padding: 14px; margin-bottom: 10px; }
+    .tensor-label { font-family: 'JetBrains Mono', monospace; font-size: 9px; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); margin-bottom: 6px; }
+    .tensor-shape { font-family: 'JetBrains Mono', monospace; font-size: 14px; color: var(--accent-blue); margin-bottom: 3px; }
+    .tensor-note { font-size: 11px; color: var(--text-muted); }
 
-    .param-table { width: 100%; border-collapse: collapse; font-size: 13px; }
-    .param-table th {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 10px;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-      color: var(--text-muted);
-      text-align: left;
-      padding: 10px 0;
-      border-bottom: 1px solid var(--border);
-    }
-    .param-table td {
-      padding: 10px 0;
-      border-bottom: 1px solid var(--border);
-      color: var(--text-secondary);
-    }
+    .param-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+    .param-table th { font-family: 'JetBrains Mono', monospace; font-size: 9px; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); text-align: left; padding: 8px 0; border-bottom: 1px solid var(--border); }
+    .param-table td { padding: 8px 0; border-bottom: 1px solid var(--border); color: var(--text-secondary); }
     .param-name { font-family: 'JetBrains Mono', monospace; color: var(--accent-purple); }
     .param-value { color: var(--accent-orange); }
 
     .close-btn {
       position: absolute;
-      top: 16px; right: 16px;
+      top: 14px; right: 14px;
       width: 28px; height: 28px;
       border: none;
       background: var(--bg-tertiary);
@@ -221,215 +135,79 @@
     }
     .close-btn:hover { background: var(--border); color: var(--text-primary); }
 
-    .panel-placeholder {
-      text-align: center;
-      padding: 40px 20px;
-      color: var(--text-muted);
-    }
-    .panel-placeholder svg {
-      width: 48px; height: 48px;
-      margin-bottom: 12px;
-      opacity: 0.4;
-    }
+    .panel-placeholder { text-align: center; padding: 40px 20px; color: var(--text-muted); }
+    .panel-placeholder svg { width: 48px; height: 48px; margin-bottom: 12px; opacity: 0.4; }
 
-    /* ========== TENSOR VISUALIZATION ========== */
-    .tensor-demo {
-      background: var(--bg-tertiary);
-      border-radius: 12px;
-      padding: 20px;
-      margin: 40px 0;
-    }
-    .tensor-demo-title {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 12px;
-      color: var(--text-muted);
-      text-transform: uppercase;
-      letter-spacing: 2px;
-      margin-bottom: 20px;
-      text-align: center;
-    }
+    /* Section header */
+    .section-header { text-align: center; padding: 40px 0 20px; }
+    .section-label { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--accent-blue); text-transform: uppercase; letter-spacing: 2px; margin-bottom: 6px; }
+    .section-title { font-size: clamp(24px, 3vw, 36px); font-weight: 600; }
 
-    /* ========== SECTION HEADER ========== */
-    .section-header {
-      text-align: center;
-      padding: 40px 0 20px;
-    }
-    .section-label {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 11px;
-      color: var(--accent-blue);
-      text-transform: uppercase;
-      letter-spacing: 2px;
-      margin-bottom: 8px;
-    }
-    .section-title {
-      font-size: clamp(28px, 4vw, 40px);
-      font-weight: 600;
-    }
-
-    /* ========== MODULE CARDS ========== */
+    /* Cards */
     .module-card {
       background: var(--bg-secondary);
       border: 1px solid var(--border);
       border-radius: 12px;
-      padding: 28px;
-      margin-bottom: 20px;
+      padding: 24px;
+      margin-bottom: 16px;
       opacity: 0;
-      transform: translateY(20px);
-      transition: all 0.5s ease;
+      transform: translateY(15px);
+      transition: all 0.4s ease;
     }
     .module-card.visible { opacity: 1; transform: translateY(0); }
     .module-card:hover { border-color: var(--accent-blue); }
 
-    .module-card::before {
-      content: '';
-      position: absolute;
-      top: 0; left: 0; right: 0;
-      height: 3px;
-      border-radius: 12px 12px 0 0;
-    }
-    .module-card { position: relative; overflow: hidden; }
-    .module-card.blue::before { background: var(--accent-blue); }
-    .module-card.green::before { background: var(--accent-green); }
-    .module-card.purple::before { background: var(--accent-purple); }
-    .module-card.orange::before { background: var(--accent-orange); }
-    .module-card.pink::before { background: var(--accent-pink); }
-    .module-card.cyan::before { background: var(--accent-cyan); }
-
-    .card-header { display: flex; align-items: center; gap: 14px; margin-bottom: 16px; }
-    .card-icon {
-      width: 44px; height: 44px;
-      border-radius: 10px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 20px;
-    }
+    .card-header { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
+    .card-icon { width: 40px; height: 40px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 18px; }
     .blue .card-icon { background: rgba(88,166,255,0.15); }
-    .green .card-icon { background: rgba(63,185,80,0.15); }
-    .purple .card-icon { background: rgba(163,113,247,0.15); }
     .orange .card-icon { background: rgba(240,136,62,0.15); }
-    .pink .card-icon { background: rgba(247,120,186,0.15); }
+    .purple .card-icon { background: rgba(163,113,247,0.15); }
     .cyan .card-icon { background: rgba(57,197,207,0.15); }
+    .pink .card-icon { background: rgba(247,120,186,0.15); }
 
-    .card-title { font-size: 22px; font-weight: 600; }
-    .card-subtitle {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 11px;
-      color: var(--text-muted);
-      margin-top: 2px;
-    }
+    .card-title { font-size: 18px; font-weight: 600; }
+    .card-subtitle { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--text-muted); margin-top: 2px; }
 
-    .card-content { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
-    .card-text { color: var(--text-secondary); font-size: 14px; line-height: 1.8; }
-    .card-text p { margin-bottom: 12px; }
+    .card-content { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    .card-text { color: var(--text-secondary); font-size: 13px; line-height: 1.7; }
+    .card-text p { margin-bottom: 10px; }
     .card-text strong { color: var(--text-primary); }
-    .card-text code {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 12px;
-      background: var(--bg-tertiary);
-      padding: 2px 6px;
-      border-radius: 4px;
-      color: var(--accent-orange);
-    }
+    .card-text code { font-family: 'JetBrains Mono', monospace; font-size: 11px; background: var(--bg-tertiary); padding: 2px 5px; border-radius: 3px; color: var(--accent-orange); }
 
-    .tensor-flow {
-      background: var(--bg-tertiary);
-      border-radius: 10px;
-      padding: 16px;
-    }
-    .tensor-flow-title {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 10px;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-      color: var(--text-muted);
-      margin-bottom: 12px;
-    }
-    .tensor-row {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      padding: 8px 0;
-      border-bottom: 1px solid var(--border);
-    }
+    .tensor-flow { background: var(--bg-tertiary); border-radius: 8px; padding: 14px; }
+    .tensor-flow-title { font-family: 'JetBrains Mono', monospace; font-size: 9px; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); margin-bottom: 10px; }
+    .tensor-row { display: flex; align-items: center; gap: 8px; padding: 6px 0; border-bottom: 1px solid var(--border); }
     .tensor-row:last-child { border-bottom: none; }
-    .tensor-name { font-family: 'JetBrains Mono', monospace; font-size: 12px; min-width: 50px; }
+    .tensor-name { font-family: 'JetBrains Mono', monospace; font-size: 11px; min-width: 45px; }
     .tensor-arrow { color: var(--text-muted); }
-    .tensor-dims {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 12px;
-      color: var(--accent-blue);
-      background: var(--bg-secondary);
-      padding: 3px 10px;
-      border-radius: 4px;
-    }
+    .tensor-dims { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--accent-blue); background: var(--bg-secondary); padding: 2px 8px; border-radius: 3px; }
 
-    /* ========== CHEATSHEET ========== */
-    .cheatsheet {
-      background: var(--bg-secondary);
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      padding: 32px;
-      margin: 40px 0;
-    }
-    .cheatsheet-title { font-size: 24px; font-weight: 600; margin-bottom: 24px; text-align: center; }
-    .cheatsheet-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-      gap: 16px;
-    }
-    .cheat-item {
-      background: var(--bg-tertiary);
-      border-radius: 8px;
-      padding: 16px;
-    }
-    .cheat-symbol {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 20px;
-      color: var(--accent-blue);
-      margin-bottom: 6px;
-    }
-    .cheat-name { font-weight: 500; font-size: 14px; }
-    .cheat-desc { font-size: 12px; color: var(--text-muted); margin-top: 4px; }
+    /* Cheatsheet */
+    .cheatsheet { background: var(--bg-secondary); border: 1px solid var(--border); border-radius: 12px; padding: 28px; margin: 30px 0; }
+    .cheatsheet-title { font-size: 20px; font-weight: 600; margin-bottom: 20px; text-align: center; }
+    .cheatsheet-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; }
+    .cheat-item { background: var(--bg-tertiary); border-radius: 8px; padding: 14px; }
+    .cheat-symbol { font-family: 'JetBrains Mono', monospace; font-size: 18px; color: var(--accent-blue); margin-bottom: 4px; }
+    .cheat-name { font-weight: 500; font-size: 13px; }
+    .cheat-desc { font-size: 11px; color: var(--text-muted); margin-top: 3px; }
 
-    footer {
-      text-align: center;
-      padding: 40px 0;
-      border-top: 1px solid var(--border);
-      margin-top: 40px;
-    }
+    footer { text-align: center; padding: 30px 0; border-top: 1px solid var(--border); margin-top: 30px; }
     footer a { color: var(--accent-blue); text-decoration: none; }
-    footer a:hover { text-decoration: underline; }
-    footer p { color: var(--text-muted); font-size: 13px; margin-top: 8px; }
+    footer p { color: var(--text-muted); font-size: 12px; margin-top: 6px; }
 
-    /* Scrollbar */
     ::-webkit-scrollbar { width: 6px; }
     ::-webkit-scrollbar-track { background: var(--bg-secondary); }
     ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
 
-    /* ========== ANIMATIONS ========== */
-    @keyframes fadeUp {
-      from { opacity: 0; transform: translateY(20px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-    @keyframes pulse {
-      0%, 100% { opacity: 0.6; }
-      50% { opacity: 1; }
-    }
-    @keyframes shimmer {
-      0% { background-position: -200% 0; }
-      100% { background-position: 200% 0; }
-    }
+    @keyframes fadeUp { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
 
-    /* Responsive */
     @media (max-width: 1100px) {
       .detail-panel {
         position: fixed;
         bottom: 0; left: 0; right: 0; top: auto;
         transform: translateY(100%);
         width: 100%;
-        max-height: 60vh;
+        max-height: 65vh;
         border-radius: 20px 20px 0 0;
       }
       .detail-panel.visible { transform: translateY(0); }
@@ -438,7 +216,6 @@
   </style>
 </head>
 <body>
-  <!-- HERO -->
   <section class="hero">
     <div class="container">
       <h1>Transformer 架构解析</h1>
@@ -446,536 +223,461 @@
     </div>
   </section>
 
-  <!-- MAIN DIAGRAM -->
-  <section class="diagram-container">
+  <section class="diagram-section">
     <div class="container">
-      <svg class="main-svg" viewBox="0 0 1400 900" xmlns="http://www.w3.org/2000/svg">
-        <defs>
-          <!-- Gradients for modules -->
-          <linearGradient id="gradEmbed" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" style="stop-color:#58a6ff;stop-opacity:0.25"/>
-            <stop offset="100%" style="stop-color:#58a6ff;stop-opacity:0.05"/>
-          </linearGradient>
-          <linearGradient id="gradEnc" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" style="stop-color:#3fb950;stop-opacity:0.2"/>
-            <stop offset="100%" style="stop-color:#3fb950;stop-opacity:0.05"/>
-          </linearGradient>
-          <linearGradient id="gradAttn" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" style="stop-color:#f0883e;stop-opacity:0.25"/>
-            <stop offset="100%" style="stop-color:#f0883e;stop-opacity:0.05"/>
-          </linearGradient>
-          <linearGradient id="gradFFN" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" style="stop-color:#a371f7;stop-opacity:0.2"/>
-            <stop offset="100%" style="stop-color:#a371f7;stop-opacity:0.05"/>
-          </linearGradient>
-          <linearGradient id="gradLN" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" style="stop-color:#39c5cf;stop-opacity:0.2"/>
-            <stop offset="100%" style="stop-color:#39c5cf;stop-opacity:0.05"/>
-          </linearGradient>
-          <linearGradient id="gradDec" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" style="stop-color:#f778ba;stop-opacity:0.2"/>
-            <stop offset="100%" style="stop-color:#f778ba;stop-opacity:0.05"/>
-          </linearGradient>
-          <linearGradient id="gradOut" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" style="stop-color:#d29922;stop-opacity:0.25"/>
-            <stop offset="100%" style="stop-color:#d29922;stop-opacity:0.05"/>
-          </linearGradient>
+      <div class="diagram-wrapper">
+        <svg class="main-svg" viewBox="0 0 1500 950" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <!-- Gradients -->
+            <linearGradient id="gEmbed" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#58a6ff;stop-opacity:0.2"/><stop offset="100%" style="stop-color:#58a6ff;stop-opacity:0.05"/></linearGradient>
+            <linearGradient id="gEnc" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#3fb950;stop-opacity:0.15"/><stop offset="100%" style="stop-color:#3fb950;stop-opacity:0.03"/></linearGradient>
+            <linearGradient id="gAttn" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#f0883e;stop-opacity:0.2"/><stop offset="100%" style="stop-color:#f0883e;stop-opacity:0.05"/></linearGradient>
+            <linearGradient id="gFFN" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#a371f7;stop-opacity:0.15"/><stop offset="100%" style="stop-color:#a371f7;stop-opacity:0.03"/></linearGradient>
+            <linearGradient id="gLN" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#39c5cf;stop-opacity:0.15"/><stop offset="100%" style="stop-color:#39c5cf;stop-opacity:0.03"/></linearGradient>
+            <linearGradient id="gDec" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#f778ba;stop-opacity:0.15"/><stop offset="100%" style="stop-color:#f778ba;stop-opacity:0.03"/></linearGradient>
+            <linearGradient id="gOut" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#d29922;stop-opacity:0.2"/><stop offset="100%" style="stop-color:#d29922;stop-opacity:0.05"/></linearGradient>
 
-          <!-- Glow filters -->
-          <filter id="glowBlue" x="-50%" y="-50%" width="200%" height="200%">
-            <feGaussianBlur stdDeviation="8" result="blur"/>
-            <feFlood flood-color="#58a6ff" flood-opacity="0.5"/>
-            <feComposite in2="blur" operator="in"/>
-            <feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge>
-          </filter>
-          <filter id="glowGreen" x="-50%" y="-50%" width="200%" height="200%">
-            <feGaussianBlur stdDeviation="8" result="blur"/>
-            <feFlood flood-color="#3fb950" flood-opacity="0.5"/>
-            <feComposite in2="blur" operator="in"/>
-            <feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge>
-          </filter>
-          <filter id="glowOrange" x="-50%" y="-50%" width="200%" height="200%">
-            <feGaussianBlur stdDeviation="8" result="blur"/>
-            <feFlood flood-color="#f0883e" flood-opacity="0.5"/>
-            <feComposite in2="blur" operator="in"/>
-            <feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge>
-          </filter>
-          <filter id="glowPurple" x="-50%" y="-50%" width="200%" height="200%">
-            <feGaussianBlur stdDeviation="8" result="blur"/>
-            <feFlood flood-color="#a371f7" flood-opacity="0.5"/>
-            <feComposite in2="blur" operator="in"/>
-            <feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge>
-          </filter>
-          <filter id="glowPink" x="-50%" y="-50%" width="200%" height="200%">
-            <feGaussianBlur stdDeviation="8" result="blur"/>
-            <feFlood flood-color="#f778ba" flood-opacity="0.5"/>
-            <feComposite in2="blur" operator="in"/>
-            <feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge>
-          </filter>
-          <filter id="glowCyan" x="-50%" y="-50%" width="200%" height="200%">
-            <feGaussianBlur stdDeviation="8" result="blur"/>
-            <feFlood flood-color="#39c5cf" flood-opacity="0.5"/>
-            <feComposite in2="blur" operator="in"/>
-            <feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge>
-          </filter>
+            <!-- Glow filters -->
+            <filter id="glow" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="6" result="b"/><feFlood flood-opacity="0.4"/><feComposite in2="b" operator="in"/><feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge></filter>
 
-          <!-- Arrow markers -->
-          <marker id="arr" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto">
-            <polygon points="0 0, 6 3, 0 6" fill="#6e7681"/>
-          </marker>
-          <marker id="arrBlue" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto">
-            <polygon points="0 0, 8 4, 0 8" fill="#58a6ff"/>
-          </marker>
-          <marker id="arrGreen" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto">
-            <polygon points="0 0, 8 4, 0 8" fill="#3fb950"/>
-          </marker>
-          <marker id="arrOrange" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto">
-            <polygon points="0 0, 8 4, 0 8" fill="#f0883e"/>
-          </marker>
-          <marker id="arrPink" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto">
-            <polygon points="0 0, 8 4, 0 8" fill="#f778ba"/>
-          </marker>
-        </defs>
+            <!-- Arrow markers -->
+            <marker id="arr" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto"><polygon points="0 0,6 3,0 6" fill="#6e7681"/></marker>
+            <marker id="arrB" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto"><polygon points="0 0,7 3.5,0 7" fill="#58a6ff"/></marker>
+            <marker id="arrG" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto"><polygon points="0 0,7 3.5,0 7" fill="#3fb950"/></marker>
+            <marker id="arrO" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto"><polygon points="0 0,7 3.5,0 7" fill="#f0883e"/></marker>
+            <marker id="arrP" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto"><polygon points="0 0,7 3.5,0 7" fill="#f778ba"/></marker>
+          </defs>
 
-        <!-- ========== SECTION LABELS ========== -->
-        <text x="220" y="40" text-anchor="middle" fill="#3fb950" font-family="Space Grotesk" font-size="14" font-weight="600" letter-spacing="2">ENCODER</text>
-        <text x="700" y="40" text-anchor="middle" fill="#f778ba" font-family="Space Grotesk" font-size="14" font-weight="600" letter-spacing="2">DECODER</text>
-        <text x="1150" y="300" text-anchor="middle" fill="#d29922" font-family="Space Grotesk" font-size="14" font-weight="600" letter-spacing="2">OUTPUT</text>
+          <!-- ========== SECTION LABELS ========== -->
+          <text x="280" y="35" text-anchor="middle" fill="#3fb950" font-family="Space Grotesk" font-size="14" font-weight="600" letter-spacing="2">ENCODER</text>
+          <text x="780" y="35" text-anchor="middle" fill="#f778ba" font-family="Space Grotesk" font-size="14" font-weight="600" letter-spacing="2">DECODER</text>
+          <text x="1250" y="280" text-anchor="middle" fill="#d29922" font-family="Space Grotesk" font-size="14" font-weight="600" letter-spacing="2">OUTPUT</text>
 
-        <!-- ========== INPUT TOKEN SEQUENCE ========== -->
-        <g class="module-group" data-module="input" transform="translate(30, 70)">
-          <rect class="module-bg" x="0" y="0" width="140" height="80" rx="12" fill="url(#gradEmbed)" stroke="#58a6ff" stroke-width="2"/>
-          <rect class="module-glow" x="-5" y="-5" width="150" height="90" rx="14" fill="none" stroke="#58a6ff" stroke-width="2" filter="url(#glowBlue)"/>
-          <text x="70" y="28" text-anchor="middle" fill="#58a6ff" font-family="Space Grotesk" font-size="13" font-weight="500">Input Tokens</text>
-          <text x="70" y="50" text-anchor="middle" fill="#f0f6fc" font-family="JetBrains Mono" font-size="16" font-weight="500">[B, L]</text>
-          <text x="70" y="68" text-anchor="middle" fill="#8b949e" font-family="Space Grotesk" font-size="11">Token IDs</text>
-        </g>
-
-        <!-- Token visualization -->
-        <g transform="translate(30, 170)">
-          <rect x="0" y="0" width="140" height="50" rx="8" fill="#21262d" stroke="#30363d" stroke-width="1"/>
-          <text x="70" y="20" text-anchor="middle" fill="#8b949e" font-family="JetBrains Mono" font-size="10">序列: "Hello world"</text>
-          <text x="70" y="36" text-anchor="middle" fill="#58a6ff" font-family="JetBrains Mono" font-size="10">[B=1, L=5]</text>
-        </g>
-
-        <!-- Arrow down -->
-        <line x1="100" y1="150" x2="100" y2="170" stroke="#58a6ff" stroke-width="2" class="flow-particle-v" marker-end="url(#arrBlue)"/>
-
-        <!-- ========== EMBEDDING LAYER ========== -->
-        <g class="module-group" data-module="embedding" transform="translate(30, 240)">
-          <rect class="module-bg" x="0" y="0" width="140" height="80" rx="12" fill="url(#gradEmbed)" stroke="#58a6ff" stroke-width="2"/>
-          <rect class="module-glow" x="-5" y="-5" width="150" height="90" rx="14" fill="none" stroke="#58a6ff" stroke-width="2" filter="url(#glowBlue)"/>
-          <text x="70" y="22" text-anchor="middle" fill="#58a6ff" font-family="Space Grotesk" font-size="13" font-weight="500">Embedding</text>
-          <text x="70" y="44" text-anchor="middle" fill="#f0f6fc" font-family="JetBrains Mono" font-size="14">[B, L, D]</text>
-          <text x="70" y="62" text-anchor="middle" fill="#8b949e" font-family="Space Grotesk" font-size="10">vocab → d_model</text>
-        </g>
-
-        <!-- ========== POSITIONAL ENCODING ========== -->
-        <g class="module-group" data-module="positional" transform="translate(30, 340)">
-          <rect class="module-bg" x="0" y="0" width="140" height="80" rx="12" fill="url(#gradEmbed)" stroke="#58a6ff" stroke-width="2"/>
-          <rect class="module-glow" x="-5" y="-5" width="150" height="90" rx="14" fill="none" stroke="#58a6ff" stroke-width="2" filter="url(#glowBlue)"/>
-          <text x="70" y="22" text-anchor="middle" fill="#58a6ff" font-family="Space Grotesk" font-size="13" font-weight="500">+ Positional</text>
-          <text x="70" y="44" text-anchor="middle" fill="#f0f6fc" font-family="JetBrains Mono" font-size="14">[B, L, D]</text>
-          <text x="70" y="62" text-anchor="middle" fill="#8b949e" font-family="Space Grotesk" font-size="10">sin/cos encoding</text>
-        </g>
-
-        <!-- Flow arrow between embedding and positional -->
-        <line x1="100" y1="320" x2="100" y2="340" stroke="#58a6ff" stroke-width="2" class="flow-particle-v" marker-end="url(#arrBlue)"/>
-
-        <!-- ========== ENCODER SECTION ========== -->
-        <g transform="translate(220, 70)">
-          <!-- ENCODER INPUT -->
-          <g>
-            <rect x="0" y="0" width="280" height="50" rx="8" fill="rgba(63,185,80,0.1)" stroke="#3fb950" stroke-width="1" stroke-dasharray="6 4"/>
-            <text x="140" y="20" text-anchor="middle" fill="#3fb950" font-family="Space Grotesk" font-size="12">Encoder Input: [B, L_src, D]</text>
-            <text x="140" y="38" text-anchor="middle" fill="#8b949e" font-family="JetBrains Mono" font-size="10">d_model = 512</text>
+          <!-- ========== INPUT SECTION ========== -->
+          <!-- Input Tokens -->
+          <g class="mod" data-mod="input" transform="translate(30, 60)">
+            <rect class="mod-bg" x="0" y="0" width="150" height="90" rx="12" fill="url(#gEmbed)" stroke="#58a6ff" stroke-width="2"/>
+            <rect class="mod-glow" x="-4" y="-4" width="158" height="98" rx="14" fill="none" stroke="#58a6ff" stroke-width="2" filter="url(#glow)"/>
+            <text x="75" y="28" text-anchor="middle" fill="#58a6ff" font-family="Space Grotesk" font-size="13" font-weight="500">Input Tokens</text>
+            <text x="75" y="50" text-anchor="middle" fill="#f0f6fc" font-family="JetBrains Mono" font-size="14">Shape: [B, L]</text>
+            <text x="75" y="68" text-anchor="middle" fill="#8b949e" font-family="Space Grotesk" font-size="11">B=batch, L=seq_len</text>
+            <text x="75" y="82" text-anchor="middle" fill="#6e7681" font-family="Space Grotesk" font-size="9">例: "Hello world"</text>
           </g>
 
-          <!-- Arrow to first layer -->
-          <line x1="140" y1="50" x2="140" y2="75" stroke="#3fb950" stroke-width="2" class="flow-particle-v" marker-end="url(#arrGreen)"/>
+          <!-- Arrow down -->
+          <line x1="105" y1="150" x2="105" y2="170" stroke="#58a6ff" stroke-width="1.5" marker-end="url(#arrB)"/>
 
-          <!-- ===== ENCODER LAYER ===== -->
-          <g transform="translate(0, 75)">
+          <!-- Embedding -->
+          <g class="mod" data-mod="embedding" transform="translate(30, 175)">
+            <rect class="mod-bg" x="0" y="0" width="150" height="90" rx="12" fill="url(#gEmbed)" stroke="#58a6ff" stroke-width="2"/>
+            <rect class="mod-glow" x="-4" y="-4" width="158" height="98" rx="14" fill="none" stroke="#58a6ff" stroke-width="2" filter="url(#glow)"/>
+            <text x="75" y="26" text-anchor="middle" fill="#58a6ff" font-family="Space Grotesk" font-size="13" font-weight="500">Embedding</text>
+            <text x="75" y="48" text-anchor="middle" fill="#f0f6fc" font-family="JetBrains Mono" font-size="14">[B, L] → [B, L, D]</text>
+            <text x="75" y="66" text-anchor="middle" fill="#8b949e" font-family="Space Grotesk" font-size="10">vocab × d_model</text>
+            <text x="75" y="80" text-anchor="middle" fill="#6e7681" font-family="Space Grotesk" font-size="9">ID → 512维向量</text>
+          </g>
+
+          <!-- Arrow down -->
+          <line x1="105" y1="265" x2="105" y2="285" stroke="#58a6ff" stroke-width="1.5" marker-end="url(#arrB)"/>
+
+          <!-- Positional Encoding -->
+          <g class="mod" data-mod="positional" transform="translate(30, 290)">
+            <rect class="mod-bg" x="0" y="0" width="150" height="90" rx="12" fill="url(#gEmbed)" stroke="#58a6ff" stroke-width="2"/>
+            <rect class="mod-glow" x="-4" y="-4" width="158" height="98" rx="14" fill="none" stroke="#58a6ff" stroke-width="2" filter="url(#glow)"/>
+            <text x="75" y="26" text-anchor="middle" fill="#58a6ff" font-family="Space Grotesk" font-size="13" font-weight="500">+ Positional</text>
+            <text x="75" y="48" text-anchor="middle" fill="#f0f6fc" font-family="JetBrains Mono" font-size="14">[B, L, D] → [B, L, D]</text>
+            <text x="75" y="66" text-anchor="middle" fill="#8b949e" font-family="Space Grotesk" font-size="10">sin/cos 编码</text>
+            <text x="75" y="80" text-anchor="middle" fill="#6e7681" font-family="Space Grotesk" font-size="9">注入位置信息</text>
+          </g>
+
+          <!-- ========== ENCODER ========== -->
+          <g transform="translate(230, 60)">
+            <!-- Encoder Input indicator -->
+            <rect x="0" y="0" width="300" height="45" rx="6" fill="rgba(63,185,80,0.08)" stroke="#3fb950" stroke-width="1" stroke-dasharray="4 3"/>
+            <text x="150" y="18" text-anchor="middle" fill="#3fb950" font-family="Space Grotesk" font-size="11">Encoder Input: [B, L_src, D=512]</text>
+            <text x="150" y="34" text-anchor="middle" fill="#6e7681" font-family="JetBrains Mono" font-size="9">d_model = 512 统一维度</text>
+
+            <line x1="150" y1="45" x2="150" y2="65" stroke="#3fb950" stroke-width="1.5" marker-end="url(#arrG)"/>
+
             <!-- ===== SELF ATTENTION ===== -->
-            <g class="module-group" data-module="enc-attention">
-              <!-- Module background -->
-              <rect class="module-bg" x="0" y="0" width="280" height="140" rx="14" fill="url(#gradAttn)" stroke="#f0883e" stroke-width="2"/>
-              <rect class="module-glow" x="-5" y="-5" width="290" height="150" rx="16" fill="none" stroke="#f0883e" stroke-width="2" filter="url(#glowOrange)"/>
+            <g class="mod" data-mod="enc-attention" transform="translate(0, 70)">
+              <rect class="mod-bg" x="0" y="0" width="300" height="200" rx="14" fill="url(#gAttn)" stroke="#f0883e" stroke-width="2"/>
+              <rect class="mod-glow" x="-4" y="-4" width="308" height="208" rx="16" fill="none" stroke="#f0883e" stroke-width="2" filter="url(#glow)"/>
 
-              <!-- Header -->
-              <text x="140" y="28" text-anchor="middle" fill="#f0883e" font-family="Space Grotesk" font-size="15" font-weight="600">Multi-Head Self-Attention</text>
+              <text x="150" y="26" text-anchor="middle" fill="#f0883e" font-family="Space Grotesk" font-size="15" font-weight="600">Multi-Head Self-Attention</text>
 
-              <!-- Q=K=V diagram -->
-              <g transform="translate(20, 45)">
-                <text x="0" y="0" fill="#8b949e" font-family="Space Grotesk" font-size="10">Q = K = V = X</text>
-                <text x="0" y="14" fill="#6e7681" font-family="Space Grotesk" font-size="9">Attention(Q,K,V) = softmax(QKᵀ/√d_k)V</text>
-              </g>
+              <!-- Q=K=V note -->
+              <rect x="20" y="40" width="260" height="36" rx="6" fill="rgba(240,136,62,0.1)" stroke="#f0883e" stroke-width="1"/>
+              <text x="150" y="56" text-anchor="middle" fill="#f0883e" font-family="Space Grotesk" font-size="11">Q = K = V = X (输入的线性投影)</text>
+              <text x="150" y="70" text-anchor="middle" fill="#8b949e" font-family="JetBrains Mono" font-size="9">每个 token 生成 Query、Key、Value 三个向量</text>
 
-              <!-- Input/Output indicators -->
-              <rect x="20" y="85" width="80" height="24" rx="6" fill="rgba(240,136,62,0.2)"/>
-              <text x="60" y="102" text-anchor="middle" fill="#f0883e" font-family="JetBrains Mono" font-size="11">IN: [B,L,D]</text>
+              <!-- Multi-head visualization -->
+              <g transform="translate(20, 85)">
+                <text x="0" y="0" fill="#6e7681" font-family="Space Grotesk" font-size="10">多头机制 (h=8):</text>
 
-              <rect x="180" y="85" width="80" height="24" rx="6" fill="rgba(240,136,62,0.2)"/>
-              <text x="220" y="102" text-anchor="middle" fill="#f0883e" font-family="JetBrains Mono" font-size="11">OUT: [B,L,D]</text>
+                <!-- Head boxes -->
+                <rect x="0" y="8" width="35" height="20" rx="3" fill="rgba(240,136,62,0.15)" stroke="#f0883e" stroke-width="1"/>
+                <text x="17" y="22" text-anchor="middle" fill="#f0883e" font-family="JetBrains Mono" font-size="8">Head1</text>
+                <rect x="40" y="8" width="35" height="20" rx="3" fill="rgba(240,136,62,0.15)" stroke="#f0883e" stroke-width="1"/>
+                <text x="57" y="22" text-anchor="middle" fill="#f0883e" font-family="JetBrains Mono" font-size="8">Head2</text>
+                <rect x="80" y="8" width="35" height="20" rx="3" fill="rgba(240,136,62,0.15)" stroke="#f0883e" stroke-width="1"/>
+                <text x="97" y="22" text-anchor="middle" fill="#f0883e" font-family="JetBrains Mono" font-size="8">...</text>
+                <rect x="120" y="8" width="35" height="20" rx="3" fill="rgba(240,136,62,0.15)" stroke="#f0883e" stroke-width="1"/>
+                <text x="137" y="22" text-anchor="middle" fill="#f0883e" font-family="JetBrains Mono" font-size="8">Head8</text>
 
-              <!-- Params -->
-              <text x="140" y="128" text-anchor="middle" fill="#8b949e" font-family="JetBrains Mono" font-size="10">h=8 heads · d_k=64 · dropout=0.1</text>
-            </g>
-
-            <!-- Arrow down -->
-            <line x1="140" y1="140" x2="140" y2="165" stroke="#f0883e" stroke-width="2" class="flow-particle-v" marker-end="url(#arrOrange)"/>
-
-            <!-- ===== ADD & NORM 1 ===== -->
-            <g class="module-group" data-module="enc-norm1" transform="translate(0, 165)">
-              <rect class="module-bg" x="0" y="0" width="280" height="90" rx="12" fill="url(#gradLN)" stroke="#39c5cf" stroke-width="2"/>
-              <rect class="module-glow" x="-5" y="-5" width="290" height="100" rx="14" fill="none" stroke="#39c5cf" stroke-width="2" filter="url(#glowCyan)"/>
-
-              <text x="140" y="28" text-anchor="middle" fill="#39c5cf" font-family="Space Grotesk" font-size="14" font-weight="500">Add & LayerNorm</text>
-
-              <rect x="20" y="45" width="100" height="22" rx="5" fill="rgba(57,197,207,0.15)"/>
-              <text x="70" y="60" text-anchor="middle" fill="#39c5cf" font-family="JetBrains Mono" font-size="10">x + Attention(x)</text>
-
-              <rect x="160" y="45" width="100" height="22" rx="5" fill="rgba(57,197,207,0.15)"/>
-              <text x="210" y="60" text-anchor="middle" fill="#39c5cf" font-family="JetBrains Mono" font-size="10">LayerNorm</text>
-
-              <text x="140" y="78" text-anchor="middle" fill="#6e7681" font-family="Space Grotesk" font-size="10">残差连接 + 归一化</text>
-            </g>
-
-            <!-- Arrow down -->
-            <line x1="140" y1="255" x2="140" y2="280" stroke="#39c5cf" stroke-width="2" class="flow-particle-v" marker-end="url(#arr)"/>
-
-            <!-- ===== FFN ===== -->
-            <g class="module-group" data-module="enc-ffn" transform="translate(0, 280)">
-              <rect class="module-bg" x="0" y="0" width="280" height="140" rx="14" fill="url(#gradFFN)" stroke="#a371f7" stroke-width="2"/>
-              <rect class="module-glow" x="-5" y="-5" width="290" height="150" rx="16" fill="none" stroke="#a371f7" stroke-width="2" filter="url(#glowPurple)"/>
-
-              <text x="140" y="28" text-anchor="middle" fill="#a371f7" font-family="Space Grotesk" font-size="15" font-weight="600">Feed Forward Network</text>
-
-              <!-- FFN diagram -->
-              <g transform="translate(20, 48)">
-                <rect x="0" y="0" width="60" height="30" rx="4" fill="rgba(163,113,247,0.2)" stroke="#a371f7" stroke-width="1"/>
-                <text x="30" y="19" text-anchor="middle" fill="#a371f7" font-family="JetBrains Mono" font-size="10">D=512</text>
-
-                <text x="75" y="19" fill="#6e7681" font-family="Space Grotesk" font-size="12">→</text>
-
-                <rect x="95" y="0" width="60" height="30" rx="4" fill="rgba(163,113,247,0.2)" stroke="#a371f7" stroke-width="1"/>
-                <text x="125" y="19" text-anchor="middle" fill="#a371f7" font-family="JetBrains Mono" font-size="10">4D=2048</text>
-
-                <text x="170" y="19" fill="#6e7681" font-family="Space Grotesk" font-size="12">→</text>
-
-                <rect x="190" y="0" width="60" height="30" rx="4" fill="rgba(163,113,247,0.2)" stroke="#a371f7" stroke-width="1"/>
-                <text x="220" y="19" text-anchor="middle" fill="#a371f7" font-family="JetBrains Mono" font-size="10">D=512</text>
+                <!-- Dimension note -->
+                <text x="0" y="42" fill="#8b949e" font-family="Space Grotesk" font-size="9">每个头: D=512 → d_k=64 → 输出8个64维向量</text>
+                <text x="0" y="54" fill="#8b949e" font-family="Space Grotesk" font-size="9">Concat: [64×8] → 512维 → Linear → 输出</text>
               </g>
 
               <!-- IN/OUT -->
-              <rect x="20" y="95" width="80" height="22" rx="5" fill="rgba(163,113,247,0.2)"/>
-              <text x="60" y="111" text-anchor="middle" fill="#a371f7" font-family="JetBrains Mono" font-size="10">IN: [B,L,D]</text>
+              <rect x="20" y="160" width="100" height="28" rx="5" fill="rgba(240,136,62,0.15)"/>
+              <text x="70" y="170" text-anchor="middle" fill="#f0883e" font-family="JetBrains Mono" font-size="9">IN: [B, L, 512]</text>
+              <text x="70" y="182" text-anchor="middle" fill="#6e7681" font-family="JetBrains Mono" font-size="8">每个位置512维</text>
 
-              <rect x="180" y="95" width="80" height="22" rx="5" fill="rgba(163,113,247,0.2)"/>
-              <text x="220" y="111" text-anchor="middle" fill="#a371f7" font-family="JetBrains Mono" font-size="10">OUT: [B,L,D]</text>
-
-              <text x="140" y="128" text-anchor="middle" fill="#6e7681" font-family="Space Grotesk" font-size="10">Linear → ReLU → Linear</text>
+              <rect x="180" y="160" width="100" height="28" rx="5" fill="rgba(240,136,62,0.15)"/>
+              <text x="230" y="170" text-anchor="middle" fill="#f0883e" font-family="JetBrains Mono" font-size="9">OUT: [B, L, 512]</text>
+              <text x="230" y="182" text-anchor="middle" fill="#6e7681" font-family="JetBrains Mono" font-size="8">维度保持不变</text>
             </g>
 
-            <!-- Arrow down -->
-            <line x1="140" y1="420" x2="140" y2="445" stroke="#a371f7" stroke-width="2" class="flow-particle-v" marker-end="url(#arr)"/>
+            <line x1="150" y1="270" x2="150" y2="290" stroke="#f0883e" stroke-width="1.5" marker-end="url(#arrO)"/>
 
-            <!-- ===== ADD & NORM 2 ===== -->
-            <g class="module-group" data-module="enc-norm2" transform="translate(0, 445)">
-              <rect class="module-bg" x="0" y="0" width="280" height="90" rx="12" fill="url(#gradLN)" stroke="#39c5cf" stroke-width="2"/>
-              <rect class="module-glow" x="-5" y="-5" width="290" height="100" rx="14" fill="none" stroke="#39c5cf" stroke-width="2" filter="url(#glowCyan)"/>
+            <!-- Add & Norm 1 -->
+            <g class="mod" data-mod="enc-norm1" transform="translate(0, 295)">
+              <rect class="mod-bg" x="0" y="0" width="300" height="90" rx="12" fill="url(#gLN)" stroke="#39c5cf" stroke-width="2"/>
+              <rect class="mod-glow" x="-4" y="-4" width="308" height="98" rx="14" fill="none" stroke="#39c5cf" stroke-width="2" filter="url(#glow)"/>
 
-              <text x="140" y="28" text-anchor="middle" fill="#39c5cf" font-family="Space Grotesk" font-size="14" font-weight="500">Add & LayerNorm</text>
+              <text x="150" y="26" text-anchor="middle" fill="#39c5cf" font-family="Space Grotesk" font-size="14" font-weight="500">Add & LayerNorm</text>
 
-              <rect x="20" y="45" width="100" height="22" rx="5" fill="rgba(57,197,207,0.15)"/>
-              <text x="70" y="60" text-anchor="middle" fill="#39c5cf" font-family="JetBrains Mono" font-size="10">x + FFN(x)</text>
+              <rect x="20" y="40" width="120" height="22" rx="4" fill="rgba(57,197,207,0.12)"/>
+              <text x="80" y="55" text-anchor="middle" fill="#39c5cf" font-family="JetBrains Mono" font-size="10">残差: x + Attention(x)</text>
 
-              <rect x="160" y="45" width="100" height="22" rx="5" fill="rgba(57,197,207,0.15)"/>
-              <text x="210" y="60" text-anchor="middle" fill="#39c5cf" font-family="JetBrains Mono" font-size="10">LayerNorm</text>
+              <rect x="160" y="40" width="120" height="22" rx="4" fill="rgba(57,197,207,0.12)"/>
+              <text x="220" y="55" text-anchor="middle" fill="#39c5cf" font-family="JetBrains Mono" font-size="10">LayerNorm(残差)</text>
 
-              <text x="140" y="78" text-anchor="middle" fill="#6e7681" font-family="Space Grotesk" font-size="10">残差连接 + 归一化</text>
+              <text x="150" y="76" text-anchor="middle" fill="#6e7681" font-family="Space Grotesk" font-size="10">维度不变: [B, L, 512] → [B, L, 512]</text>
+            </g>
+
+            <line x1="150" y1="385" x2="150" y2="405" stroke="#39c5cf" stroke-width="1.5" marker-end="url(#arr)"/>
+
+            <!-- FFN -->
+            <g class="mod" data-mod="enc-ffn" transform="translate(0, 410)">
+              <rect class="mod-bg" x="0" y="0" width="300" height="165" rx="14" fill="url(#gFFN)" stroke="#a371f7" stroke-width="2"/>
+              <rect class="mod-glow" x="-4" y="-4" width="308" height="173" rx="16" fill="none" stroke="#a371f7" stroke-width="2" filter="url(#glow)"/>
+
+              <text x="150" y="26" text-anchor="middle" fill="#a371f7" font-family="Space Grotesk" font-size="15" font-weight="600">Feed Forward Network</text>
+
+              <!-- FFN diagram with dimensions -->
+              <g transform="translate(20, 40)">
+                <text x="0" y="0" fill="#8b949e" font-family="Space Grotesk" font-size="10">维度变换:</text>
+
+                <rect x="0" y="10" width="50" height="35" rx="4" fill="rgba(163,113,247,0.15)" stroke="#a371f7" stroke-width="1"/>
+                <text x="25" y="28" text-anchor="middle" fill="#a371f7" font-family="JetBrains Mono" font-size="10">512</text>
+                <text x="25" y="40" text-anchor="middle" fill="#6e7681" font-family="Space Grotesk" font-size="8">输入</text>
+
+                <text x="65" y="30" fill="#6e7681" font-family="Space Grotesk" font-size="14">→</text>
+
+                <rect x="85" y="10" width="50" height="35" rx="4" fill="rgba(163,113,247,0.15)" stroke="#a371f7" stroke-width="1"/>
+                <text x="110" y="28" text-anchor="middle" fill="#a371f7" font-family="JetBrains Mono" font-size="10">2048</text>
+                <text x="110" y="40" text-anchor="middle" fill="#6e7681" font-family="Space Grotesk" font-size="8">ReLU后</text>
+
+                <text x="150" y="30" fill="#6e7681" font-family="Space Grotesk" font-size="14">→</text>
+
+                <rect x="170" y="10" width="50" height="35" rx="4" fill="rgba(163,113,247,0.15)" stroke="#a371f7" stroke-width="1"/>
+                <text x="195" y="28" text-anchor="middle" fill="#a371f7" font-family="JetBrains Mono" font-size="10">512</text>
+                <text x="195" y="40" text-anchor="middle" fill="#6e7681" font-family="Space Grotesk" font-size="8">输出</text>
+
+                <text x="0" y="62" fill="#6e7681" font-family="Space Grotesk" font-size="9">公式: FFN(x) = max(0, xW₁+b₁)W₂+b₂</text>
+                <text x="0" y="74" fill="#6e7681" font-family="Space Grotesk" font-size="9">作用: 逐位置非线性变换,增强表达能力</text>
+              </g>
+
+              <rect x="20" y="130" width="100" height="26" rx="5" fill="rgba(163,113,247,0.15)"/>
+              <text x="70" y="147" text-anchor="middle" fill="#a371f7" font-family="JetBrains Mono" font-size="9">IN: [B, L, 512]</text>
+
+              <rect x="180" y="130" width="100" height="26" rx="5" fill="rgba(163,113,247,0.15)"/>
+              <text x="230" y="147" text-anchor="middle" fill="#a371f7" font-family="JetBrains Mono" font-size="9">OUT: [B, L, 512]</text>
+            </g>
+
+            <line x1="150" y1="575" x2="150" y2="595" stroke="#a371f7" stroke-width="1.5" marker-end="url(#arr)"/>
+
+            <!-- Add & Norm 2 -->
+            <g class="mod" data-mod="enc-norm2" transform="translate(0, 600)">
+              <rect class="mod-bg" x="0" y="0" width="300" height="70" rx="12" fill="url(#gLN)" stroke="#39c5cf" stroke-width="2"/>
+              <rect class="mod-glow" x="-4" y="-4" width="308" height="78" rx="14" fill="none" stroke="#39c5cf" stroke-width="2" filter="url(#glow)"/>
+
+              <text x="150" y="24" text-anchor="middle" fill="#39c5cf" font-family="Space Grotesk" font-size="14" font-weight="500">Add & LayerNorm</text>
+              <text x="150" y="44" text-anchor="middle" fill="#6e7681" font-family="Space Grotesk" font-size="10">残差: x + FFN(x) → LayerNorm</text>
+              <text x="150" y="60" text-anchor="middle" fill="#8b949e" font-family="JetBrains Mono" font-size="9">[B, L, 512] → [B, L, 512]</text>
             </g>
 
             <!-- Layer N indicator -->
-            <text x="300" y="270" fill="#6e7681" font-family="JetBrains Mono" font-size="12" transform="rotate(90, 300, 270)">× N = 6 层</text>
+            <text x="320" y="340" fill="#6e7681" font-family="JetBrains Mono" font-size="11" transform="rotate(90, 320, 340)">× 6层 Encoder</text>
+
+            <!-- Encoder Output -->
+            <g transform="translate(0, 720)">
+              <line x1="150" y1="0" x2="150" y2="20" stroke="#3fb950" stroke-width="1.5" marker-end="url(#arrG)"/>
+              <rect x="0" y="20" width="300" height="55" rx="8" fill="rgba(63,185,80,0.12)" stroke="#3fb950" stroke-width="1.5"/>
+              <text x="150" y="42" text-anchor="middle" fill="#3fb950" font-family="Space Grotesk" font-size="12">Encoder Output: [B, L_src, 512]</text>
+              <text x="150" y="60" text-anchor="middle" fill="#8b949e" font-family="Space Grotesk" font-size="10">提供给 Decoder 的 Cross Attention 作为 K、V</text>
+            </g>
           </g>
 
-          <!-- ENCODER OUTPUT -->
-          <g transform="translate(0, 625)">
-            <line x1="140" y1="0" x2="140" y2="20" stroke="#3fb950" stroke-width="2" class="flow-particle-v" marker-end="url(#arrGreen)"/>
-            <rect x="0" y="20" width="280" height="50" rx="8" fill="rgba(63,185,80,0.15)" stroke="#3fb950" stroke-width="1.5"/>
-            <text x="140" y="42" text-anchor="middle" fill="#3fb950" font-family="Space Grotesk" font-size="12">Encoder Output: [B, L_src, D]</text>
-            <text x="140" y="58" text-anchor="middle" fill="#8b949e" font-family="JetBrains Mono" font-size="10">作为 Cross Attention 的 K, V</text>
-          </g>
-        </g>
+          <!-- Cross Attention Arrow -->
+          <path d="M 530 430 Q 650 430, 650 260 Q 650 100, 750 100" fill="none" stroke="#3fb950" stroke-width="2" stroke-dasharray="8 5"/>
+          <text x="600" y="265" fill="#3fb950" font-family="Space Grotesk" font-size="10" transform="rotate(-90, 600, 265)">K、V 来自 Encoder</text>
 
-        <!-- Cross Attention arrow (Encoder → Decoder) -->
-        <path d="M 500 450 Q 600 450, 600 300 Q 600 150, 700 150" fill="none" stroke="#3fb950" stroke-width="2" stroke-dasharray="8 6" class="flow-particle"/>
-        <text x="550" y="300" fill="#3fb950" font-family="JetBrains Mono" font-size="10" transform="rotate(-90, 550, 300)">K, V 来自 Encoder</text>
+          <!-- ========== DECODER ========== -->
+          <g transform="translate(570, 60)">
+            <!-- Output Tokens -->
+            <g class="mod" data-mod="output-tokens" transform="translate(0, 0)">
+              <rect class="mod-bg" x="0" y="0" width="150" height="90" rx="12" fill="url(#gDec)" stroke="#f778ba" stroke-width="2"/>
+              <rect class="mod-glow" x="-4" y="-4" width="158" height="98" rx="14" fill="none" stroke="#f778ba" stroke-width="2" filter="url(#glow)"/>
+              <text x="75" y="26" text-anchor="middle" fill="#f778ba" font-family="Space Grotesk" font-size="13" font-weight="500">Output Tokens</text>
+              <text x="75" y="48" text-anchor="middle" fill="#f0f6fc" font-family="JetBrains Mono" font-size="14">Shape: [B, L]</text>
+              <text x="75" y="66" text-anchor="middle" fill="#8b949e" font-family="Space Grotesk" font-size="10">Shifted Right</text>
+              <text x="75" y="80" text-anchor="middle" fill="#6e7681" font-family="Space Grotesk" font-size="9">目标序列右移一位</text>
+            </g>
 
-        <!-- ========== DECODER SECTION ========== -->
-        <g transform="translate(540, 70)">
-          <!-- Output tokens -->
-          <g class="module-group" data-module="output-tokens">
-            <rect class="module-bg" x="0" y="0" width="140" height="80" rx="12" fill="url(#gradDec)" stroke="#f778ba" stroke-width="2"/>
-            <rect class="module-glow" x="-5" y="-5" width="150" height="90" rx="14" fill="none" stroke="#f778ba" stroke-width="2" filter="url(#glowPink)"/>
-            <text x="70" y="22" text-anchor="middle" fill="#f778ba" font-family="Space Grotesk" font-size="13" font-weight="500">Output Tokens</text>
-            <text x="70" y="44" text-anchor="middle" fill="#f0f6fc" font-family="JetBrains Mono" font-size="14">[B, L]</text>
-            <text x="70" y="62" text-anchor="middle" fill="#8b949e" font-family="Space Grotesk" font-size="10">Shifted Right</text>
-          </g>
+            <line x1="75" y1="90" x2="75" y2="110" stroke="#f778ba" stroke-width="1.5" marker-end="url(#arrP)"/>
 
-          <!-- Decoder Embedding -->
-          <g class="module-group" data-module="dec-embedding" transform="translate(0, 100)">
-            <rect class="module-bg" x="0" y="0" width="140" height="80" rx="12" fill="url(#gradDec)" stroke="#f778ba" stroke-width="2"/>
-            <rect class="module-glow" x="-5" y="-5" width="150" height="90" rx="14" fill="none" stroke="#f778ba" stroke-width="2" filter="url(#glowPink)"/>
-            <text x="70" y="22" text-anchor="middle" fill="#f778ba" font-family="Space Grotesk" font-size="13" font-weight="500">Embedding</text>
-            <text x="70" y="44" text-anchor="middle" fill="#f0f6fc" font-family="JetBrains Mono" font-size="14">[B, L, D]</text>
-            <text x="70" y="62" text-anchor="middle" fill="#8b949e" font-family="Space Grotesk" font-size="10">+ Positional</text>
-          </g>
+            <!-- Decoder Embedding -->
+            <g class="mod" data-mod="dec-embedding" transform="translate(0, 115)">
+              <rect class="mod-bg" x="0" y="0" width="150" height="75" rx="12" fill="url(#gDec)" stroke="#f778ba" stroke-width="2"/>
+              <rect class="mod-glow" x="-4" y="-4" width="158" height="83" rx="14" fill="none" stroke="#f778ba" stroke-width="2" filter="url(#glow)"/>
+              <text x="75" y="24" text-anchor="middle" fill="#f778ba" font-family="Space Grotesk" font-size="13" font-weight="500">Embedding</text>
+              <text x="75" y="44" text-anchor="middle" fill="#f0f6fc" font-family="JetBrains Mono" font-size="12">[B, L] → [B, L, 512]</text>
+              <text x="75" y="62" text-anchor="middle" fill="#8b949e" font-family="Space Grotesk" font-size="10">+ 位置编码</text>
+            </g>
 
-          <line x1="70" y1="80" x2="70" y2="100" stroke="#f778ba" stroke-width="2" class="flow-particle-v" marker-end="url(#arrPink)"/>
+            <!-- Decoder Input indicator -->
+            <g transform="translate(0, 210)">
+              <rect x="0" y="0" width="170" height="45" rx="6" fill="rgba(247,120,186,0.08)" stroke="#f778ba" stroke-width="1" stroke-dasharray="4 3"/>
+              <text x="85" y="18" text-anchor="middle" fill="#f778ba" font-family="Space Grotesk" font-size="11">Decoder Input</text>
+              <text x="85" y="34" text-anchor="middle" fill="#6e7681" font-family="JetBrains Mono" font-size="9">[B, L_tgt, 512]</text>
+            </g>
 
-          <!-- Decoder Input -->
-          <g transform="translate(0, 200)">
-            <rect x="0" y="0" width="160" height="45" rx="8" fill="rgba(247,120,186,0.1)" stroke="#f778ba" stroke-width="1" stroke-dasharray="6 4"/>
-            <text x="80" y="18" text-anchor="middle" fill="#f778ba" font-family="Space Grotesk" font-size="11">Decoder Input: [B, L_tgt, D]</text>
-            <text x="80" y="33" text-anchor="middle" fill="#8b949e" font-family="JetBrains Mono" font-size="10">目标序列嵌入</text>
-          </g>
+            <line x1="85" y1="255" x2="85" y2="275" stroke="#f778ba" stroke-width="1.5" marker-end="url(#arrP)"/>
 
-          <line x1="80" y1="245" x2="80" y2="265" stroke="#f778ba" stroke-width="2" class="flow-particle-v" marker-end="url(#arrPink)"/>
+            <!-- ===== DECODER LAYER ===== -->
+            <g transform="translate(0, 280)">
+              <!-- Masked Self Attention -->
+              <g class="mod" data-mod="dec-masked-attn" transform="translate(0, 0)">
+                <rect class="mod-bg" x="0" y="0" width="170" height="155" rx="14" fill="url(#gAttn)" stroke="#f0883e" stroke-width="2"/>
+                <rect class="mod-glow" x="-4" y="-4" width="178" height="163" rx="16" fill="none" stroke="#f0883e" stroke-width="2" filter="url(#glow)"/>
 
-          <!-- ===== DECODER LAYER ===== -->
-          <g transform="translate(0, 265)">
-            <!-- ===== MASKED SELF ATTENTION ===== -->
-            <g class="module-group" data-module="dec-masked-attn">
-              <rect class="module-bg" x="0" y="0" width="160" height="130" rx="14" fill="url(#gradAttn)" stroke="#f0883e" stroke-width="2"/>
-              <rect class="module-glow" x="-5" y="-5" width="170" height="140" rx="16" fill="none" stroke="#f0883e" stroke-width="2" filter="url(#glowOrange)"/>
+                <text x="85" y="24" text-anchor="middle" fill="#f0883e" font-family="Space Grotesk" font-size="13" font-weight="600">Masked Self-Attn</text>
 
-              <text x="80" y="24" text-anchor="middle" fill="#f0883e" font-family="Space Grotesk" font-size="13" font-weight="600">Masked Self-Attn</text>
+                <!-- Mask visualization -->
+                <rect x="15" y="38" width="140" height="45" rx="6" fill="rgba(240,136,62,0.1)" stroke="#f0883e" stroke-width="1"/>
+                <text x="85" y="52" text-anchor="middle" fill="#f0883e" font-family="Space Grotesk" font-size="10">因果 Mask (Causal Mask)</text>
+                <text x="85" y="66" text-anchor="middle" fill="#8b949e" font-family="Space Grotesk" font-size="9">预测第t个token时,只能看1~t-1</text>
+                <text x="85" y="78" text-anchor="middle" fill="#6e7681" font-family="JetBrains Mono" font-size="8">上三角设为 -∞ → softmax后权重为0</text>
 
-              <!-- Mask visualization -->
-              <g transform="translate(25, 40)">
-                <rect x="0" y="0" width="50" height="30" rx="4" fill="rgba(240,136,62,0.2)" stroke="#f0883e" stroke-width="1"/>
-                <text x="25" y="19" text-anchor="middle" fill="#f0883e" font-family="JetBrains Mono" font-size="9">因果Mask</text>
-                <text x="25" y="40" text-anchor="middle" fill="#6e7681" font-family="Space Grotesk" font-size="8">看不到未来</text>
+                <rect x="15" y="95" width="60" height="22" rx="4" fill="rgba(240,136,62,0.15)"/>
+                <text x="45" y="110" text-anchor="middle" fill="#f0883e" font-family="JetBrains Mono" font-size="8">IN [B,L,512]</text>
+
+                <rect x="95" y="95" width="60" height="22" rx="4" fill="rgba(240,136,62,0.15)"/>
+                <text x="125" y="110" text-anchor="middle" fill="#f0883e" font-family="JetBrains Mono" font-size="8">OUT [B,L,512]</text>
+
+                <text x="85" y="140" text-anchor="middle" fill="#6e7681" font-family="JetBrains Mono" font-size="8">h=8 heads, 因果mask</text>
               </g>
 
-              <rect x="15" y="85" width="55" height="20" rx="5" fill="rgba(240,136,62,0.2)"/>
-              <text x="42" y="99" text-anchor="middle" fill="#f0883e" font-family="JetBrains Mono" font-size="9">IN [B,L,D]</text>
+              <line x1="85" y1="155" x2="85" y2="175" stroke="#f0883e" stroke-width="1.5" marker-end="url(#arrO)"/>
 
-              <rect x="90" y="85" width="55" height="20" rx="5" fill="rgba(240,136,62,0.2)"/>
-              <text x="117" y="99" text-anchor="middle" fill="#f0883e" font-family="JetBrains Mono" font-size="9">OUT [B,L,D]</text>
-
-              <text x="80" y="120" text-anchor="middle" fill="#6e7681" font-family="JetBrains Mono" font-size="9">h=8 · d_k=64</text>
-            </g>
-
-            <line x1="80" y1="130" x2="80" y2="150" stroke="#f0883e" stroke-width="2" class="flow-particle-v" marker-end="url(#arrOrange)"/>
-
-            <!-- ===== ADD & NORM 1 ===== -->
-            <g class="module-group" data-module="dec-norm1" transform="translate(0, 150)">
-              <rect class="module-bg" x="0" y="0" width="160" height="70" rx="12" fill="url(#gradLN)" stroke="#39c5cf" stroke-width="2"/>
-              <rect class="module-glow" x="-5" y="-5" width="170" height="80" rx="14" fill="none" stroke="#39c5cf" stroke-width="2" filter="url(#glowCyan)"/>
-
-              <text x="80" y="24" text-anchor="middle" fill="#39c5cf" font-family="Space Grotesk" font-size="12" font-weight="500">Add & LayerNorm</text>
-              <text x="80" y="42" text-anchor="middle" fill="#6e7681" font-family="Space Grotesk" font-size="9">x + MaskedAttn(x)</text>
-              <text x="80" y="58" text-anchor="middle" fill="#8b949e" font-family="JetBrains Mono" font-size="9">[B, L, D] → [B, L, D]</text>
-            </g>
-
-            <line x1="80" y1="220" x2="80" y2="240" stroke="#39c5cf" stroke-width="2" class="flow-particle-v" marker-end="url(#arr)"/>
-
-            <!-- ===== CROSS ATTENTION ===== -->
-            <g class="module-group" data-module="dec-cross-attn" transform="translate(0, 240)">
-              <rect class="module-bg" x="0" y="0" width="160" height="130" rx="14" fill="url(#gradAttn)" stroke="#f0883e" stroke-width="2"/>
-              <rect class="module-glow" x="-5" y="-5" width="170" height="140" rx="16" fill="none" stroke="#f0883e" stroke-width="2" filter="url(#glowOrange)"/>
-
-              <text x="80" y="24" text-anchor="middle" fill="#f0883e" font-family="Space Grotesk" font-size="13" font-weight="600">Cross Attention</text>
-
-              <g transform="translate(15, 40)">
-                <text x="0" y="0" fill="#6e7681" font-family="Space Grotesk" font-size="9">Q: 来自 Decoder</text>
-                <text x="0" y="14" fill="#6e7681" font-family="Space Grotesk" font-size="9">K,V: 来自 Encoder</text>
+              <!-- Add & Norm 1 -->
+              <g class="mod" data-mod="dec-norm1" transform="translate(0, 180)">
+                <rect class="mod-bg" x="0" y="0" width="170" height="70" rx="12" fill="url(#gLN)" stroke="#39c5cf" stroke-width="2"/>
+                <rect class="mod-glow" x="-4" y="-4" width="178" height="78" rx="14" fill="none" stroke="#39c5cf" stroke-width="2" filter="url(#glow)"/>
+                <text x="85" y="24" text-anchor="middle" fill="#39c5cf" font-family="Space Grotesk" font-size="12" font-weight="500">Add & LayerNorm</text>
+                <text x="85" y="42" text-anchor="middle" fill="#6e7681" font-family="Space Grotesk" font-size="9">x + MaskedAttn(x) → LN</text>
+                <text x="85" y="58" text-anchor="middle" fill="#8b949e" font-family="JetBrains Mono" font-size="9">[B,L,512] → [B,L,512]</text>
               </g>
 
-              <rect x="15" y="70" width="55" height="20" rx="5" fill="rgba(240,136,62,0.2)"/>
-              <text x="42" y="84" text-anchor="middle" fill="#f0883e" font-family="JetBrains Mono" font-size="9">Q [B,L,D]</text>
+              <line x1="85" y1="250" x2="85" y2="270" stroke="#39c5cf" stroke-width="1.5" marker-end="url(#arr)"/>
 
-              <rect x="90" y="70" width="55" height="20" rx="5" fill="rgba(240,136,62,0.2)"/>
-              <text x="117" y="84" text-anchor="middle" fill="#f0883e" font-family="JetBrains Mono" font-size="9">OUT [B,L,D]</text>
+              <!-- Cross Attention -->
+              <g class="mod" data-mod="dec-cross-attn" transform="translate(0, 275)">
+                <rect class="mod-bg" x="0" y="0" width="170" height="155" rx="14" fill="url(#gAttn)" stroke="#f0883e" stroke-width="2"/>
+                <rect class="mod-glow" x="-4" y="-4" width="178" height="163" rx="16" fill="none" stroke="#f0883e" stroke-width="2" filter="url(#glow)"/>
 
-              <text x="80" y="118" text-anchor="middle" fill="#6e7681" font-family="JetBrains Mono" font-size="9">关注源序列信息</text>
-            </g>
+                <text x="85" y="24" text-anchor="middle" fill="#f0883e" font-family="Space Grotesk" font-size="13" font-weight="600">Cross Attention</text>
 
-            <line x1="80" y1="370" x2="80" y2="390" stroke="#f0883e" stroke-width="2" class="flow-particle-v" marker-end="url(#arrOrange)"/>
+                <rect x="15" y="38" width="140" height="50" rx="6" fill="rgba(240,136,62,0.1)" stroke="#f0883e" stroke-width="1"/>
+                <text x="85" y="52" text-anchor="middle" fill="#f0883e" font-family="Space Grotesk" font-size="10">Q、K、V 来源不同!</text>
+                <text x="85" y="68" text-anchor="middle" fill="#8b949e" font-family="Space Grotesk" font-size="9">Q: Decoder自身 | K、V: Encoder输出</text>
+                <text x="85" y="82" text-anchor="middle" fill="#6e7681" font-family="Space Grotesk" font-size="9">让Decoder关注源序列的相关部分</text>
 
-            <!-- ===== ADD & NORM 2 ===== -->
-            <g class="module-group" data-module="dec-norm2" transform="translate(0, 390)">
-              <rect class="module-bg" x="0" y="0" width="160" height="70" rx="12" fill="url(#gradLN)" stroke="#39c5cf" stroke-width="2"/>
-              <rect class="module-glow" x="-5" y="-5" width="170" height="80" rx="14" fill="none" stroke="#39c5cf" stroke-width="2" filter="url(#glowCyan)"/>
+                <rect x="15" y="100" width="60" height="22" rx="4" fill="rgba(240,136,62,0.15)"/>
+                <text x="45" y="115" text-anchor="middle" fill="#f0883e" font-family="JetBrains Mono" font-size="8">Q [B,L,512]</text>
 
-              <text x="80" y="24" text-anchor="middle" fill="#39c5cf" font-family="Space Grotesk" font-size="12" font-weight="500">Add & LayerNorm</text>
-              <text x="80" y="42" text-anchor="middle" fill="#6e7681" font-family="Space Grotesk" font-size="9">x + CrossAttn(x)</text>
-              <text x="80" y="58" text-anchor="middle" fill="#8b949e" font-family="JetBrains Mono" font-size="9">[B, L, D] → [B, L, D]</text>
-            </g>
+                <rect x="95" y="100" width="60" height="22" rx="4" fill="rgba(240,136,62,0.15)"/>
+                <text x="125" y="115" text-anchor="middle" fill="#f0883e" font-family="JetBrains Mono" font-size="8">OUT [B,L,512]</text>
 
-            <line x1="80" y1="460" x2="80" y2="480" stroke="#39c5cf" stroke-width="2" class="flow-particle-v" marker-end="url(#arr)"/>
-
-            <!-- ===== DECODER FFN ===== -->
-            <g class="module-group" data-module="dec-ffn" transform="translate(0, 480)">
-              <rect class="module-bg" x="0" y="0" width="160" height="100" rx="12" fill="url(#gradFFN)" stroke="#a371f7" stroke-width="2"/>
-              <rect class="module-glow" x="-5" y="-5" width="170" height="110" rx="14" fill="none" stroke="#a371f7" stroke-width="2" filter="url(#glowPurple)"/>
-
-              <text x="80" y="22" text-anchor="middle" fill="#a371f7" font-family="Space Grotesk" font-size="13" font-weight="600">FFN</text>
-
-              <g transform="translate(20, 38)">
-                <text x="0" y="0" fill="#6e7681" font-family="Space Grotesk" font-size="9">D=512 → 4D=2048 → D=512</text>
+                <text x="85" y="142" text-anchor="middle" fill="#6e7681" font-family="JetBrains Mono" font-size="8">K、V维度: [B, L_src, 512]</text>
               </g>
 
-              <rect x="15" y="60" width="55" height="20" rx="5" fill="rgba(163,113,247,0.2)"/>
-              <text x="42" y="74" text-anchor="middle" fill="#a371f7" font-family="JetBrains Mono" font-size="9">IN [B,L,D]</text>
+              <line x1="85" y1="430" x2="85" y2="450" stroke="#f0883e" stroke-width="1.5" marker-end="url(#arrO)"/>
 
-              <rect x="90" y="60" width="55" height="20" rx="5" fill="rgba(163,113,247,0.2)"/>
-              <text x="117" y="74" text-anchor="middle" fill="#a371f7" font-family="JetBrains Mono" font-size="9">OUT [B,L,D]</text>
+              <!-- Add & Norm 2 -->
+              <g class="mod" data-mod="dec-norm2" transform="translate(0, 455)">
+                <rect class="mod-bg" x="0" y="0" width="170" height="70" rx="12" fill="url(#gLN)" stroke="#39c5cf" stroke-width="2"/>
+                <rect class="mod-glow" x="-4" y="-4" width="178" height="78" rx="14" fill="none" stroke="#39c5cf" stroke-width="2" filter="url(#glow)"/>
+                <text x="85" y="24" text-anchor="middle" fill="#39c5cf" font-family="Space Grotesk" font-size="12" font-weight="500">Add & LayerNorm</text>
+                <text x="85" y="42" text-anchor="middle" fill="#6e7681" font-family="Space Grotesk" font-size="9">x + CrossAttn(x) → LN</text>
+                <text x="85" y="58" text-anchor="middle" fill="#8b949e" font-family="JetBrains Mono" font-size="9">[B,L,512] → [B,L,512]</text>
+              </g>
+
+              <line x1="85" y1="525" x2="85" y2="545" stroke="#39c5cf" stroke-width="1.5" marker-end="url(#arr)"/>
+
+              <!-- Decoder FFN -->
+              <g class="mod" data-mod="dec-ffn" transform="translate(0, 550)">
+                <rect class="mod-bg" x="0" y="0" width="170" height="120" rx="12" fill="url(#gFFN)" stroke="#a371f7" stroke-width="2"/>
+                <rect class="mod-glow" x="-4" y="-4" width="178" height="128" rx="14" fill="none" stroke="#a371f7" stroke-width="2" filter="url(#glow)"/>
+
+                <text x="85" y="24" text-anchor="middle" fill="#a371f7" font-family="Space Grotesk" font-size="13" font-weight="600">FFN</text>
+
+                <g transform="translate(15, 38)">
+                  <text x="0" y="0" fill="#6e7681" font-family="Space Grotesk" font-size="9">维度变换:</text>
+                  <text x="0" y="14" fill="#8b949e" font-family="JetBrains Mono" font-size="10">512 → 2048 → 512</text>
+                  <text x="0" y="28" fill="#6e7681" font-family="Space Grotesk" font-size="9">ReLU(max(0,x)) 激活</text>
+                </g>
+
+                <rect x="15" y="85" width="60" height="20" rx="4" fill="rgba(163,113,247,0.15)"/>
+                <text x="45" y="99" text-anchor="middle" fill="#a371f7" font-family="JetBrains Mono" font-size="8">IN [B,L,512]</text>
+
+                <rect x="95" y="85" width="60" height="20" rx="4" fill="rgba(163,113,247,0.15)"/>
+                <text x="125" y="99" text-anchor="middle" fill="#a371f7" font-family="JetBrains Mono" font-size="8">OUT [B,L,512]</text>
+              </g>
+
+              <line x1="85" y1="670" x2="85" y2="690" stroke="#a371f7" stroke-width="1.5" marker-end="url(#arr)"/>
+
+              <!-- Add & Norm 3 -->
+              <g class="mod" data-mod="dec-norm3" transform="translate(0, 695)">
+                <rect class="mod-bg" x="0" y="0" width="170" height="70" rx="12" fill="url(#gLN)" stroke="#39c5cf" stroke-width="2"/>
+                <rect class="mod-glow" x="-4" y="-4" width="178" height="78" rx="14" fill="none" stroke="#39c5cf" stroke-width="2" filter="url(#glow)"/>
+                <text x="85" y="24" text-anchor="middle" fill="#39c5cf" font-family="Space Grotesk" font-size="12" font-weight="500">Add & LayerNorm</text>
+                <text x="85" y="42" text-anchor="middle" fill="#6e7681" font-family="Space Grotesk" font-size="9">x + FFN(x) → LN</text>
+                <text x="85" y="58" text-anchor="middle" fill="#8b949e" font-family="JetBrains Mono" font-size="9">[B,L,512] → [B,L,512]</text>
+              </g>
+
+              <text x="190" y="520" fill="#6e7681" font-family="JetBrains Mono" font-size="10" transform="rotate(90, 190, 520)">× 6层 Decoder</text>
             </g>
 
-            <line x1="80" y1="580" x2="80" y2="600" stroke="#a371f7" stroke-width="2" class="flow-particle-v" marker-end="url(#arr)"/>
+            <!-- Decoder Output -->
+            <g transform="translate(0, 830)">
+              <line x1="85" y1="0" x2="85" y2="20" stroke="#f778ba" stroke-width="1.5" marker-end="url(#arrP)"/>
+              <rect x="0" y="20" width="170" height="45" rx="8" fill="rgba(247,120,186,0.12)" stroke="#f778ba" stroke-width="1.5"/>
+              <text x="85" y="40" text-anchor="middle" fill="#f778ba" font-family="Space Grotesk" font-size="11">Decoder Output: [B, L_tgt, 512]</text>
+              <text x="85" y="56" text-anchor="middle" fill="#8b949e" font-family="JetBrains Mono" font-size="9">每位置512维隐藏态</text>
+            </g>
+          </g>
 
-            <!-- ===== ADD & NORM 3 ===== -->
-            <g class="module-group" data-module="dec-norm3" transform="translate(0, 600)">
-              <rect class="module-bg" x="0" y="0" width="160" height="70" rx="12" fill="url(#gradLN)" stroke="#39c5cf" stroke-width="2"/>
-              <rect class="module-glow" x="-5" y="-5" width="170" height="80" rx="14" fill="none" stroke="#39c5cf" stroke-width="2" filter="url(#glowCyan)"/>
+          <!-- ========== OUTPUT ========== -->
+          <g transform="translate(1050, 260)">
+            <!-- Linear -->
+            <g class="mod" data-mod="linear" transform="translate(0, 0)">
+              <rect class="mod-bg" x="0" y="0" width="180" height="115" rx="14" fill="url(#gOut)" stroke="#d29922" stroke-width="2"/>
+              <rect class="mod-glow" x="-4" y="-4" width="188" height="123" rx="16" fill="none" stroke="#d29922" stroke-width="2" filter="url(#glow)"/>
 
-              <text x="80" y="24" text-anchor="middle" fill="#39c5cf" font-family="Space Grotesk" font-size="12" font-weight="500">Add & LayerNorm</text>
-              <text x="80" y="42" text-anchor="middle" fill="#6e7681" font-family="Space Grotesk" font-size="9">x + FFN(x)</text>
-              <text x="80" y="58" text-anchor="middle" fill="#8b949e" font-family="JetBrains Mono" font-size="9">[B, L, D] → [B, L, D]</text>
+              <text x="90" y="26" text-anchor="middle" fill="#d29922" font-family="Space Grotesk" font-size="15" font-weight="600">Linear Projection</text>
+
+              <g transform="translate(20, 40)">
+                <text x="0" y="0" fill="#8b949e" font-family="Space Grotesk" font-size="10">维度变换:</text>
+                <text x="0" y="16" fill="#f0f6fc" font-family="JetBrains Mono" font-size="11">[B, L, 512] → [B, L, V]</text>
+                <text x="0" y="30" fill="#6e7681" font-family="Space Grotesk" font-size="9">V = vocab_size (词表大小)</text>
+                <text x="0" y="44" fill="#6e7681" font-family="Space Grotesk" font-size="9">权重: [512, V] 线性映射</text>
+              </g>
+
+              <rect x="20" y="90" width="65" height="20" rx="4" fill="rgba(210,153,34,0.15)"/>
+              <text x="52" y="104" text-anchor="middle" fill="#d29922" font-family="JetBrains Mono" font-size="8">IN [B,L,512]</text>
+
+              <rect x="95" y="90" width="65" height="20" rx="4" fill="rgba(210,153,34,0.15)"/>
+              <text x="127" y="104" text-anchor="middle" fill="#d29922" font-family="JetBrains Mono" font-size="8">OUT [B,L,V]</text>
             </g>
 
-            <!-- Layer N indicator -->
-            <text x="180" y="350" fill="#6e7681" font-family="JetBrains Mono" font-size="11" transform="rotate(90, 180, 350)">× N = 6 层</text>
-          </g>
+            <line x1="90" y1="115" x2="90" y2="140" stroke="#d29922" stroke-width="1.5" marker-end="url(#arr)"/>
 
-          <!-- DECODER OUTPUT -->
-          <g transform="translate(0, 745)">
-            <line x1="80" y1="0" x2="80" y2="20" stroke="#f778ba" stroke-width="2" class="flow-particle-v" marker-end="url(#arrPink)"/>
-            <rect x="0" y="20" width="160" height="45" rx="8" fill="rgba(247,120,186,0.15)" stroke="#f778ba" stroke-width="1.5"/>
-            <text x="80" y="40" text-anchor="middle" fill="#f778ba" font-family="Space Grotesk" font-size="11">Decoder Output: [B, L_tgt, D]</text>
-          </g>
-        </g>
+            <!-- Softmax -->
+            <g class="mod" data-mod="softmax" transform="translate(0, 145)">
+              <rect class="mod-bg" x="0" y="0" width="180" height="85" rx="14" fill="url(#gOut)" stroke="#d29922" stroke-width="2"/>
+              <rect class="mod-glow" x="-4" y="-4" width="188" height="93" rx="16" fill="none" stroke="#d29922" stroke-width="2" filter="url(#glow)"/>
 
-        <!-- ========== OUTPUT SECTION ========== -->
-        <g transform="translate(920, 280)">
-          <!-- Linear -->
-          <g class="module-group" data-module="linear">
-            <rect class="module-bg" x="0" y="0" width="180" height="100" rx="14" fill="url(#gradOut)" stroke="#d29922" stroke-width="2"/>
-            <rect class="module-glow" x="-5" y="-5" width="190" height="110" rx="16" fill="none" stroke="#d29922" stroke-width="2" filter="url(#glowOrange)"/>
+              <text x="90" y="28" text-anchor="middle" fill="#d29922" font-family="Space Grotesk" font-size="15" font-weight="600">Softmax</text>
 
-            <text x="90" y="28" text-anchor="middle" fill="#d29922" font-family="Space Grotesk" font-size="15" font-weight="600">Linear Projection</text>
-
-            <g transform="translate(20, 42)">
-              <text x="0" y="0" fill="#6e7681" font-family="Space Grotesk" font-size="10">隐藏态 → 词表</text>
-              <text x="0" y="14" fill="#6e7681" font-family="Space Grotesk" font-size="10">[d_model, vocab]</text>
+              <text x="90" y="50" text-anchor="middle" fill="#8b949e" font-family="Space Grotesk" font-size="10">logits → 概率分布</text>
+              <text x="90" y="66" text-anchor="middle" fill="#6e7681" font-family="JetBrains Mono" font-size="9">[B,L,V] → [B,L,V]</text>
+              <text x="90" y="80" text-anchor="middle" fill="#6e7681" font-family="Space Grotesk" font-size="9">每位置概率和=1</text>
             </g>
 
-            <rect x="20" y="68" width="65" height="20" rx="5" fill="rgba(210,153,34,0.2)"/>
-            <text x="52" y="82" text-anchor="middle" fill="#d29922" font-family="JetBrains Mono" font-size="9">IN [B,L,D]</text>
+            <line x1="90" y1="230" x2="90" y2="255" stroke="#d29922" stroke-width="1.5" marker-end="url(#arr)"/>
 
-            <rect x="95" y="68" width="65" height="20" rx="5" fill="rgba(210,153,34,0.2)"/>
-            <text x="127" y="82" text-anchor="middle" fill="#d29922" font-family="JetBrains Mono" font-size="9">OUT [B,L,V]</text>
+            <!-- Output -->
+            <g class="mod" data-mod="output" transform="translate(0, 260)">
+              <rect class="mod-bg" x="0" y="0" width="180" height="85" rx="14" fill="rgba(210,153,34,0.12)" stroke="#d29922" stroke-width="2"/>
+              <rect class="mod-glow" x="-4" y="-4" width="188" height="93" rx="16" fill="none" stroke="#d29922" stroke-width="2" filter="url(#glow)"/>
+
+              <text x="90" y="28" text-anchor="middle" fill="#d29922" font-family="Space Grotesk" font-size="15" font-weight="600">Output</text>
+
+              <text x="90" y="50" text-anchor="middle" fill="#f0f6fc" font-family="Space Grotesk" font-size="11">选择概率最高的token</text>
+              <text x="90" y="68" text-anchor="middle" fill="#6e7681" font-family="JetBrains Mono" font-size="9">[B, L] = Token IDs</text>
+            </g>
           </g>
 
-          <!-- Arrow -->
-          <line x1="90" y1="100" x2="90" y2="125" stroke="#d29922" stroke-width="2" class="flow-particle-v" marker-end="url(#arr)"/>
+          <!-- Arrow from Decoder to Output -->
+          <path d="M 890 430 Q 1000 430, 1050 320" fill="none" stroke="#f778ba" stroke-width="2" stroke-dasharray="8 5"/>
 
-          <!-- Softmax -->
-          <g class="module-group" data-module="softmax">
-            <rect class="module-bg" x="0" y="125" width="180" height="80" rx="14" fill="url(#gradOut)" stroke="#d29922" stroke-width="2"/>
-            <rect class="module-glow" x="-5" y="120" width="190" height="90" rx="16" fill="none" stroke="#d29922" stroke-width="2" filter="url(#glowOrange)"/>
-
-            <text x="90" y="155" text-anchor="middle" fill="#d29922" font-family="Space Grotesk" font-size="15" font-weight="600">Softmax</text>
-
-            <text x="90" y="178" text-anchor="middle" fill="#6e7681" font-family="Space Grotesk" font-size="10">logits → 概率分布</text>
-            <text x="90" y="195" text-anchor="middle" fill="#8b949e" font-family="JetBrains Mono" font-size="9">[B, L, V] → [B, L, V]</text>
+          <!-- ========== LEGEND ========== -->
+          <g transform="translate(30, 920)">
+            <text x="0" y="0" fill="#6e7681" font-family="JetBrains Mono" font-size="9" letter-spacing="1">图例</text>
+            <g transform="translate(0, 12)">
+              <rect width="10" height="10" rx="2" fill="#58a6ff"/><text x="16" y="9" fill="#8b949e" font-family="Space Grotesk" font-size="10">Embedding</text>
+            </g>
+            <g transform="translate(100, 12)">
+              <rect width="10" height="10" rx="2" fill="#f0883e"/><text x="16" y="9" fill="#8b949e" font-family="Space Grotesk" font-size="10">Attention</text>
+            </g>
+            <g transform="translate(190, 12)">
+              <rect width="10" height="10" rx="2" fill="#39c5cf"/><text x="16" y="9" fill="#8b949e" font-family="Space Grotesk" font-size="10">LayerNorm</text>
+            </g>
+            <g transform="translate(300, 12)">
+              <rect width="10" height="10" rx="2" fill="#a371f7"/><text x="16" y="9" fill="#8b949e" font-family="Space Grotesk" font-size="10">FFN</text>
+            </g>
+            <g transform="translate(370, 12)">
+              <rect width="10" height="10" rx="2" fill="#3fb950"/><text x="16" y="9" fill="#8b949e" font-family="Space Grotesk" font-size="10">Encoder</text>
+            </g>
+            <g transform="translate(450, 12)">
+              <rect width="10" height="10" rx="2" fill="#f778ba"/><text x="16" y="9" fill="#8b949e" font-family="Space Grotesk" font-size="10">Decoder</text>
+            </g>
+            <g transform="translate(540, 12)">
+              <rect width="10" height="10" rx="2" fill="#d29922"/><text x="16" y="9" fill="#8b949e" font-family="Space Grotesk" font-size="10">Output</text>
+            </g>
           </g>
 
-          <!-- Arrow -->
-          <line x1="90" y1="205" x2="90" y2="230" stroke="#d29922" stroke-width="2" class="flow-particle-v" marker-end="url(#arr)"/>
+          <!-- Dimension Reference -->
+          <g transform="translate(30, 945)">
+            <text x="0" y="0" fill="#6e7681" font-family="JetBrains Mono" font-size="9" letter-spacing="1">维度说明</text>
+            <g transform="translate(0, 12)">
+              <text x="0" y="0" fill="#f0883e" font-family="JetBrains Mono" font-size="9">B</text><text x="14" y="0" fill="#6e7681" font-family="Space Grotesk" font-size="10">= Batch · </text>
+              <text x="80" y="0" fill="#f0883e" font-family="JetBrains Mono" font-size="9">L</text><text x="94" y="0" fill="#6e7681" font-family="Space Grotesk" font-size="10">= 序列长度 · </text>
+              <text x="175" y="0" fill="#f0883e" font-family="JetBrains Mono" font-size="9">D/d_model</text><text x="245" y="0" fill="#6e7681" font-family="Space Grotesk" font-size="10">= 512 · </text>
+              <text x="305" y="0" fill="#f0883e" font-family="JetBrains Mono" font-size="9">V</text><text x="320" y="0" fill="#6e7681" font-family="Space Grotesk" font-size="10">= 词表大小</text>
+            </g>
+          </g>
+        </svg>
 
-          <!-- Output -->
-          <g class="module-group" data-module="output">
-            <rect class="module-bg" x="0" y="230" width="180" height="90" rx="14" fill="rgba(210,153,34,0.15)" stroke="#d29922" stroke-width="2"/>
-            <rect class="module-glow" x="-5" y="225" width="190" height="100" rx="16" fill="none" stroke="#d29922" stroke-width="2" filter="url(#glowOrange)"/>
-
-            <text x="90" y="260" text-anchor="middle" fill="#d29922" font-family="Space Grotesk" font-size="15" font-weight="600">Output</text>
-
-            <text x="90" y="283" text-anchor="middle" fill="#f0f6fc" font-family="JetBrains Mono" font-size="12">概率最高的 token</text>
-            <text x="90" y="302" text-anchor="middle" fill="#8b949e" font-family="JetBrains Mono" font-size="10">[B, L] = Token IDs</text>
-          </g>
-        </g>
-
-        <!-- ========== LEGEND ========== -->
-        <g transform="translate(30, 840)">
-          <text x="0" y="0" fill="#6e7681" font-family="JetBrains Mono" font-size="10" letter-spacing="1">图例</text>
-          <g transform="translate(0, 15)">
-            <rect width="12" height="12" rx="2" fill="#58a6ff"/>
-            <text x="20" y="10" fill="#8b949e" font-family="Space Grotesk" font-size="11">Embedding</text>
-          </g>
-          <g transform="translate(120, 15)">
-            <rect width="12" height="12" rx="2" fill="#f0883e"/>
-            <text x="20" y="10" fill="#8b949e" font-family="Space Grotesk" font-size="11">Attention</text>
-          </g>
-          <g transform="translate(230, 15)">
-            <rect width="12" height="12" rx="2" fill="#39c5cf"/>
-            <text x="20" y="10" fill="#8b949e" font-family="Space Grotesk" font-size="11">LayerNorm</text>
-          </g>
-          <g transform="translate(350, 15)">
-            <rect width="12" height="12" rx="2" fill="#a371f7"/>
-            <text x="20" y="10" fill="#8b949e" font-family="Space Grotesk" font-size="11">FFN</text>
-          </g>
-          <g transform="translate(430, 15)">
-            <rect width="12" height="12" rx="2" fill="#3fb950"/>
-            <text x="20" y="10" fill="#8b949e" font-family="Space Grotesk" font-size="11">Encoder</text>
-          </g>
-          <g transform="translate(520, 15)">
-            <rect width="12" height="12" rx="2" fill="#f778ba"/>
-            <text x="20" y="10" fill="#8b949e" font-family="Space Grotesk" font-size="11">Decoder</text>
-          </g>
-          <g transform="translate(620, 15)">
-            <rect width="12" height="12" rx="2" fill="#d29922"/>
-            <text x="20" y="10" fill="#8b949e" font-family="Space Grotesk" font-size="11">Output</text>
-          </g>
-        </g>
-
-        <!-- ========== DIMENSION REFERENCE ========== -->
-        <g transform="translate(30, 870)">
-          <text x="0" y="0" fill="#6e7681" font-family="JetBrains Mono" font-size="10" letter-spacing="1">维度说明</text>
-          <g transform="translate(0, 15)">
-            <text x="0" y="0" fill="#f0883e" font-family="JetBrains Mono" font-size="10">B</text>
-            <text x="18" y="0" fill="#6e7681" font-family="Space Grotesk" font-size="10">= Batch Size · </text>
-            <text x="115" y="0" fill="#f0883e" font-family="JetBrains Mono" font-size="10">L</text>
-            <text x="133" y="0" fill="#6e7681" font-family="Space Grotesk" font-size="10">= Seq Length · </text>
-            <text x="230" y="0" fill="#f0883e" font-family="JetBrains Mono" font-size="10">D</text>
-            <text x="248" y="0" fill="#6e7681" font-family="Space Grotesk" font-size="10">= d_model=512 · </text>
-            <text x="355" y="0" fill="#f0883e" font-family="JetBrains Mono" font-size="10">V</text>
-            <text x="373" y="0" fill="#6e7681" font-family="Space Grotesk" font-size="10">= Vocab Size</text>
-          </g>
-        </g>
-      </svg>
-
-      <!-- DETAIL PANEL -->
-      <div class="detail-panel" id="detailPanel">
-        <button class="close-btn" onclick="closePanel()">×</button>
-        <div class="panel-placeholder" id="panelPlaceholder">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-            <circle cx="12" cy="12" r="10"/>
-            <path d="M12 16v-4"/>
-            <path d="M12 8h.01"/>
-          </svg>
-          <p>点击架构图中的任意模块<br>查看详细说明</p>
+        <!-- Detail Panel -->
+        <div class="detail-panel" id="detailPanel">
+          <button class="close-btn" onclick="closePanel()">×</button>
+          <div class="panel-placeholder" id="panelPlaceholder">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+            <p>点击架构图中的任意模块<br>查看详细说明</p>
+          </div>
+          <div id="panelContent" style="display: none;"></div>
         </div>
-        <div id="panelContent" style="display: none;"></div>
       </div>
     </div>
   </section>
 
-  <!-- ========== MODULE DETAILS ========== -->
+  <!-- Module Details -->
   <section>
     <div class="container">
       <div class="section-header">
@@ -983,7 +685,7 @@
         <h2 class="section-title">核心模块详解</h2>
       </div>
 
-      <!-- Input Embedding -->
+      <!-- Embedding -->
       <div class="module-card blue">
         <div class="card-header">
           <div class="card-icon">📥</div>
@@ -995,37 +697,20 @@
         <div class="card-content">
           <div class="card-text">
             <p><strong>Embedding 层</strong>将离散的 token ID 映射为连续的 d_model 维向量。每个 token 被转换为一个捕获语义信息的稠密向量。</p>
-            <p>Embedding 矩阵形状为 <code>[vocab_size, d_model]</code>。例如 GPT-3 的词表约 50,000，d_model=12288。</p>
-            <p>每个 token 经过 Embedding 后，获得一个固定维度的语义表示向量，捕获了该 token 的语法和语义信息。</p>
+            <p>维度变化: <code>[B, L] → [B, L, D]</code></p>
+            <p>Embedding 矩阵形状为 <code>[vocab_size, d_model]</code>。例如词表50000，d_model=512，则参数量为 50000×512 ≈ 2500万。</p>
           </div>
           <div class="tensor-flow">
             <div class="tensor-flow-title">数据维度</div>
-            <div class="tensor-row">
-              <span class="tensor-name">输入</span>
-              <span class="tensor-arrow">→</span>
-              <span class="tensor-dims">[B, L]</span>
-            </div>
-            <div class="tensor-row">
-              <span class="tensor-name">输出</span>
-              <span class="tensor-arrow">→</span>
-              <span class="tensor-dims">[B, L, D]</span>
-            </div>
-            <div class="tensor-flow-title" style="margin-top: 12px;">关键参数</div>
-            <div class="tensor-row">
-              <span class="tensor-name">vocab</span>
-              <span class="tensor-arrow">=</span>
-              <span class="tensor-dims">~50k</span>
-            </div>
-            <div class="tensor-row">
-              <span class="tensor-name">d_model</span>
-              <span class="tensor-arrow">=</span>
-              <span class="tensor-dims">512</span>
-            </div>
+            <div class="tensor-row"><span class="tensor-name">输入</span><span class="tensor-arrow">→</span><span class="tensor-dims">[B, L]</span></div>
+            <div class="tensor-row"><span class="tensor-name">输出</span><span class="tensor-arrow">→</span><span class="tensor-dims">[B, L, 512]</span></div>
+            <div class="tensor-flow-title" style="margin-top:10px">为什么变化?</div>
+            <div class="tensor-row"><span class="tensor-name">原因</span><span class="tensor-arrow">→</span><span class="tensor-dims">查表替换</span></div>
           </div>
         </div>
       </div>
 
-      <!-- Multi-Head Self-Attention -->
+      <!-- Multi-Head Attention -->
       <div class="module-card orange">
         <div class="card-header">
           <div class="card-icon">🔍</div>
@@ -1036,44 +721,20 @@
         </div>
         <div class="card-content">
           <div class="card-text">
-            <p><strong>Self-Attention</strong> 是 Transformer 的核心。它允许序列中每个位置关注所有其他位置，捕获长距离依赖。</p>
-            <p>公式: <code>Attention(Q,K,V) = softmax(QKᵀ/√d_k)V</code></p>
-            <p><strong>Multi-Head</strong> 将注意力分散到 h 个头中，每个头学习不同的注意力模式（语法、语义、指代等）。</p>
-            <p>最终输出: <code>MultiHead = Concat(head_1,...,head_h) × W_O</code></p>
+            <p><strong>核心思想</strong>: 将注意力分散到多个"头"中，每个头学习不同的注意力模式。</p>
+            <p><strong>维度变化</strong>: 输入 D=512 分成 h=8 个头，每头 d_k=64。</p>
+            <p>每个头独立计算: <code>Attention(Q_i, K_i, V_i)</code> → 得到8个64维输出</p>
+            <p>拼接后: <code>[64×8] = 512</code> → Linear → 最终输出</p>
+            <p><strong>为什么多头?</strong> 不同头可以学习不同类型的依赖关系（语法、语义、指代等）。</p>
           </div>
           <div class="tensor-flow">
-            <div class="tensor-flow-title">数据维度</div>
-            <div class="tensor-row">
-              <span class="tensor-name">输入</span>
-              <span class="tensor-arrow">→</span>
-              <span class="tensor-dims">[B, L, D]</span>
-            </div>
-            <div class="tensor-row">
-              <span class="tensor-name">Q,K,V</span>
-              <span class="tensor-arrow">→</span>
-              <span class="tensor-dims">[B, L, D]</span>
-            </div>
-            <div class="tensor-row">
-              <span class="tensor-name">注意力</span>
-              <span class="tensor-arrow">→</span>
-              <span class="tensor-dims">[B, h, L, L]</span>
-            </div>
-            <div class="tensor-row">
-              <span class="tensor-name">输出</span>
-              <span class="tensor-arrow">→</span>
-              <span class="tensor-dims">[B, L, D]</span>
-            </div>
-            <div class="tensor-flow-title" style="margin-top: 12px;">参数</div>
-            <div class="tensor-row">
-              <span class="tensor-name">h</span>
-              <span class="tensor-arrow">=</span>
-              <span class="tensor-dims">8</span>
-            </div>
-            <div class="tensor-row">
-              <span class="tensor-name">d_k</span>
-              <span class="tensor-arrow">=</span>
-              <span class="tensor-dims">64 (D/h)</span>
-            </div>
+            <div class="tensor-flow-title">维度变化详解</div>
+            <div class="tensor-row"><span class="tensor-name">输入X</span><span class="tensor-arrow">→</span><span class="tensor-dims">[B,L,512]</span></div>
+            <div class="tensor-row"><span class="tensor-name">投影Q,K,V</span><span class="tensor-arrow">→</span><span class="tensor-dims">[B,L,512]</span></div>
+            <div class="tensor-row"><span class="tensor-name">分头</span><span class="tensor-arrow">→</span><span class="tensor-dims">[B,h,L,64]</span></div>
+            <div class="tensor-row"><span class="tensor-name">注意力</span><span class="tensor-arrow">→</span><span class="tensor-dims">[B,h,L,L]</span></div>
+            <div class="tensor-row"><span class="tensor-name">拼接</span><span class="tensor-arrow">→</span><span class="tensor-dims">[B,L,512]</span></div>
+            <div class="tensor-row"><span class="tensor-name">输出</span><span class="tensor-arrow">→</span><span class="tensor-dims">[B,L,512]</span></div>
           </div>
         </div>
       </div>
@@ -1089,32 +750,16 @@
         </div>
         <div class="card-content">
           <div class="card-text">
-            <p><strong>Masked Self-Attention</strong> 确保 Decoder 在预测第 t 个 token 时，只能看到位置 1 到 t-1 的信息。</p>
-            <p>实现方式：在 softmax 前，将上三角位置设为 <code>-∞</code>。由于 <code>softmax(-∞) = 0</code>，这些位置的注意力权重变为 0。</p>
-            <p>这是 GPT、LLaMA 等自回归语言模型的核心，确保生成时只能基于已生成的 token。</p>
+            <p><strong>作用</strong>: 确保 Decoder 在预测第 t 个 token 时，只能看到位置 1 到 t-1 的信息（不能"作弊"看未来）。</p>
+            <p><strong>实现方式</strong>: 在 softmax 前，将上三角位置设为 <code>-∞</code></p>
+            <p>由于 <code>softmax(-∞) = 0</code>，这些位置的注意力权重变为 0，实现因果（causal）特性。</p>
+            <p><strong>为什么需要?</strong>: 训练时如果能看到未来token，模型会"作弊"；推理时未来token还不存在。</p>
           </div>
           <div class="tensor-flow">
-            <div class="tensor-flow-title">数据维度</div>
-            <div class="tensor-row">
-              <span class="tensor-name">输入</span>
-              <span class="tensor-arrow">→</span>
-              <span class="tensor-dims">[B, L, D]</span>
-            </div>
-            <div class="tensor-row">
-              <span class="tensor-name">Mask</span>
-              <span class="tensor-arrow">→</span>
-              <span class="tensor-dims">[L, L]</span>
-            </div>
-            <div class="tensor-row">
-              <span class="tensor-name">Mask值</span>
-              <span class="tensor-arrow">→</span>
-              <span class="tensor-dims">上三角=-∞</span>
-            </div>
-            <div class="tensor-row">
-              <span class="tensor-name">输出</span>
-              <span class="tensor-arrow">→</span>
-              <span class="tensor-dims">[B, L, D]</span>
-            </div>
+            <div class="tensor-flow-title">维度变化</div>
+            <div class="tensor-row"><span class="tensor-name">输入</span><span class="tensor-arrow">→</span><span class="tensor-dims">[B,L,512]</span></div>
+            <div class="tensor-row"><span class="tensor-name">加Mask</span><span class="tensor-arrow">→</span><span class="tensor-dims">[L,L]上三角-∞</span></div>
+            <div class="tensor-row"><span class="tensor-name">输出</span><span class="tensor-arrow">→</span><span class="tensor-dims">[B,L,512]</span></div>
           </div>
         </div>
       </div>
@@ -1130,37 +775,23 @@
         </div>
         <div class="card-content">
           <div class="card-text">
-            <p><strong>Cross Attention</strong> 连接 Encoder 和 Decoder，让 Decoder 的每个位置可以关注 Encoder 的所有位置。</p>
-            <p>关键区别：<br>• <strong>Q</strong> 来自 Decoder<br>• <strong>K, V</strong> 来自 Encoder</p>
-            <p>这使得每个 Decoder 位置都能"查询"整个源序列的信息。例如翻译时，Decoder 每个位置可关注源语言的相关部分。</p>
+            <p><strong>核心区别</strong>: Q 来自 Decoder，K 和 V 来自 Encoder 输出。</p>
+            <p><strong>作用</strong>: 让 Decoder 的每个位置可以"查询"源序列（Encoder输出）的所有位置，实现跨序列交互。</p>
+            <p><strong>维度注意</strong>: Q 的序列长度是 L_tgt（目标长度），K、V 的序列长度是 L_src（源长度）。</p>
+            <p><strong>应用</strong>: 翻译任务中，Decoder 每生成一个词，可以关注源句子的相关部分。</p>
           </div>
           <div class="tensor-flow">
-            <div class="tensor-flow-title">数据维度</div>
-            <div class="tensor-row">
-              <span class="tensor-name">Q</span>
-              <span class="tensor-arrow">→</span>
-              <span class="tensor-dims">[B, L_dec, D]</span>
-            </div>
-            <div class="tensor-row">
-              <span class="tensor-name">K, V</span>
-              <span class="tensor-arrow">→</span>
-              <span class="tensor-dims">[B, L_enc, D]</span>
-            </div>
-            <div class="tensor-row">
-              <span class="tensor-name">Attn</span>
-              <span class="tensor-arrow">→</span>
-              <span class="tensor-dims">[B, L_dec, L_enc]</span>
-            </div>
-            <div class="tensor-row">
-              <span class="tensor-name">输出</span>
-              <span class="tensor-arrow">→</span>
-              <span class="tensor-dims">[B, L_dec, D]</span>
-            </div>
+            <div class="tensor-flow-title">维度变化</div>
+            <div class="tensor-row"><span class="tensor-name">Q</span><span class="tensor-arrow">→</span><span class="tensor-dims">[B,L_tgt,512]</span></div>
+            <div class="tensor-row"><span class="tensor-name">K</span><span class="tensor-arrow">→</span><span class="tensor-dims">[B,L_src,512]</span></div>
+            <div class="tensor-row"><span class="tensor-name">V</span><span class="tensor-arrow">→</span><span class="tensor-dims">[B,L_src,512]</span></div>
+            <div class="tensor-row"><span class="tensor-name">Attn矩阵</span><span class="tensor-arrow">→</span><span class="tensor-dims">[B,L_tgt,L_src]</span></div>
+            <div class="tensor-row"><span class="tensor-name">输出</span><span class="tensor-arrow">→</span><span class="tensor-dims">[B,L_tgt,512]</span></div>
           </div>
         </div>
       </div>
 
-      <!-- Feed Forward Network -->
+      <!-- FFN -->
       <div class="module-card purple">
         <div class="card-header">
           <div class="card-icon">⚡</div>
@@ -1171,44 +802,23 @@
         </div>
         <div class="card-content">
           <div class="card-text">
-            <p><strong>FFN</strong> 是每个 Transformer 层中的两个线性变换，中间有 ReLU 激活：</p>
-            <p><code>FFN(x) = max(0, xW₁ + b₁)W₂ + b₂</code></p>
-            <p>它是<strong>逐位置</strong>（point-wise）应用的——对序列中每个位置的向量独立应用相同变换。</p>
-            <p>维度扩展：D → 4D → D（通常是 d_model 的 4 倍）。Attention 负责"信息流动"，FFN 负责"信息变换"。</p>
+            <p><strong>结构</strong>: 两个线性变换，中间有 ReLU 激活: <code>FFN(x) = max(0, xW₁+b₁)W₂+b₂</code></p>
+            <p><strong>维度变化</strong>: <code>512 → 2048 → 512</code></p>
+            <p><strong>为什么扩展到4倍?</strong>: 更大的隐藏层维度让模型有更多容量学习复杂的非线性变换。实验证明4倍是经验最优。</p>
+            <p><strong>逐位置</strong>: FFN 对序列中每个位置的向量独立应用相同变换，是"逐位置"（point-wise）的。</p>
+            <p><strong>Attention vs FFN</strong>: Attention 负责"谁该关注谁"（信息流动），FFN 负责"如何表示"（信息变换）。</p>
           </div>
           <div class="tensor-flow">
-            <div class="tensor-flow-title">数据维度</div>
-            <div class="tensor-row">
-              <span class="tensor-name">输入</span>
-              <span class="tensor-arrow">→</span>
-              <span class="tensor-dims">[B, L, D]</span>
-            </div>
-            <div class="tensor-row">
-              <span class="tensor-name">隐藏</span>
-              <span class="tensor-arrow">→</span>
-              <span class="tensor-dims">[B, L, 4D]</span>
-            </div>
-            <div class="tensor-row">
-              <span class="tensor-name">输出</span>
-              <span class="tensor-arrow">→</span>
-              <span class="tensor-dims">[B, L, D]</span>
-            </div>
-            <div class="tensor-flow-title" style="margin-top: 12px;">参数</div>
-            <div class="tensor-row">
-              <span class="tensor-name">d_model</span>
-              <span class="tensor-arrow">=</span>
-              <span class="tensor-dims">512</span>
-            </div>
-            <div class="tensor-row">
-              <span class="tensor-name">d_ff</span>
-              <span class="tensor-arrow">=</span>
-              <span class="tensor-dims">2048 (4×D)</span>
-            </div>
+            <div class="tensor-flow-title">维度变化详解</div>
+            <div class="tensor-row"><span class="tensor-name">输入</span><span class="tensor-arrow">→</span><span class="tensor-dims">[B,L,512]</span></div>
+            <div class="tensor-row"><span class="tensor-name">W1投影</span><span class="tensor-arrow">→</span><span class="tensor-dims">[B,L,2048]</span></div>
+            <div class="tensor-row"><span class="tensor-name">ReLU</span><span class="tensor-arrow">→</span><span class="tensor-dims">[B,L,2048]</span></div>
+            <div class="tensor-row"><span class="tensor-name">W2投影</span><span class="tensor-arrow">→</span><span class="tensor-dims">[B,L,512]</span></div>
           </div>
         </div>
       </div>
 
-      <!-- Layer Normalization -->
+      <!-- LayerNorm -->
       <div class="module-card cyan">
         <div class="card-header">
           <div class="card-icon">📊</div>
@@ -1219,124 +829,36 @@
         </div>
         <div class="card-content">
           <div class="card-text">
-            <p><strong>LayerNorm</strong> 对每一层归一化：</p>
-            <p><code>LN(x) = γ ⊙ (x - μ) / √(σ² + ε) + β</code></p>
-            <p>在特征维度（D）上归一化，对每个样本独立处理。与 BatchNorm 不同，LayerNorm 对序列长度变化更鲁棒。</p>
-            <p><strong>Add & Norm</strong> = 残差连接 (x + Sublayer(x)) + LayerNorm。残差连接确保梯度直接回传。</p>
+            <p><strong>公式</strong>: <code>LN(x) = γ ⊙ (x - μ) / √(σ² + ε) + β</code></p>
+            <p><strong>归一化维度</strong>: 在特征维度 D 上归一化，对每个样本、每个位置独立处理。</p>
+            <p><strong>与 BatchNorm 区别</strong>: BatchNorm 在 batch 维度归一化，LayerNorm 在特征维度归一化。LayerNorm 对序列长度变化更鲁棒。</p>
+            <p><strong>Add & Norm</strong>: 残差连接 (x + Sublayer(x)) + LayerNorm。残差连接确保梯度直接回传，避免深层网络梯度消失。</p>
           </div>
           <div class="tensor-flow">
-            <div class="tensor-flow-title">数据维度</div>
-            <div class="tensor-row">
-              <span class="tensor-name">输入</span>
-              <span class="tensor-arrow">→</span>
-              <span class="tensor-dims">[B, L, D]</span>
-            </div>
-            <div class="tensor-row">
-              <span class="tensor-name">均值</span>
-              <span class="tensor-arrow">→</span>
-              <span class="tensor-dims">[B, L, 1]</span>
-            </div>
-            <div class="tensor-row">
-              <span class="tensor-name">输出</span>
-              <span class="tensor-arrow">→</span>
-              <span class="tensor-dims">[B, L, D]</span>
-            </div>
-            <div class="tensor-flow-title" style="margin-top: 12px;">参数</div>
-            <div class="tensor-row">
-              <span class="tensor-name">γ, β</span>
-              <span class="tensor-arrow">=</span>
-              <span class="tensor-dims">各 D 个</span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Positional Encoding -->
-      <div class="module-card blue">
-        <div class="card-header">
-          <div class="card-icon">📍</div>
-          <div>
-            <div class="card-title">Positional Encoding</div>
-            <div class="card-subtitle">位置编码</div>
-          </div>
-        </div>
-        <div class="card-content">
-          <div class="card-text">
-            <p>Transformer 无循环结构，无法自然捕获位置信息。位置编码通过正弦/余弦函数注入位置信号：</p>
-            <p><code>PE(pos, 2i) = sin(pos / 10000^(2i/d))</code><br><code>PE(pos, 2i+1) = cos(pos / 10000^(2i/d))</code></p>
-            <p>这种编码方式允许模型学习相对位置关系（因为 sin(A+B) 可表示 A 和 B 的关系）。</p>
-            <p>现代 LLM 也使用可学习的位置编码或 RoPE（旋转位置编码）等更先进的方法。</p>
-          </div>
-          <div class="tensor-flow">
-            <div class="tensor-flow-title">数据维度</div>
-            <div class="tensor-row">
-              <span class="tensor-name">输入</span>
-              <span class="tensor-arrow">→</span>
-              <span class="tensor-dims">[B, L, D]</span>
-            </div>
-            <div class="tensor-row">
-              <span class="tensor-name">输出</span>
-              <span class="tensor-arrow">→</span>
-              <span class="tensor-dims">[B, L, D]</span>
-            </div>
-            <div class="tensor-flow-title" style="margin-top: 12px;">特点</div>
-            <div class="tensor-row">
-              <span class="tensor-name">确定性</span>
-              <span class="tensor-arrow">→</span>
-              <span class="tensor-dims">无需学习</span>
-            </div>
-            <div class="tensor-row">
-              <span class="tensor-name">可扩展</span>
-              <span class="tensor-arrow">→</span>
-              <span class="tensor-dims">任意长度</span>
-            </div>
+            <div class="tensor-flow-title">维度变化</div>
+            <div class="tensor-row"><span class="tensor-name">输入</span><span class="tensor-arrow">→</span><span class="tensor-dims">[B,L,D]</span></div>
+            <div class="tensor-row"><span class="tensor-name">均值μ</span><span class="tensor-arrow">→</span><span class="tensor-dims">[B,L,1]</span></div>
+            <div class="tensor-row"><span class="tensor-name">方差σ²</span><span class="tensor-arrow">→</span><span class="tensor-dims">[B,L,1]</span></div>
+            <div class="tensor-row"><span class="tensor-name">输出</span><span class="tensor-arrow">→</span><span class="tensor-dims">[B,L,D]</span></div>
           </div>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- ========== CHEATSHEET ========== -->
+  <!-- Cheatsheet -->
   <section>
     <div class="container">
       <div class="cheatsheet">
         <h2 class="cheatsheet-title">维度符号速查表</h2>
         <div class="cheatsheet-grid">
-          <div class="cheat-item">
-            <div class="cheat-symbol">B</div>
-            <div class="cheat-name">Batch Size</div>
-            <div class="cheat-desc">批大小，同时处理的序列数量，通常 1-64</div>
-          </div>
-          <div class="cheat-item">
-            <div class="cheat-symbol">L</div>
-            <div class="cheat-name">Sequence Length</div>
-            <div class="cheat-desc">序列长度，token 数量，通常 128-4096</div>
-          </div>
-          <div class="cheat-item">
-            <div class="cheat-symbol">D</div>
-            <div class="cheat-name">d_model</div>
-            <div class="cheat-desc">模型维度，嵌入和隐藏层向量维度，常见 512/768/1024/4096</div>
-          </div>
-          <div class="cheat-item">
-            <div class="cheat-symbol">d_k</div>
-            <div class="cheat-name">Key Dimension</div>
-            <div class="cheat-desc">每头 Key 向量维度 = D / h</div>
-          </div>
-          <div class="cheat-item">
-            <div class="cheat-symbol">d_ff</div>
-            <div class="cheat-name">FFN Dimension</div>
-            <div class="cheat-desc">FFN 隐藏层维度，通常 4 × d_model</div>
-          </div>
-          <div class="cheat-item">
-            <div class="cheat-symbol">h</div>
-            <div class="cheat-name">Num Heads</div>
-            <div class="cheat-desc">注意力头数量，允许并行学习多种注意力模式</div>
-          </div>
-          <div class="cheat-item">
-            <div class="cheat-symbol">V</div>
-            <div class="cheat-name">Vocabulary Size</div>
-            <div class="cheat-desc">词表大小，GPT-3: 50257，中文通常 50000+</div>
-          </div>
+          <div class="cheat-item"><div class="cheat-symbol">B</div><div class="cheat-name">Batch Size</div><div class="cheat-desc">同时处理的序列数量,通常1-64</div></div>
+          <div class="cheat-item"><div class="cheat-symbol">L</div><div class="cheat-name">Sequence Length</div><div class="cheat-desc">序列中token数量,通常128-4096</div></div>
+          <div class="cheat-item"><div class="cheat-symbol">D / d_model</div><div class="cheat-name">Model Dimension</div><div class="cheat-desc">模型维度,嵌入和隐藏层向量维度</div></div>
+          <div class="cheat-item"><div class="cheat-symbol">d_k / d_v</div><div class="cheat-name">Per-Head Dimension</div><div class="cheat-desc">每头维度=D/h,通常64</div></div>
+          <div class="cheat-item"><div class="cheat-symbol">d_ff</div><div class="cheat-name">FFN Dimension</div><div class="cheat-desc">FFN隐藏层,通常4×d_model</div></div>
+          <div class="cheat-item"><div class="cheat-symbol">h</div><div class="cheat-name">Num Heads</div><div class="cheat-desc">注意力头数量,通常8</div></div>
+          <div class="cheat-item"><div class="cheat-symbol">V</div><div class="cheat-name">Vocabulary Size</div><div class="cheat-desc">词表大小,GPT-3:50257</div></div>
         </div>
       </div>
     </div>
@@ -1352,208 +874,129 @@
   <script>
     const moduleData = {
       'input': {
-        title: 'Input Tokens',
-        category: 'Input Layer',
-        icon: '📝',
-        color: '#58a6ff',
-        desc: '原始输入 token 序列。通常是词元（word pieces）或字符的 ID。训练时为一个 batch 的序列。',
-        input: { shape: '-', note: '原始 Token IDs' },
-        output: { shape: '[B, L]', note: 'B=batch, L=seq_len' },
+        title: 'Input Tokens', category: 'Input', icon: '📝', color: '#58a6ff',
+        desc: '原始输入token序列,通常是词元或字符的ID。例: "Hello world" → [1,5] 表示batch=1,长度=5',
+        input: { shape: '-', note: '原始Token IDs' },
+        output: { shape: '[B, L]', note: 'B=batch数,L=序列长度' },
         params: []
       },
       'embedding': {
-        title: 'Embedding Layer',
-        category: 'Input Processing',
-        icon: '📥',
-        color: '#58a6ff',
-        desc: '通过嵌入矩阵将离散 token ID 映射为连续向量。矩阵形状 [vocab_size, d_model]，每个 token 获得语义向量。',
+        title: 'Embedding', category: 'Input Processing', icon: '📥', color: '#58a6ff',
+        desc: '通过嵌入矩阵将离散token ID映射为连续向量。查表替换,每个token获得一个512维语义向量。',
         input: { shape: '[B, L]', note: 'Token IDs' },
-        output: { shape: '[B, L, D]', note: 'D = d_model = 512' },
-        params: [
-          { name: 'vocab_size', value: '~50,000' },
-          { name: 'd_model', value: '512' }
-        ]
+        output: { shape: '[B, L, 512]', note: '每个token变为512维向量' },
+        params: [{name: 'vocab_size', value: '~50,000'}, {name: 'd_model', value: '512'}]
       },
       'positional': {
-        title: 'Positional Encoding',
-        category: 'Input Processing',
-        icon: '📍',
-        color: '#58a6ff',
-        desc: '通过正弦/余弦函数添加位置信息。由于 Transformer 无循环结构，需要显式注入位置信号。',
-        input: { shape: '[B, L, D]', note: '词嵌入' },
-        output: { shape: '[B, L, D]', note: '词嵌入 + 位置编码' },
-        params: [
-          { name: 'd_model', value: '512' },
-          { name: 'max_len', value: '5000' }
-        ]
+        title: 'Positional Encoding', category: 'Input Processing', icon: '📍', color: '#58a6ff',
+        desc: '通过正弦/余弦函数添加位置信息。Transformer无循环结构,需要显式注入位置信号。',
+        input: { shape: '[B, L, 512]', note: '词嵌入' },
+        output: { shape: '[B, L, 512]', note: '+位置编码,维度不变' },
+        params: [{name: 'd_model', value: '512'}, {name: 'max_len', value: '5000'}]
       },
       'enc-attention': {
-        title: 'Multi-Head Self-Attention',
-        category: 'Encoder / Attention',
-        icon: '🔍',
-        color: '#f0883e',
-        desc: 'Self-Attention 允许源序列每个位置关注所有其他位置。Q=K=V=X，通过多头学习不同注意力模式。',
-        input: { shape: '[B, L, D]', note: 'Encoder 输入' },
-        output: { shape: '[B, L, D]', note: '注意力增强表示' },
-        params: [
-          { name: 'h', value: '8 heads' },
-          { name: 'd_k', value: '64 (D/h)' },
-          { name: 'dropout', value: '0.1' }
-        ]
+        title: 'Multi-Head Self-Attention', category: 'Encoder', icon: '🔍', color: '#f0883e',
+        desc: '核心注意力机制。Q=K=V=X,分成8个头,每头64维,独立计算注意力,最后拼接。为什么多头:不同头学习不同依赖关系(语法/语义/指代等)',
+        input: { shape: '[B, L, 512]', note: 'Encoder输入' },
+        output: { shape: '[B, L, 512]', note: '注意力增强,维度不变' },
+        params: [{name: 'h', value: '8 heads'}, {name: 'd_k', value: '64 (D/h)'}, {name: 'dropout', value: '0.1'}]
       },
       'enc-norm1': {
-        title: 'Add & LayerNorm',
-        category: 'Encoder / Normalization',
-        icon: '📊',
-        color: '#39c5cf',
-        desc: '残差连接 + LayerNorm。x + Attention(x) 后进行归一化。残差连接确保梯度回传。',
-        input: { shape: '[B, L, D]', note: 'x + Attn(x)' },
-        output: { shape: '[B, L, D]', note: '归一化结果' },
-        params: [{ name: 'ε', value: '1e-6' }]
+        title: 'Add & LayerNorm', category: 'Encoder', icon: '📊', color: '#39c5cf',
+        desc: '残差连接+x+Attention(x)+LayerNorm。残差连接确保梯度直接回传,LayerNorm稳定训练。维度不变。',
+        input: { shape: '[B, L, 512]', note: 'x + Attn(x)' },
+        output: { shape: '[B, L, 512]', note: '归一化,维度不变' },
+        params: [{name: 'ε', value: '1e-6'}]
       },
       'enc-ffn': {
-        title: 'Feed Forward Network',
-        category: 'Encoder / MLP',
-        icon: '⚡',
-        color: '#a371f7',
-        desc: '逐位置前馈网络：Linear(ReLU(Linear(x)))。D → 4D → D，引入非线性变换。',
-        input: { shape: '[B, L, D]', note: 'LayerNorm 输出' },
-        output: { shape: '[B, L, D]', note: '非线性变换结果' },
-        params: [
-          { name: 'd_model', value: '512' },
-          { name: 'd_ff', value: '2048 (4×D)' }
-        ]
+        title: 'Feed Forward Network', category: 'Encoder', icon: '⚡', color: '#a371f7',
+        desc: '两个线性变换+ReLU:512→2048→512。为什么扩展4倍:更大隐藏层提供更强表达能力。逐位置应用,独立变换每个token。',
+        input: { shape: '[B, L, 512]', note: 'LayerNorm输出' },
+        output: { shape: '[B, L, 512]', note: '非线性变换,维度不变' },
+        params: [{name: 'd_model', value: '512'}, {name: 'd_ff', value: '2048 (4×D)'}]
       },
       'enc-norm2': {
-        title: 'Add & LayerNorm',
-        category: 'Encoder / Normalization',
-        icon: '📊',
-        color: '#39c5cf',
-        desc: 'Encoder 层尾部的 Add & LayerNorm，对 FFN 输出进行残差连接和归一化。',
-        input: { shape: '[B, L, D]', note: 'x + FFN(x)' },
-        output: { shape: '[B, L, D]', note: 'Encoder 层输出' },
+        title: 'Add & LayerNorm', category: 'Encoder', icon: '📊', color: '#39c5cf',
+        desc: 'Encoder层尾部的Add&LayerNorm,对FFN输出进行残差连接和归一化。',
+        input: { shape: '[B, L, 512]', note: 'x + FFN(x)' },
+        output: { shape: '[B, L, 512]', note: 'Encoder层最终输出' },
         params: []
       },
       'output-tokens': {
-        title: 'Output Tokens',
-        category: 'Decoder',
-        icon: '📤',
-        color: '#f778ba',
-        desc: 'Decoder 的目标序列。训练时右移一位（shifted right），确保预测第 t 个 token 时只能用 1 到 t-1。',
-        input: { shape: '[B, L]', note: '目标 Token IDs' },
+        title: 'Output Tokens', category: 'Decoder', icon: '📤', color: '#f778ba',
+        desc: 'Decoder目标序列。训练时右移一位(shifted right),确保预测第t个token时只能用1到t-1。',
+        input: { shape: '[B, L]', note: '目标Token IDs' },
         output: { shape: '[B, L]', note: '右移后的序列' },
         params: []
       },
       'dec-embedding': {
-        title: 'Decoder Embedding',
-        category: 'Decoder',
-        icon: '📤',
-        color: '#f778ba',
-        desc: '与 Encoder Embedding 相同，将目标序列 token ID 映射为向量，并添加位置编码。',
-        input: { shape: '[B, L]', note: '目标 Token IDs' },
-        output: { shape: '[B, L, D]', note: '目标序列嵌入' },
-        params: [
-          { name: 'vocab_size', value: '~50,000' },
-          { name: 'd_model', value: '512' }
-        ]
+        title: 'Decoder Embedding', category: 'Decoder', icon: '📤', color: '#f778ba',
+        desc: '与Encoder Embedding相同,将目标序列token ID映射为512维向量,并添加位置编码。',
+        input: { shape: '[B, L]', note: '目标Token IDs' },
+        output: { shape: '[B, L, 512]', note: '目标序列嵌入' },
+        params: [{name: 'vocab_size', value: '~50,000'}, {name: 'd_model', value: '512'}]
       },
       'dec-masked-attn': {
-        title: 'Masked Self-Attention',
-        category: 'Decoder / Attention',
-        icon: '🎭',
-        color: '#f0883e',
-        desc: '带因果 mask 的 Self-Attention。确保位置 t 只能看到 1 到 t-1，通过将上三角设为 -∞ 实现。',
-        input: { shape: '[B, L, D]', note: '目标序列嵌入' },
-        output: { shape: '[B, L, D]', note: '遮蔽后的表示' },
-        params: [
-          { name: 'h', value: '8 heads' },
-          { name: 'mask', value: '[L, L] 因果' }
-        ]
+        title: 'Masked Self-Attention', category: 'Decoder', icon: '🎭', color: '#f0883e',
+        desc: '带因果mask的Self-Attention。将上三角设为-∞,确保位置t只能看到1到t-1。softmax(-∞)=0,实现因果遮蔽。',
+        input: { shape: '[B, L, 512]', note: '目标序列嵌入' },
+        output: { shape: '[B, L, 512]', note: '遮蔽后的表示' },
+        params: [{name: 'h', value: '8 heads'}, {name: 'mask', value: '[L,L]因果'}]
       },
       'dec-norm1': {
-        title: 'Add & LayerNorm',
-        category: 'Decoder / Normalization',
-        icon: '📊',
-        color: '#39c5cf',
-        desc: 'Decoder 第一层的 Add & LayerNorm（Masked Attn 后）。',
-        input: { shape: '[B, L, D]', note: 'x + MaskedAttn(x)' },
-        output: { shape: '[B, L, D]', note: '归一化结果' },
+        title: 'Add & LayerNorm', category: 'Decoder', icon: '📊', color: '#39c5cf',
+        desc: 'Decoder第一层的Add&LayerNorm(Masked Attn后)。',
+        input: { shape: '[B, L, 512]', note: 'x + MaskedAttn(x)' },
+        output: { shape: '[B, L, 512]', note: '归一化结果' },
         params: []
       },
       'dec-cross-attn': {
-        title: 'Cross Attention',
-        category: 'Decoder / Attention',
-        icon: '🔗',
-        color: '#f0883e',
-        desc: '跨注意力层。Q 来自 Decoder，K 和 V 来自 Encoder 输出。让 Decoder 可关注源序列所有位置。',
-        input: { shape: '[B, L, D]', note: 'Q:Dec, K,V:Enc' },
-        output: { shape: '[B, L, D]', note: '融合源序列信息' },
-        params: [{ name: 'h', value: '8 heads' }]
+        title: 'Cross Attention', category: 'Decoder', icon: '🔗', color: '#f0883e',
+        desc: '跨注意力层,Q来自Decoder,K和V来自Encoder输出。让Decoder可关注源序列所有位置,是翻译等任务的关键。',
+        input: { shape: '[B, L, 512]', note: 'Q:Dec | K,V:Enc' },
+        output: { shape: '[B, L, 512]', note: '融合源序列信息' },
+        params: [{name: 'h', value: '8 heads'}]
       },
       'dec-norm2': {
-        title: 'Add & LayerNorm',
-        category: 'Decoder / Normalization',
-        icon: '📊',
-        color: '#39c5cf',
-        desc: 'Decoder 第二层的 Add & LayerNorm（Cross Attn 后）。',
-        input: { shape: '[B, L, D]', note: 'x + CrossAttn(x)' },
-        output: { shape: '[B, L, D]', note: '归一化结果' },
+        title: 'Add & LayerNorm', category: 'Decoder', icon: '📊', color: '#39c5cf',
+        desc: 'Decoder第二层的Add&LayerNorm(Cross Attn后)。',
+        input: { shape: '[B, L, 512]', note: 'x + CrossAttn(x)' },
+        output: { shape: '[B, L, 512]', note: '归一化结果' },
         params: []
       },
       'dec-ffn': {
-        title: 'Feed Forward Network',
-        category: 'Decoder / MLP',
-        icon: '⚡',
-        color: '#a371f7',
-        desc: 'Decoder 层的 FFN，与 Encoder 中相同，逐位置变换。',
-        input: { shape: '[B, L, D]', note: 'LayerNorm 输出' },
-        output: { shape: '[B, L, D]', note: '非线性变换结果' },
-        params: [
-          { name: 'd_model', value: '512' },
-          { name: 'd_ff', value: '2048' }
-        ]
+        title: 'Feed Forward Network', category: 'Decoder', icon: '⚡', color: '#a371f7',
+        desc: 'Decoder层的FFN,与Encoder中相同,512→2048→512,逐位置变换。',
+        input: { shape: '[B, L, 512]', note: 'LayerNorm输出' },
+        output: { shape: '[B, L, 512]', note: '非线性变换结果' },
+        params: [{name: 'd_model', value: '512'}, {name: 'd_ff', value: '2048'}]
       },
       'dec-norm3': {
-        title: 'Add & LayerNorm',
-        category: 'Decoder / Normalization',
-        icon: '📊',
-        color: '#39c5cf',
-        desc: 'Decoder 层尾部的 Add & LayerNorm。',
-        input: { shape: '[B, L, D]', note: 'x + FFN(x)' },
-        output: { shape: '[B, L, D]', note: 'Decoder 输出' },
+        title: 'Add & LayerNorm', category: 'Decoder', icon: '📊', color: '#39c5cf',
+        desc: 'Decoder层尾部的Add&LayerNorm。',
+        input: { shape: '[B, L, 512]', note: 'x + FFN(x)' },
+        output: { shape: '[B, L, 512]', note: 'Decoder最终输出' },
         params: []
       },
       'linear': {
-        title: 'Linear Projection',
-        category: 'Output',
-        icon: '🎯',
-        color: '#d29922',
-        desc: '将 Decoder 输出的隐藏向量映射到词表维度。权重形状 [d_model, vocab_size]。',
-        input: { shape: '[B, L, D]', note: 'Decoder 输出' },
-        output: { shape: '[B, L, V]', note: 'logits' },
-        params: [
-          { name: 'd_model', value: '512' },
-          { name: 'vocab_size', value: '~50k' }
-        ]
+        title: 'Linear Projection', category: 'Output', icon: '🎯', color: '#d29922',
+        desc: '将Decoder输出的512维隐藏向量映射到词表维度。权重形状[512,V],输出logits(未归一化分数)。',
+        input: { shape: '[B, L, 512]', note: 'Decoder输出' },
+        output: { shape: '[B, L, V]', note: 'V=vocab_size' },
+        params: [{name: 'd_model', value: '512'}, {name: 'vocab_size', value: '~50k'}]
       },
       'softmax': {
-        title: 'Softmax',
-        category: 'Output',
-        icon: '📈',
-        color: '#d29922',
-        desc: '将 logits 转换为概率分布。每个位置输出向量和为 1，表示生成每个 token 的概率。',
+        title: 'Softmax', category: 'Output', icon: '📈', color: '#d29922',
+        desc: '将logits转换为概率分布。每个位置输出向量和为1,表示生成每个token的概率。',
         input: { shape: '[B, L, V]', note: 'logits' },
         output: { shape: '[B, L, V]', note: '概率分布' },
         params: []
       },
       'output': {
-        title: 'Output',
-        category: 'Output',
-        icon: '✅',
-        color: '#d29922',
-        desc: '最终输出：每个位置的词表概率分布。推理时选择概率最高的 token（greedy）或使用束搜索。',
+        title: 'Output', category: 'Output', icon: '✅', color: '#d29922',
+        desc: '最终输出:每个位置的词表概率分布。推理时选择概率最高的token(greedy)或使用束搜索。',
         input: { shape: '[B, L, V]', note: '概率分布' },
-        output: { shape: '[B, L]', note: 'Token ID 序列' },
+        output: { shape: '[B, L]', note: 'Token ID序列' },
         params: []
       }
     };
@@ -1561,16 +1004,13 @@
     const panel = document.getElementById('detailPanel');
     const placeholder = document.getElementById('panelPlaceholder');
     const content = document.getElementById('panelContent');
-    const modules = document.querySelectorAll('.module-group');
+    const modules = document.querySelectorAll('.mod');
 
-    function closePanel() {
-      panel.classList.remove('visible');
-    }
+    function closePanel() { panel.classList.remove('visible'); }
 
     modules.forEach(m => {
       m.addEventListener('click', () => {
-        const id = m.dataset.module;
-        const data = moduleData[id];
+        const data = moduleData[m.dataset.mod];
         if (data) showPanel(data);
       });
     });
@@ -1580,47 +1020,28 @@
       content.style.display = 'block';
 
       const paramsHTML = data.params.length ? `
-        <div class="tensor-block">
+        <div class="tensor-box">
           <div class="tensor-label">关键参数</div>
-          <table class="param-table">
-            <thead><tr><th>参数</th><th>值</th></tr></thead>
-            <tbody>
-              ${data.params.map(p => `<tr><td class="param-name">${p.name}</td><td class="param-value">${p.value}</td></tr>`).join('')}
-            </tbody>
-          </table>
+          <table class="param-table"><thead><tr><th>参数</th><th>值</th></tr></thead><tbody>
+            ${data.params.map(p => `<tr><td class="param-name">${p.name}</td><td class="param-value">${p.value}</td></tr>`).join('')}
+          </tbody></table>
         </div>
       ` : '';
 
       content.innerHTML = `
         <div class="panel-header">
-          <div class="panel-icon" style="background: ${data.color}22; border: 2px solid ${data.color};">${data.icon}</div>
-          <div>
-            <div class="panel-title">${data.title}</div>
-            <div class="panel-category">${data.category}</div>
-          </div>
+          <div class="panel-icon" style="background:${data.color}22;border:2px solid ${data.color}">${data.icon}</div>
+          <div><div class="panel-title">${data.title}</div><div class="panel-category">${data.category}</div></div>
         </div>
         <p class="panel-desc">${data.desc}</p>
-        <div class="tensor-block">
-          <div class="tensor-label">输入张量</div>
-          <div class="tensor-value">${data.input.shape}</div>
-          <div class="tensor-note">${data.input.note}</div>
-        </div>
-        <div class="tensor-block">
-          <div class="tensor-label">输出张量</div>
-          <div class="tensor-value">${data.output.shape}</div>
-          <div class="tensor-note">${data.output.note}</div>
-        </div>
+        <div class="tensor-box"><div class="tensor-label">输入张量</div><div class="tensor-shape">${data.input.shape}</div><div class="tensor-note">${data.input.note}</div></div>
+        <div class="tensor-box"><div class="tensor-label">输出张量</div><div class="tensor-shape">${data.output.shape}</div><div class="tensor-note">${data.output.note}</div></div>
         ${paramsHTML}
       `;
-
       panel.classList.add('visible');
     }
 
-    // Scroll animations
-    const observer = new IntersectionObserver(e => e.forEach(el => {
-      if (el.isIntersecting) el.target.classList.add('visible');
-    }), { threshold: 0.1 });
-
+    const observer = new IntersectionObserver(e => e.forEach(el => { if (el.isIntersecting) el.target.classList.add('visible'); }), {threshold: 0.1});
     document.querySelectorAll('.module-card').forEach(c => observer.observe(c));
   </script>
 </body>
