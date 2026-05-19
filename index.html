@@ -1,0 +1,1001 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Neural Networks: Zero to Hero — GPT 学习路线图</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&family=IBM+Plex+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-deep: #080a0e;
+            --bg-surface: #0f1318;
+            --bg-card: #141820;
+            --bg-card-hover: #1a1f28;
+            --border: #1e2530;
+            --border-light: #2a3140;
+            --text-primary: #e8eaed;
+            --text-secondary: #8b919e;
+            --text-muted: #5a6270;
+            --accent: #00d4aa;
+            --accent-dim: rgba(0, 212, 170, 0.15);
+            --accent2: #ff6b9d;
+            --accent2-dim: rgba(255, 107, 157, 0.15);
+            --accent3: #ffd93d;
+            --accent4: #60a5fa;
+            --accent5: #a78bfa;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'IBM Plex Sans', sans-serif;
+            background: var(--bg-deep);
+            color: var(--text-primary);
+            line-height: 1.7;
+            min-height: 100vh;
+        }
+
+        /* Hero */
+        .hero {
+            min-height: 70vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding: 80px 40px;
+            background: radial-gradient(ellipse at 50% 20%, rgba(0, 212, 170, 0.06) 0%, transparent 50%),
+                        radial-gradient(ellipse at 80% 80%, rgba(255, 107, 157, 0.04) 0%, transparent 40%);
+            position: relative;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-image: radial-gradient(circle at 1px 1px, rgba(255,255,255,0.02) 1px, transparent 0);
+            background-size: 50px 50px;
+            pointer-events: none;
+        }
+
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            background: var(--accent-dim);
+            border: 1px solid rgba(0, 212, 170, 0.3);
+            border-radius: 20px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.8rem;
+            color: var(--accent);
+            margin-bottom: 24px;
+            width: fit-content;
+        }
+
+        .hero h1 {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: clamp(2.5rem, 6vw, 4.5rem);
+            font-weight: 600;
+            letter-spacing: -0.02em;
+            margin-bottom: 16px;
+            background: linear-gradient(135deg, var(--text-primary) 0%, var(--accent) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            line-height: 1.1;
+        }
+
+        .hero p {
+            color: var(--text-secondary);
+            font-size: 1.15rem;
+            max-width: 650px;
+            margin-bottom: 40px;
+        }
+
+        .hero-actions {
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 14px 28px;
+            border-radius: 10px;
+            font-size: 0.95rem;
+            font-weight: 500;
+            text-decoration: none;
+            transition: all 0.2s ease;
+            cursor: pointer;
+            border: none;
+        }
+
+        .btn-primary {
+            background: var(--accent);
+            color: var(--bg-deep);
+        }
+
+        .btn-primary:hover {
+            background: #00e6b8;
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--text-primary);
+        }
+
+        .btn-secondary:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        /* Navigation */
+        .nav {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: rgba(8, 10, 14, 0.92);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border);
+            padding: 0 40px;
+        }
+
+        .nav-inner {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            gap: 8px;
+            overflow-x: auto;
+            scrollbar-width: none;
+        }
+
+        .nav-inner::-webkit-scrollbar { display: none; }
+
+        .nav-btn {
+            padding: 18px 20px;
+            background: transparent;
+            border: none;
+            border-bottom: 2px solid transparent;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: all 0.2s;
+        }
+
+        .nav-btn:hover { color: var(--text-primary); }
+        .nav-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+        /* Main Content */
+        .content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 60px 40px;
+        }
+
+        /* Section */
+        .stage-section {
+            margin-bottom: 80px;
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .stage-section.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .stage-header {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 32px;
+        }
+
+        .stage-num {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.8rem;
+            padding: 8px 14px;
+            background: var(--accent-dim);
+            border: 1px solid rgba(0, 212, 170, 0.3);
+            border-radius: 8px;
+            color: var(--accent);
+        }
+
+        .stage-title {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.8rem;
+            font-weight: 600;
+        }
+
+        .stage-title .highlight { color: var(--accent); }
+
+        /* Cards Grid */
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 20px;
+        }
+
+        /* Lecture Card */
+        .lecture-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 28px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .lecture-card:hover {
+            border-color: var(--accent);
+            transform: translateY(-4px);
+            box-shadow: 0 12px 40px rgba(0, 212, 170, 0.1);
+        }
+
+        .lecture-card h3 {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-bottom: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+
+        .lecture-card h4 {
+            font-size: 1.15rem;
+            font-weight: 600;
+            margin-bottom: 12px;
+            color: var(--text-primary);
+        }
+
+        .lecture-card .video-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            color: var(--accent2);
+            font-size: 0.85rem;
+            text-decoration: none;
+            margin-bottom: 16px;
+        }
+
+        .lecture-card .video-link:hover { text-decoration: underline; }
+
+        .lecture-tags {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-bottom: 16px;
+        }
+
+        .tag {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.7rem;
+            padding: 4px 10px;
+            border-radius: 6px;
+            background: var(--accent-dim);
+            color: var(--accent);
+        }
+
+        .tag.code { background: var(--accent2-dim); color: var(--accent2); }
+        .tag.core { background: rgba(255, 217, 61, 0.1); color: var(--accent3); }
+
+        .lecture-desc {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            margin-bottom: 16px;
+        }
+
+        .lecture-files {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            padding-top: 16px;
+            border-top: 1px solid var(--border);
+        }
+
+        .file-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            color: var(--text-muted);
+            font-size: 0.8rem;
+            text-decoration: none;
+            padding: 6px 12px;
+            background: var(--bg-surface);
+            border-radius: 6px;
+            transition: all 0.2s;
+        }
+
+        .file-link:hover {
+            background: var(--accent-dim);
+            color: var(--accent);
+        }
+
+        /* Code Block */
+        .code-block {
+            background: var(--bg-surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 20px;
+            margin: 16px 0;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+            line-height: 1.6;
+            overflow-x: auto;
+        }
+
+        .code-block .comment { color: var(--text-muted); }
+        .code-block .keyword { color: #c792ea; }
+        .code-block .function { color: #82aaff; }
+        .code-block .string { color: #c3e88d; }
+        .code-block .number { color: #f78c6c; }
+
+        /* Dimension Table */
+        .dim-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 16px 0;
+            font-size: 0.85rem;
+        }
+
+        .dim-table th, .dim-table td {
+            padding: 12px 16px;
+            border: 1px solid var(--border);
+            text-align: left;
+        }
+
+        .dim-table th {
+            background: var(--bg-card);
+            color: var(--text-secondary);
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: 500;
+        }
+
+        .dim-table td { background: var(--bg-surface); }
+        .dim-table code {
+            font-family: 'JetBrains Mono', monospace;
+            color: var(--accent4);
+            background: rgba(96, 165, 250, 0.1);
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+
+        /* Flow Diagram */
+        .flow-diagram {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 24px;
+            margin: 20px 0;
+            overflow-x: auto;
+        }
+
+        .flow-diagram h4 {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.8rem;
+            color: var(--accent);
+            margin-bottom: 16px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .flow-row {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .flow-node {
+            background: var(--bg-surface);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 12px 18px;
+            text-align: center;
+            min-width: 80px;
+            transition: all 0.2s;
+        }
+
+        .flow-node:hover {
+            border-color: var(--accent);
+        }
+
+        .flow-node .op {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.8rem;
+            color: var(--accent3);
+        }
+
+        .flow-node .dim {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            margin-top: 4px;
+        }
+
+        .flow-arrow {
+            color: var(--accent);
+            font-size: 1.2rem;
+        }
+
+        /* Footer */
+        footer {
+            border-top: 1px solid var(--border);
+            padding: 60px 40px;
+            text-align: center;
+        }
+
+        footer p {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            margin-bottom: 16px;
+        }
+
+        footer a {
+            color: var(--accent);
+            text-decoration: none;
+        }
+
+        footer a:hover { text-decoration: underline; }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .hero { padding: 60px 20px; }
+            .content { padding: 40px 20px; }
+            .nav { padding: 0 20px; }
+            .cards-grid { grid-template-columns: 1fr; }
+        }
+
+        /* Scroll animations */
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+    <!-- Hero -->
+    <section class="hero">
+        <div class="hero-badge">
+            <span>⭐</span>
+            <span>Based on Andrej Karpathy's YouTube Series</span>
+        </div>
+        <h1>Neural Networks:<br>Zero to Hero</h1>
+        <p>基于 Andrej Karpathy 的 YouTube 播放列表构建的中文学习指南。本仓库包含视频的详细中文注释、代码解读和学习笔记。</p>
+        <div class="hero-actions">
+            <a href="https://github.com/wushanchi/karpathy-gpt-roadmap" class="btn btn-primary" target="_blank">
+                <span>📦</span> GitHub 仓库
+            </a>
+            <a href="https://www.youtube.com/playlist?list=PLAqhIrjkxbuWI23v9cThsA9GvCAUhRvKZ" class="btn btn-secondary" target="_blank">
+                <span>🎬</span> 观看视频
+            </a>
+        </div>
+    </section>
+
+    <!-- Navigation -->
+    <nav class="nav">
+        <div class="nav-inner">
+            <button class="nav-btn active" onclick="scrollTo('stage1')">阶段一</button>
+            <button class="nav-btn" onclick="scrollTo('stage2')">阶段二</button>
+            <button class="nav-btn" onclick="scrollTo('stage3')">阶段三</button>
+            <button class="nav-btn" onclick="scrollTo('stage4')">阶段四</button>
+            <button class="nav-btn" onclick="scrollTo('stage5')">阶段五</button>
+        </div>
+    </nav>
+
+    <!-- Content -->
+    <main class="content">
+        <!-- Stage 1 -->
+        <section id="stage1" class="stage-section">
+            <div class="stage-header">
+                <span class="stage-num">阶段一</span>
+                <h2 class="stage-title">神经网络基础</h2>
+            </div>
+
+            <div class="cards-grid">
+                <!-- Lecture 1 -->
+                <div class="lecture-card">
+                    <h3>Lecture 1</h3>
+                    <h4>反向传播 (Backpropagation)</h4>
+                    <a href="https://www.youtube.com/watch?v=VMj-3S1tku0" class="video-link" target="_blank">▶ 观看视频</a>
+                    <div class="lecture-tags">
+                        <span class="tag">自动求导</span>
+                        <span class="tag">梯度下降</span>
+                        <span class="tag code">micrograd</span>
+                    </div>
+                    <p class="lecture-desc">理解神经网络如何学习，掌握反向传播的数学原理和计算图构建。</p>
+
+                    <div class="flow-diagram">
+                        <h4>核心: Value 类前向/反向传播</h4>
+                        <div class="flow-row">
+                            <div class="flow-node"><div class="op">a = Value(2)</div></div>
+                            <span class="flow-arrow">→</span>
+                            <div class="flow-node"><div class="op">*</div></div>
+                            <span class="flow-arrow">→</span>
+                            <div class="flow-node"><div class="op">+</div></div>
+                            <span class="flow-arrow">→</span>
+                            <div class="flow-node" style="border-color: var(--accent);"><div class="op">c.backward()</div></div>
+                        </div>
+                    </div>
+
+                    <div class="code-block">
+<span class="comment"># 梯度公式</span>
+<span class="keyword">加法:</span> ∂L/∂a = out.grad
+<span class="keyword">乘法:</span> ∂L/∂a = b.data * out.grad
+<span class="keyword">ReLU:</span> ∂L/∂a = (a > 0) * out.grad
+                    </div>
+
+                    <div class="lecture-files">
+                        <a href="https://github.com/wushanchi/karpathy-gpt-roadmap/tree/main/micrograd-comment" class="file-link">📁 code/</a>
+                        <a href="https://github.com/wushanchi/karpathy-gpt-roadmap/blob/main/micrograd-comment/notes.md" class="file-link">📝 notes.md</a>
+                        <a href="https://wushanchi.github.io/karpathy-gpt-roadmap/micrograd-comment/" class="file-link">🌐 index.html</a>
+                    </div>
+                </div>
+
+                <!-- Lecture 2 -->
+                <div class="lecture-card">
+                    <h3>Lecture 2</h3>
+                    <h4>语言建模入门 (Language Modeling)</h4>
+                    <a href="https://www.youtube.com/watch?v=PaCmpygFfXo" class="video-link" target="_blank">▶ 观看视频</a>
+                    <div class="lecture-tags">
+                        <span class="tag">字符级</span>
+                        <span class="tag">Bigram</span>
+                        <span class="tag code">makemore</span>
+                    </div>
+                    <p class="lecture-desc">字符级语言模型，理解 Bigram 模型和 PyTorch Tensor 的使用技巧。</p>
+
+                    <table class="dim-table">
+                        <tr><th>操作</th><th>输入</th><th>输出</th></tr>
+                        <tr><td>查表</td><td><code>(B, T)</code></td><td><code>(B, T, V)</code></td></tr>
+                        <tr><td>Softmax</td><td><code>(B, T, V)</code></td><td><code>(B, T, V)</code> 概率</td></tr>
+                    </table>
+
+                    <div class="lecture-files">
+                        <a href="https://github.com/wushanchi/karpathy-gpt-roadmap/tree/main/makemore-part1-comment" class="file-link">📁 code/</a>
+                        <a href="https://github.com/wushanchi/karpathy-gpt-roadmap/blob/main/makemore-part1-comment/notes.md" class="file-link">📝 notes.md</a>
+                        <a href="https://wushanchi.github.io/karpathy-gpt-roadmap/makemore-part1-comment/" class="file-link">🌐 index.html</a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Stage 2 -->
+        <section id="stage2" class="stage-section">
+            <div class="stage-header">
+                <span class="stage-num">阶段二</span>
+                <h2 class="stage-title">MLP 与现代训练技术</h2>
+            </div>
+
+            <div class="cards-grid">
+                <!-- Lecture 3 -->
+                <div class="lecture-card">
+                    <h3>Lecture 3</h3>
+                    <h4>多层感知机 (MLP)</h4>
+                    <a href="https://www.youtube.com/watch?v=TCH_1BHY58I" class="video-link" target="_blank">▶ 观看视频</a>
+                    <div class="lecture-tags">
+                        <span class="tag">嵌入层</span>
+                        <span class="tag">过拟合</span>
+                        <span class="tag code">makemore</span>
+                    </div>
+                    <p class="lecture-desc">MLP 语言模型：拼接历史嵌入，通过全连接层预测下一个字符。</p>
+
+                    <div class="flow-diagram">
+                        <h4>MLP 架构</h4>
+                        <div class="flow-row">
+                            <div class="flow-node"><div class="op">idx</div><div class="dim">(B, T)</div></div>
+                            <span class="flow-arrow">→</span>
+                            <div class="flow-node"><div class="op">wte</div><div class="dim">(B, T, n_embd)</div></div>
+                            <span class="flow-arrow">→</span>
+                            <div class="flow-node"><div class="op">cat</div><div class="dim">(B, T, n*k)</div></div>
+                            <span class="flow-arrow">→</span>
+                            <div class="flow-node"><div class="op">Linear</div><div class="dim">(B, T, V)</div></div>
+                        </div>
+                    </div>
+
+                    <div class="lecture-files">
+                        <a href="https://github.com/wushanchi/karpathy-gpt-roadmap/tree/main/makemore-part2-comment/code" class="file-link">📁 code/</a>
+                        <a href="https://github.com/wushanchi/karpathy-gpt-roadmap/blob/main/makemore-part2-comment/notes.md" class="file-link">📝 notes.md</a>
+                        <a href="https://wushanchi.github.io/karpathy-gpt-roadmap/makemore-part2-comment/" class="file-link">🌐 index.html</a>
+                    </div>
+                </div>
+
+                <!-- Lecture 4 -->
+                <div class="lecture-card">
+                    <h3>Lecture 4</h3>
+                    <h4>激活函数与 BatchNorm</h4>
+                    <a href="https://www.youtube.com/watch?v=P6sfmUTpUmc" class="video-link" target="_blank">▶ 观看视频</a>
+                    <div class="lecture-tags">
+                        <span class="tag">BatchNorm</span>
+                        <span class="tag">梯度诊断</span>
+                    </div>
+                    <p class="lecture-desc">学习激活函数统计、BatchNorm 原理和深度网络训练诊断。</p>
+
+                    <div class="code-block">
+<span class="comment"># BatchNorm 公式</span>
+y = gamma * (x - mean) / sqrt(var + eps) + beta
+                    </div>
+
+                    <div class="lecture-files">
+                        <a href="https://github.com/wushanchi/karpathy-gpt-roadmap/tree/main/makemore-part3-comment/code" class="file-link">📁 code/</a>
+                        <a href="https://github.com/wushanchi/karpathy-gpt-roadmap/blob/main/makemore-part3-comment/notes.md" class="file-link">📝 notes.md</a>
+                        <a href="https://wushanchi.github.io/karpathy-gpt-roadmap/makemore-part3-comment/" class="file-link">🌐 index.html</a>
+                    </div>
+                </div>
+
+                <!-- Lecture 5 -->
+                <div class="lecture-card">
+                    <h3>Lecture 5</h3>
+                    <h4>手写反向传播 (Backprop Ninja)</h4>
+                    <a href="https://www.youtube.com/watch?v=q8SA3rM6ckI" class="video-link" target="_blank">▶ 观看视频</a>
+                    <div class="lecture-tags">
+                        <span class="tag">链式法则</span>
+                        <span class="tag">LayerNorm</span>
+                    </div>
+                    <p class="lecture-desc">手动实现反向传播，不使用 autograd，理解 Cross Entropy 反向传播。</p>
+
+                    <div class="code-block">
+<span class="comment"># 链式法则</span>
+∂L/∂x = ∂L/∂y * ∂y/∂x
+
+<span class="comment"># 操作梯度</span>
+<span class="keyword">Softmax:</span> da = p - y
+                    </div>
+
+                    <div class="lecture-files">
+                        <a href="https://github.com/wushanchi/karpathy-gpt-roadmap/tree/main/makemore-part4-comment/code" class="file-link">📁 code/</a>
+                        <a href="https://github.com/wushanchi/karpathy-gpt-roadmap/blob/main/makemore-part4-comment/notes.md" class="file-link">📝 notes.md</a>
+                        <a href="https://wushanchi.github.io/karpathy-gpt-roadmap/makemore-part4-comment/" class="file-link">🌐 index.html</a>
+                    </div>
+                </div>
+
+                <!-- Lecture 6 -->
+                <div class="lecture-card">
+                    <h3>Lecture 6</h3>
+                    <h4>WaveNet 与 CNN</h4>
+                    <a href="https://www.youtube.com/watch?v=t3YJ5hKiMQ0" class="video-link" target="_blank">▶ 观看视频</a>
+                    <div class="lecture-tags">
+                        <span class="tag">膨胀卷积</span>
+                        <span class="tag">因果卷积</span>
+                    </div>
+                    <p class="lecture-desc">卷积神经网络、膨胀卷积（Dilated Convolution）和层次化结构。</p>
+
+                    <div class="flow-diagram">
+                        <h4>膨胀卷积感受野</h4>
+                        <div class="flow-row">
+                            <div class="flow-node"><div class="op">d=1</div><div class="dim">感受野 3</div></div>
+                            <span class="flow-arrow">→</span>
+                            <div class="flow-node"><div class="op">d=2</div><div class="dim">感受野 5</div></div>
+                            <span class="flow-arrow">→</span>
+                            <div class="flow-node"><div class="op">d=4</div><div class="dim">感受野 9</div></div>
+                            <span class="flow-arrow">→</span>
+                            <div class="flow-node"><div class="op">d=8</div><div class="dim">感受野 17</div></div>
+                        </div>
+                    </div>
+
+                    <div class="lecture-files">
+                        <a href="https://github.com/wushanchi/karpathy-gpt-roadmap/tree/main/makemore-part5-comment/code" class="file-link">📁 code/</a>
+                        <a href="https://github.com/wushanchi/karpathy-gpt-roadmap/blob/main/makemore-part5-comment/notes.md" class="file-link">📝 notes.md</a>
+                        <a href="https://wushanchi.github.io/karpathy-gpt-roadmap/makemore-part5-comment/" class="file-link">🌐 index.html</a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Stage 3 -->
+        <section id="stage3" class="stage-section">
+            <div class="stage-header">
+                <span class="stage-num">阶段三 ⭐</span>
+                <h2 class="stage-title">Transformer 核心</h2>
+            </div>
+
+            <div class="cards-grid">
+                <!-- Lecture 7 -->
+                <div class="lecture-card" style="border-color: var(--accent);">
+                    <h3>Lecture 7 ⭐</h3>
+                    <h4>Let's build GPT</h4>
+                    <a href="https://www.youtube.com/watch?v=kCc8FmEb1nY" class="video-link" target="_blank">▶ 观看视频</a>
+                    <div class="lecture-tags">
+                        <span class="tag core">核心必看</span>
+                        <span class="tag">Self-Attention</span>
+                        <span class="tag">Transformer</span>
+                    </div>
+                    <p class="lecture-desc">课程核心！Self-Attention、Multi-Head Attention、GPT-2 架构详解。</p>
+
+                    <div class="code-block">
+<span class="comment"># Self-Attention 公式</span>
+Attention(Q,K,V) = softmax(QK^T / √d_k) V
+
+<span class="comment"># Multi-Head</span>
+head_i = Attention(Q_i, K_i, V_i)
+output = concat(head_1, ..., head_n) * W_o
+                    </div>
+
+                    <div class="flow-diagram">
+                        <h4>GPT 架构</h4>
+                        <div class="flow-row">
+                            <div class="flow-node"><div class="op">Embed</div><div class="dim">+ Pos</div></div>
+                            <span class="flow-arrow">→</span>
+                            <div class="flow-node"><div class="op">Block×12</div><div class="dim">LN+Attn+MLP</div></div>
+                            <span class="flow-arrow">→</span>
+                            <div class="flow-node"><div class="op">LN_f</div></div>
+                            <span class="flow-arrow">→</span>
+                            <div class="flow-node"><div class="op">LM Head</div></div>
+                        </div>
+                    </div>
+
+                    <table class="dim-table">
+                        <tr><th>参数</th><th>GPT-2 Small</th></tr>
+                        <tr><td>vocab_size</td><td><code>50257</code></td></tr>
+                        <tr><td>block_size</td><td><code>1024</code></td></tr>
+                        <tr><td>n_layer</td><td><code>12</code></td></tr>
+                        <tr><td>n_head</td><td><code>12</code></td></tr>
+                        <tr><td>n_embd</td><td><code>768</code></td></tr>
+                        <tr><td>参数量</td><td><code>124M</code></td></tr>
+                    </table>
+
+                    <div class="lecture-files">
+                        <a href="https://github.com/wushanchi/karpathy-gpt-roadmap/tree/main/gpt-build-comment/code" class="file-link">📁 code/</a>
+                        <a href="https://github.com/wushanchi/karpathy-gpt-roadmap/blob/main/gpt-build-comment/notes.md" class="file-link">📝 notes.md</a>
+                        <a href="https://wushanchi.github.io/karpathy-gpt-roadmap/gpt-build-comment/" class="file-link">🌐 index.html</a>
+                    </div>
+                </div>
+
+                <!-- Lecture 8 -->
+                <div class="lecture-card">
+                    <h3>Lecture 8</h3>
+                    <h4>GPT Tokenizer</h4>
+                    <a href="https://www.youtube.com/watch?v=zduSFxRajkE" class="video-link" target="_blank">▶ 观看视频</a>
+                    <div class="lecture-tags">
+                        <span class="tag">BPE</span>
+                        <span class="tag">Tokenization</span>
+                        <span class="tag code">minbpe</span>
+                    </div>
+                    <p class="lecture-desc">BPE (Byte Pair Encoding) 算法、Tokenization 问题与 GPT Tokenizer。</p>
+
+                    <div class="code-block">
+<span class="comment"># BPE 算法步骤</span>
+<span class="number">1.</span> 将文本分解为字节序列
+<span class="number">2.</span> 统计相邻字节对频率
+<span class="number">3.</span> 合并最频繁的对
+<span class="number">4.</span> 重复直到达到词汇表大小
+                    </div>
+
+                    <div class="lecture-files">
+                        <a href="https://github.com/wushanchi/karpathy-gpt-roadmap/tree/main/tokenizer-comment/code" class="file-link">📁 code/</a>
+                        <a href="https://github.com/wushanchi/karpathy-gpt-roadmap/blob/main/tokenizer-comment/notes.md" class="file-link">📝 notes.md</a>
+                        <a href="https://wushanchi.github.io/karpathy-gpt-roadmap/tokenizer-comment/" class="file-link">🌐 index.html</a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Stage 4 -->
+        <section id="stage4" class="stage-section">
+            <div class="stage-header">
+                <span class="stage-num">阶段四</span>
+                <h2 class="stage-title">GPT 训练与微调</h2>
+            </div>
+
+            <div class="cards-grid">
+                <!-- Lecture 9 -->
+                <div class="lecture-card">
+                    <h3>Lecture 9</h3>
+                    <h4>复现 GPT-2 (124M)</h4>
+                    <a href="https://www.youtube.com/watch?v=l8pRSuU81PU" class="video-link" target="_blank">▶ 观看视频</a>
+                    <div class="lecture-tags">
+                        <span class="tag">GPT-2</span>
+                        <span class="tag">FineWeb</span>
+                        <span class="tag code">build-nanogpt</span>
+                    </div>
+                    <p class="lecture-desc">从零训练 GPT-2，使用 FineWeb 数据集，训练监控与优化。</p>
+
+                    <div class="code-block">
+<span class="comment"># 训练循环</span>
+<span class="keyword">for</span> step <span class="keyword">in</span> range(num_steps):
+    X, Y = get_batch()
+    logits, loss = model(X, Y)
+    loss.backward()
+    optimizer.step()
+                    </div>
+
+                    <div class="flow-diagram">
+                        <h4>监控指标</h4>
+                        <div class="flow-row">
+                            <div class="flow-node"><div class="op">loss</div><div class="dim">训练损失</div></div>
+                            <div class="flow-node"><div class="op">eval loss</div><div class="dim">验证损失</div></div>
+                            <div class="flow-node"><div class="op">grad norm</div><div class="dim">&lt; 1.0</div></div>
+                        </div>
+                    </div>
+
+                    <div class="lecture-files">
+                        <a href="https://github.com/wushanchi/karpathy-gpt-roadmap/tree/main/nanogpt-build-comment/code" class="file-link">📁 code/</a>
+                        <a href="https://github.com/wushanchi/karpathy-gpt-roadmap/blob/main/nanogpt-build-comment/notes.md" class="file-link">📝 notes.md</a>
+                        <a href="https://wushanchi.github.io/karpathy-gpt-roadmap/nanogpt-build-comment/" class="file-link">🌐 index.html</a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Stage 5 -->
+        <section id="stage5" class="stage-section">
+            <div class="stage-header">
+                <span class="stage-num">阶段五</span>
+                <h2 class="stage-title">底层实现与进阶</h2>
+            </div>
+
+            <div class="cards-grid">
+                <!-- LLM.C -->
+                <div class="lecture-card">
+                    <h3>底层训练</h3>
+                    <h4>LLM.C — 纯 C/CUDA 实现</h4>
+                    <div class="lecture-tags">
+                        <span class="tag">零依赖</span>
+                        <span class="tag">CUDA</span>
+                    </div>
+                    <p class="lecture-desc">纯 C 和 CUDA 实现的大语言模型训练，无需任何依赖。</p>
+
+                    <div class="code-block">
+<span class="comment"># 矩阵乘法 kernel</span>
+__global__ <span class="keyword">void</span> matmul_kernel(
+    <span class="keyword">float</span>* C, <span class="keyword">float</span>* A,
+    <span class="keyword">float</span>* B, <span class="keyword">int</span> N
+) {
+    <span class="comment">// 每个线程计算一个输出元素</span>
+    <span class="keyword">int</span> row = blockIdx.y * blockDim.y + threadIdx.y;
+    <span class="keyword">int</span> col = blockIdx.x * blockDim.x + threadIdx.x;
+    ...
+}
+                    </div>
+
+                    <div class="lecture-files">
+                        <a href="https://github.com/wushanchi/karpathy-gpt-roadmap/tree/main/llm-c-comment/code" class="file-link">📁 code/</a>
+                        <a href="https://github.com/wushanchi/karpathy-gpt-roadmap/blob/main/llm-c-comment/notes.md" class="file-link">📝 notes.md</a>
+                        <a href="https://wushanchi.github.io/karpathy-gpt-roadmap/llm-c-comment/" class="file-link">🌐 index.html</a>
+                    </div>
+                </div>
+
+                <!-- Llama2.C -->
+                <div class="lecture-card">
+                    <h3>Llama2 推理</h3>
+                    <h4>llama2.c — 单文件 C 推理</h4>
+                    <div class="lecture-tags">
+                        <span class="tag">RoPE</span>
+                        <span class="tag">SwiGLU</span>
+                    </div>
+                    <p class="lecture-desc">单文件纯 C 实现的 Llama 2 推理引擎。</p>
+
+                    <div class="code-block">
+<span class="comment"># 与 GPT-2 的区别</span>
+<span class="keyword">位置编码:</span> RoPE (Rotary)
+<span class="keyword">FFN:</span> SwiGLU 激活
+<span class="keyword">归一化:</span> RMSNorm
+<span class="keyword">注意力:</span> MQA
+                    </div>
+
+                    <div class="lecture-files">
+                        <a href="https://github.com/wushanchi/karpathy-gpt-roadmap/tree/main/llama2-c-comment/code" class="file-link">📁 code/</a>
+                        <a href="https://github.com/wushanchi/karpathy-gpt-roadmap/blob/main/llama2-c-comment/notes.md" class="file-link">📝 notes.md</a>
+                        <a href="https://wushanchi.github.io/karpathy-gpt-roadmap/llama2-c-comment/" class="file-link">🌐 index.html</a>
+                    </div>
+                </div>
+
+                <!-- Minbpe -->
+                <div class="lecture-card">
+                    <h3>BPE 算法</h3>
+                    <h4>minbpe — 最简实现</h4>
+                    <div class="lecture-tags">
+                        <span class="tag">Tokenizer</span>
+                        <span class="tag">编码/解码</span>
+                    </div>
+                    <p class="lecture-desc">最简 BPE 算法实现，Tokenizer 构建教程。</p>
+
+                    <div class="code-block">
+<span class="keyword">class</span> <span class="function">RegexTokenizer</span>:
+    <span class="keyword">def</span> <span class="function">encode</span>(text) → tokens
+    <span class="keyword">def</span> <span class="function">decode</span>(tokens) → text
+                    </div>
+
+                    <div class="lecture-files">
+                        <a href="https://github.com/wushanchi/karpathy-gpt-roadmap/tree/main/minbpe-comment/code" class="file-link">📁 code/</a>
+                        <a href="https://github.com/wushanchi/karpathy-gpt-roadmap/blob/main/minbpe-comment/notes.md" class="file-link">📝 notes.md</a>
+                        <a href="https://wushanchi.github.io/karpathy-gpt-roadmap/minbpe-comment/" class="file-link">🌐 index.html</a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Learning Path -->
+        <section class="stage-section">
+            <div class="stage-header">
+                <span class="stage-num">建议</span>
+                <h2 class="stage-title">学习路径</h2>
+            </div>
+
+            <div class="cards-grid">
+                <div class="lecture-card" style="background: var(--bg-surface);">
+                    <h4>推荐学习顺序</h4>
+                    <div class="flow-diagram" style="background: transparent; border: none; padding: 0;">
+                        <div class="flow-row" style="flex-direction: column; gap: 8px;">
+                            <div class="flow-node" style="width: 200px;"><div class="op">第1-2周 → Lecture 1-2</div><div class="dim">基础概念</div></div>
+                            <span class="flow-arrow">↓</span>
+                            <div class="flow-node" style="width: 200px;"><div class="op">第3-4周 → Lecture 3-4</div><div class="dim">MLP + BatchNorm</div></div>
+                            <span class="flow-arrow">↓</span>
+                            <div class="flow-node" style="width: 200px;"><div class="op">第5-6周 → Lecture 5-6</div><div class="dim">反向传播 + CNN</div></div>
+                            <span class="flow-arrow">↓</span>
+                            <div class="flow-node" style="width: 200px; border-color: var(--accent);"><div class="op">第7周 → Lecture 7 ⭐</div><div class="dim">GPT 核心必看!</div></div>
+                            <span class="flow-arrow">↓</span>
+                            <div class="flow-node" style="width: 200px;"><div class="op">第8周 → Lecture 8-9</div><div class="dim">Tokenizer + 训练</div></div>
+                            <span class="flow-arrow">↓</span>
+                            <div class="flow-node" style="width: 200px;"><div class="op">第9周+ → 实战项目</div></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer>
+        <p>基于 <a href="https://www.youtube.com/playlist?list=PLAqhIrjkxbuWI23v9cThsA9GvCAUhRvKZ" target="_blank">Neural Networks: Zero to Hero</a> 构建</p>
+        <p>本项目仅供学习使用，内容版权归 Andrej Karpathy 所有</p>
+        <p style="margin-top: 16px;">
+            <a href="https://github.com/wushanchi/karpathy-gpt-roadmap" target="_blank">📦 GitHub</a>
+            &nbsp;|&nbsp;
+            <a href="https://github.com/wushanchi/transformer-explain" target="_blank">🔮 Transformer Explorer</a>
+        </p>
+    </footer>
+
+    <script>
+        // Scroll animations
+        const sections = document.querySelectorAll('.stage-section');
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                }
+            });
+        }, { threshold: 0.1 });
+
+        sections.forEach(section => observer.observe(section));
+
+        // Navigation
+        function scrollTo(id) {
+            const el = document.getElementById(id);
+            if (el) {
+                el.scrollIntoView({ behavior: 'smooth' });
+                document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
+                event.target.classList.add('active');
+            }
+        }
+
+        // Update active nav on scroll
+        const navBtns = document.querySelectorAll('.nav-btn');
+        window.addEventListener('scroll', () => {
+            let current = '';
+            sections.forEach((section, i) => {
+                const sectionTop = section.offsetTop;
+                if (scrollY >= sectionTop - 200) {
+                    current = ['stage1', 'stage2', 'stage3', 'stage4', 'stage5'][i];
+                }
+            });
+            navBtns.forEach(btn => {
+                btn.classList.remove('active');
+                if (btn.textContent.includes(current.replace('stage', ''))) {
+                    btn.classList.add('active');
+                }
+            });
+        });
+
+        // Initial animation
+        setTimeout(() => {
+            sections[0].classList.add('visible');
+        }, 100);
+    </script>
+</body>
+</html>

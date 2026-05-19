@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Makemore Part 5 — WaveNet 与 CNN</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&family=IBM+Plex+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-deep: #080a0e;
+            --bg-surface: #0f1318;
+            --bg-card: #141820;
+            --border: #1e2530;
+            --text-primary: #e8eaed;
+            --text-secondary: #8b919e;
+            --accent: #00d4aa;
+            --accent5: #a78bfa;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'IBM Plex Sans', sans-serif; background: var(--bg-deep); color: var(--text-primary); line-height: 1.7; }
+        .hero { min-height: 50vh; display: flex; flex-direction: column; justify-content: center; padding: 60px 40px; background: radial-gradient(ellipse at 50% 30%, rgba(167, 139, 250, 0.06) 0%, transparent 60%); }
+        .hero h1 { font-family: 'Cormorant Garamond', serif; font-size: clamp(2rem, 5vw, 3.5rem); font-weight: 600; margin-bottom: 16px; background: linear-gradient(135deg, var(--text-primary) 0%, var(--accent5) 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .hero p { color: var(--text-secondary); font-size: 1.1rem; max-width: 600px; }
+        .badge { display: inline-flex; align-items: center; gap: 8px; margin-top: 20px; padding: 8px 16px; background: rgba(167, 139, 250, 0.1); border: 1px solid rgba(167, 139, 250, 0.3); border-radius: 20px; font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; color: var(--accent5); }
+        .content { max-width: 1100px; margin: 0 auto; padding: 60px 40px; }
+        section { margin-bottom: 80px; }
+        h2 { font-family: 'Cormorant Garamond', serif; font-size: 1.8rem; margin-bottom: 16px; display: flex; align-items: center; gap: 12px; }
+        h2 .num { font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; padding: 4px 10px; background: rgba(167, 139, 250, 0.1); border: 1px solid rgba(167, 139, 250, 0.3); border-radius: 6px; color: var(--accent5); }
+        .desc { color: var(--text-secondary); margin-bottom: 32px; }
+        .card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 24px; margin-bottom: 24px; }
+        .card h3 { font-family: 'JetBrains Mono', monospace; font-size: 0.9rem; color: var(--accent); margin-bottom: 16px; }
+        pre { font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; line-height: 1.7; background: var(--bg-surface); border-radius: 8px; padding: 16px; overflow-x: auto; margin: 12px 0; }
+        .cm { color: #546e7a; font-style: italic; }
+        .dim-flow { display: flex; align-items: center; justify-content: center; gap: 16px; flex-wrap: wrap; padding: 24px; background: var(--bg-surface); border-radius: 8px; margin: 16px 0; }
+        .dim-box { background: var(--bg-card); border: 1px solid var(--border); border-radius: 8px; padding: 16px 24px; text-align: center; min-width: 100px; }
+        .dim-box .label { font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 4px; }
+        .dim-box .shape { font-family: 'JetBrains Mono', monospace; font-size: 1rem; color: var(--accent5); }
+        .dim-arrow { color: var(--accent5); font-size: 1.5rem; }
+        table { width: 100%; border-collapse: collapse; margin: 16px 0; }
+        th, td { padding: 12px 16px; border: 1px solid var(--border); text-align: left; }
+        th { background: var(--bg-card); color: var(--text-secondary); font-family: 'JetBrains Mono', monospace; }
+        td { background: var(--bg-surface); }
+        footer { border-top: 1px solid var(--border); padding: 40px; text-align: center; color: var(--text-secondary); font-size: 0.9rem; }
+        footer a { color: var(--accent5); text-decoration: none; }
+        footer a:hover { text-decoration: underline; }
+    </style>
+</head>
+<body>
+    <section class="hero">
+        <h1>Makemore Part 5 — WaveNet 与 CNN</h1>
+        <p>卷积神经网络、膨胀卷积（Dilated Convolution）和层次化结构。</p>
+        <div class="badge"><span>📝</span><span>makemore_part5.py</span></div>
+    </section>
+
+    <main class="content">
+        <section>
+            <h2><span class="num">01</span>膨胀卷积原理</h2>
+            <div class="card">
+                <h3>感受野计算</h3>
+                <pre>普通卷积 (k=3, d=1): 感受野 = 3
+膨胀卷积 (k=3, d=2): 感受野 = 3 + 2*1 = 5
+膨胀卷积 (k=3, d=4): 感受野 = 3 + 2*3 = 9
+
+<span class="cm"># 公式: 感受野 = k + (k-1)*(d-1)</span></pre>
+                <div class="dim-flow">
+                    <div class="dim-box"><div class="label">d=1</div><div class="shape">感受野 3</div></div>
+                    <span class="dim-arrow">→</span>
+                    <div class="dim-box"><div class="label">d=2</div><div class="shape">感受野 5</div></div>
+                    <span class="dim-arrow">→</span>
+                    <div class="dim-box"><div class="label">d=4</div><div class="shape">感受野 9</div></div>
+                    <span class="dim-arrow">→</span>
+                    <div class="dim-box"><div class="label">d=8</div><div class="shape">感受野 17</div></div>
+                </div>
+            </div>
+        </section>
+
+        <section>
+            <h2><span class="num">02</span>WaveNet 架构</h2>
+            <div class="card">
+                <h3>核心模块</h3>
+                <pre><span class="cm"># 门控激活: tanh(W_f * x) * sigmoid(W_g * x)</span>
+
+<span class="cm"># 残差连接: y = x + F(x)</span>
+
+<span class="cm"># 跳跃连接: skip = Σ LayerNorm(G(x))</span></pre>
+            </div>
+        </section>
+
+        <section>
+            <h2><span class="num">03</span>CNN vs RNN vs Transformer</h2>
+            <div class="card">
+                <h3>对比表</h3>
+                <table>
+                    <tr><th>特性</th><th>CNN</th><th>RNN</th><th>Transformer</th></tr>
+                    <tr><td>并行性</td><td>高</td><td>低</td><td>高</td></tr>
+                    <tr><td>感受野</td><td>有限</td><td>全局</td><td>全局</td></tr>
+                    <tr><td>长依赖</td><td>难</td><td>容易</td><td>容易</td></tr>
+                    <tr><td>计算量</td><td>O(n)</td><td>O(n)</td><td>O(n²)</td></tr>
+                </table>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <p>📚 视频: <a href="https://www.youtube.com/watch?v=t3YJ5hKiMQ0" target="_blank">WaveNet</a> | 代码: <a href="https://github.com/karpathy/makemore" target="_blank">karpathy/makemore</a></p>
+    </footer>
+</body>
+</html>

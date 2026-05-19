@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GPT 构建 — Transformer 详解</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&family=IBM+Plex+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-deep: #080a0e;
+            --bg-surface: #0f1318;
+            --bg-card: #141820;
+            --border: #1e2530;
+            --text-primary: #e8eaed;
+            --text-secondary: #8b919e;
+            --accent: #00d4aa;
+            --accent4: #60a5fa;
+            --accent3: #ffd93d;
+            --accent2: #ff6b9d;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'IBM Plex Sans', sans-serif; background: var(--bg-deep); color: var(--text-primary); line-height: 1.7; }
+        .hero { min-height: 50vh; display: flex; flex-direction: column; justify-content: center; padding: 60px 40px; background: radial-gradient(ellipse at 50% 30%, rgba(0, 212, 170, 0.06) 0%, transparent 60%); }
+        .hero h1 { font-family: 'Cormorant Garamond', serif; font-size: clamp(2rem, 5vw, 3.5rem); font-weight: 600; margin-bottom: 16px; background: linear-gradient(135deg, var(--text-primary) 0%, var(--accent) 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .hero p { color: var(--text-secondary); font-size: 1.1rem; max-width: 600px; }
+        .badge { display: inline-flex; align-items: center; gap: 8px; margin-top: 20px; padding: 8px 16px; background: rgba(0, 212, 170, 0.1); border: 1px solid rgba(0, 212, 170, 0.3); border-radius: 20px; font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; color: var(--accent); }
+        .content { max-width: 1100px; margin: 0 auto; padding: 60px 40px; }
+        section { margin-bottom: 80px; }
+        h2 { font-family: 'Cormorant Garamond', serif; font-size: 1.8rem; margin-bottom: 16px; display: flex; align-items: center; gap: 12px; }
+        h2 .num { font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; padding: 4px 10px; background: rgba(0, 212, 170, 0.1); border: 1px solid rgba(0, 212, 170, 0.3); border-radius: 6px; color: var(--accent); }
+        .desc { color: var(--text-secondary); margin-bottom: 32px; }
+        .card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 24px; margin-bottom: 24px; }
+        .card h3 { font-family: 'JetBrains Mono', monospace; font-size: 0.9rem; color: var(--accent); margin-bottom: 16px; }
+        pre { font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; line-height: 1.7; background: var(--bg-surface); border-radius: 8px; padding: 16px; overflow-x: auto; margin: 12px 0; }
+        .num { color: #f78c6c; }
+        .cm { color: #546e7a; font-style: italic; }
+        .keyword { color: #c792ea; }
+        .string { color: #c3e88d; }
+        .code-block { background: var(--bg-surface); border: 1px solid var(--border); border-radius: 12px; padding: 20px; margin: 16px 0; font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; line-height: 1.6; overflow-x: auto; }
+        .dim-flow { display: flex; align-items: center; justify-content: center; gap: 16px; flex-wrap: wrap; padding: 24px; background: var(--bg-surface); border-radius: 8px; margin: 16px 0; }
+        .dim-box { background: var(--bg-card); border: 1px solid var(--border); border-radius: 8px; padding: 16px 24px; text-align: center; min-width: 100px; }
+        .dim-box .label { font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 4px; }
+        .dim-box .shape { font-family: 'JetBrains Mono', monospace; font-size: 1rem; color: var(--accent4); }
+        .dim-arrow { color: var(--accent4); font-size: 1.5rem; }
+        .dim-table { width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 0.85rem; }
+        .dim-table th, .dim-table td { padding: 12px 16px; border: 1px solid var(--border); text-align: left; }
+        .dim-table th { background: var(--bg-card); color: var(--text-secondary); font-family: 'JetBrains Mono', monospace; font-weight: 500; }
+        .dim-table td { background: var(--bg-surface); }
+        .dim-table code { font-family: 'JetBrains Mono', monospace; color: var(--accent4); background: rgba(96, 165, 250, 0.1); padding: 2px 6px; border-radius: 4px; }
+        footer { border-top: 1px solid var(--border); padding: 40px; text-align: center; color: var(--text-secondary); font-size: 0.9rem; }
+        footer a { color: var(--accent4); text-decoration: none; }
+        footer a:hover { text-decoration: underline; }
+    </style>
+</head>
+<body>
+    <section class="hero">
+        <h1>GPT 构建 — Transformer 详解</h1>
+        <p>Self-Attention、Multi-Head Attention、GPT-2 架构实现。</p>
+        <div class="badge"><span>📝</span><span>Let's build GPT</span></div>
+    </section>
+
+    <main class="content">
+        <section>
+            <h2><span class="num">01</span>Self-Attention 机制</h2>
+            <div class="card">
+                <h3>核心公式</h3>
+                <pre>Attention(Q, K, V) = softmax(QK^T / √d_k) V</pre>
+            </div>
+            <div class="card">
+                <h3>直观理解</h3>
+                <pre>Q: "我想要查询什么？"
+K: "我包含什么信息？"
+V: "我的实际内容是什么？"
+
+相似度 = Q · K^T
+归一化 = softmax(相似度 / √d)
+输出 = Σ(归一化权重 × V)</pre>
+            </div>
+        </section>
+
+        <section>
+            <h2><span class="num">02</span>Multi-Head Attention</h2>
+            <div class="card">
+                <h3>原理</h3>
+                <pre>多头数 = n_head
+每头维度 = d_k = d_model / n_head
+
+head_i = Attention(Q_i, K_i, V_i)
+output = concat(head_1, ..., head_n) * W_o</pre>
+            </div>
+            <div class="card">
+                <h3>维度变化</h3>
+                <div class="dim-flow">
+                    <div class="dim-box"><div class="label">输入</div><div class="shape">(B, T, d_model)</div></div>
+                    <span class="dim-arrow">→</span>
+                    <div class="dim-box"><div class="label">QKV投影</div><div class="shape">(B, T, 3d_model)</div></div>
+                    <span class="dim-arrow">→</span>
+                    <div class="dim-box"><div class="label">分割</div><div class="shape">(B, n_head, T, d_k)</div></div>
+                    <span class="dim-arrow">→</span>
+                    <div class="dim-box"><div class="label">输出</div><div class="shape">(B, T, d_model)</div></div>
+                </div>
+            </div>
+        </section>
+
+        <section>
+            <h2><span class="num">03</span>Transformer 组件</h2>
+            <div class="card">
+                <h3>LayerNorm</h3>
+                <pre>LayerNorm(x) = gamma * (x - mean) / sqrt(var + eps) + beta</pre>
+            </div>
+            <div class="card">
+                <h3>残差连接</h3>
+                <pre>x = x + sublayer(x)</pre>
+            </div>
+            <div class="card">
+                <h3>位置编码</h3>
+                <pre>PE(pos, 2i) = sin(pos / 10000^(2i/d_model))
+PE(pos, 2i+1) = cos(pos / 10000^(2i/d_model))</pre>
+            </div>
+        </section>
+
+        <section>
+            <h2><span class="num">04</span>GPT 架构</h2>
+            <div class="card">
+                <h3>完整结构</h3>
+                <pre>Token Embeddings + Position Embeddings
+  ↓
+Transformer Blocks (n_layer 次)
+  ↓
+LayerNorm
+  ↓
+LM Head (Linear)
+  ↓
+Output (vocab_size)</pre>
+            </div>
+            <div class="card">
+                <h3>GPT-2 参数</h3>
+                <table class="dim-table">
+                    <tr><th>组件</th><th>参数</th></tr>
+                    <tr><td>vocab_size</td><td><code>50257</code></td></tr>
+                    <tr><td>block_size</td><td><code>1024</code></td></tr>
+                    <tr><td>n_layer</td><td><code>12</code></td></tr>
+                    <tr><td>n_head</td><td><code>12</code></td></tr>
+                    <tr><td>n_embd</td><td><code>768</code></td></tr>
+                    <tr><td>参数量</td><td><code>124M</code></td></tr>
+                </table>
+            </div>
+        </section>
+
+        <section>
+            <h2><span class="num">05</span>因果遮蔽</h2>
+            <div class="card">
+                <h3>实现</h3>
+                <pre><span class="cm"># 创建 causal mask</span>
+mask = torch.tril(torch.ones(T, T))
+attn = attn.masked_fill(mask == 0, float(<span class="string">'-inf'</span>))</pre>
+            </div>
+            <div class="card">
+                <h3>权重共享</h3>
+                <pre><span class="cm"># token embedding 和 lm_head 共享权重</span>
+self.transformer.wte.weight = self.lm_head.weight</pre>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <p>视频: <a href="https://www.youtube.com/watch?v=kCc8FmEb1nY" target="_blank">Let's build GPT</a> | 代码: <a href="https://github.com/karpathy/makemore" target="_blank">karpathy/makemore</a></p>
+    </footer>
+</body>
+</html>

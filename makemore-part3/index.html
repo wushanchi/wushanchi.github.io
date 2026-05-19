@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Makemore Part 3 — 激活函数与 BatchNorm</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&family=IBM+Plex+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-deep: #080a0e;
+            --bg-surface: #0f1318;
+            --bg-card: #141820;
+            --border: #1e2530;
+            --text-primary: #e8eaed;
+            --text-secondary: #8b919e;
+            --accent: #00d4aa;
+            --accent2: #ff6b9d;
+            --accent3: #ffd93d;
+            --accent4: #60a5fa;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'IBM Plex Sans', sans-serif; background: var(--bg-deep); color: var(--text-primary); line-height: 1.7; }
+        .hero { min-height: 50vh; display: flex; flex-direction: column; justify-content: center; padding: 60px 40px; background: radial-gradient(ellipse at 50% 30%, rgba(255, 107, 157, 0.06) 0%, transparent 60%); }
+        .hero h1 { font-family: 'Cormorant Garamond', serif; font-size: clamp(2rem, 5vw, 3.5rem); font-weight: 600; margin-bottom: 16px; background: linear-gradient(135deg, var(--text-primary) 0%, var(--accent2) 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .hero p { color: var(--text-secondary); font-size: 1.1rem; max-width: 600px; }
+        .badge { display: inline-flex; align-items: center; gap: 8px; margin-top: 20px; padding: 8px 16px; background: rgba(255, 107, 157, 0.1); border: 1px solid rgba(255, 107, 157, 0.3); border-radius: 20px; font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; color: var(--accent2); }
+        .content { max-width: 1100px; margin: 0 auto; padding: 60px 40px; }
+        section { margin-bottom: 80px; }
+        h2 { font-family: 'Cormorant Garamond', serif; font-size: 1.8rem; margin-bottom: 16px; display: flex; align-items: center; gap: 12px; }
+        h2 .num { font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; padding: 4px 10px; background: rgba(255, 107, 157, 0.1); border: 1px solid rgba(255, 107, 157, 0.3); border-radius: 6px; color: var(--accent2); }
+        .desc { color: var(--text-secondary); margin-bottom: 32px; }
+        .card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 24px; margin-bottom: 24px; }
+        .card h3 { font-family: 'JetBrains Mono', monospace; font-size: 0.9rem; color: var(--accent); margin-bottom: 16px; }
+        pre { font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; line-height: 1.7; background: var(--bg-surface); border-radius: 8px; padding: 16px; overflow-x: auto; margin: 12px 0; }
+        .kw { color: #c792ea; }
+        .cm { color: #546e7a; font-style: italic; }
+        .dim-flow { display: flex; align-items: center; justify-content: center; gap: 16px; flex-wrap: wrap; padding: 24px; background: var(--bg-surface); border-radius: 8px; margin: 16px 0; }
+        .dim-box { background: var(--bg-card); border: 1px solid var(--border); border-radius: 8px; padding: 16px 24px; text-align: center; min-width: 100px; }
+        .dim-box .label { font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 4px; }
+        .dim-box .shape { font-family: 'JetBrains Mono', monospace; font-size: 1rem; color: var(--accent4); }
+        .dim-arrow { color: var(--accent2); font-size: 1.5rem; }
+        table { width: 100%; border-collapse: collapse; margin: 16px 0; }
+        th, td { padding: 12px 16px; border: 1px solid var(--border); text-align: left; }
+        th { background: var(--bg-card); color: var(--text-secondary); font-family: 'JetBrains Mono', monospace; }
+        td { background: var(--bg-surface); }
+        footer { border-top: 1px solid var(--border); padding: 40px; text-align: center; color: var(--text-secondary); font-size: 0.9rem; }
+        footer a { color: var(--accent2); text-decoration: none; }
+        footer a:hover { text-decoration: underline; }
+    </style>
+</head>
+<body>
+    <section class="hero">
+        <h1>Makemore Part 3 — 激活函数与 BatchNorm</h1>
+        <p>学习激活函数统计、BatchNorm 原理和深度网络训练诊断。</p>
+        <div class="badge"><span>📝</span><span>makemore_part3.py</span></div>
+    </section>
+
+    <main class="content">
+        <section>
+            <h2><span class="num">01</span>BatchNorm 原理</h2>
+            <div class="card">
+                <h3>BatchNorm 公式</h3>
+                <pre>y = gamma * (x - mean) / sqrt(var + eps) + beta</pre>
+                <div class="dim-flow">
+                    <div class="dim-box"><div class="label">输入 x</div><div class="shape">(B, T, C)</div></div>
+                    <span class="dim-arrow">→</span>
+                    <div class="dim-box"><div class="label">计算均值方差</div><div class="shape">(C,)</div></div>
+                    <span class="dim-arrow">→</span>
+                    <div class="dim-box"><div class="label">标准化</div><div class="shape">(B, T, C)</div></div>
+                    <span class="dim-arrow">→</span>
+                    <div class="dim-box"><div class="label">缩放+平移</div><div class="shape">(B, T, C)</div></div>
+                </div>
+            </div>
+        </section>
+
+        <section>
+            <h2><span class="num">02</span>梯度诊断</h2>
+            <div class="card">
+                <h3>常见梯度问题</h3>
+                <table>
+                    <tr><th>现象</th><th>原因</th><th>解决方法</th></tr>
+                    <tr><td>梯度消失</td><td>层太深、激活饱和</td><td>残差连接、合适初始化</td></tr>
+                    <tr><td>梯度爆炸</td><td>学习率太高</td><td>梯度裁剪、减小学习率</td></tr>
+                    <tr><td>NaN 损失</td><td>除零、log(0)</td><td>添加 eps</td></tr>
+                </table>
+            </div>
+        </section>
+
+        <section>
+            <h2><span class="num">03</span>权重初始化</h2>
+            <div class="card">
+                <h3>初始化方法</h3>
+                <pre><span class="cm"># Xavier/Glorot 适用于 tanh/sigmoid</span>
+nn.init.xavier_uniform_(layer.weight)
+
+<span class="cm"># Kaiming/He 适用于 ReLU</span>
+nn.init.kaiming_uniform_(layer.weight, nonlinearity='relu')
+
+<span class="cm"># GPT-2 使用的初始化</span>
+std = <span class="num">0.02</span>
+<span class="kw">if</span> hasattr(module, <span class="str">'NANOGPT_SCALE_INIT'</span>):
+    std *= (<span class="num">2</span> * n_layer) ** -<span class="num">0.5</span></pre>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <p>📚 视频: <a href="https://www.youtube.com/watch?v=P6sfmUTpUmc" target="_blank">BatchNorm</a> | 代码: <a href="https://github.com/karpathy/makemore" target="_blank">karpathy/makemore</a></p>
+    </footer>
+</body>
+</html>

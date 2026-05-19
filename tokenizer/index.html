@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Minbpe — 最简 BPE 算法实现</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&family=IBM+Plex+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-deep: #080a0e;
+            --bg-surface: #0f1318;
+            --bg-card: #141820;
+            --border: #1e2530;
+            --text-primary: #e8eaed;
+            --text-secondary: #8b919e;
+            --accent: #00d4aa;
+            --accent4: #60a5fa;
+            --accent3: #ffd93d;
+            --accent2: #ff6b9d;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'IBM Plex Sans', sans-serif; background: var(--bg-deep); color: var(--text-primary); line-height: 1.7; }
+        .hero { min-height: 50vh; display: flex; flex-direction: column; justify-content: center; padding: 60px 40px; background: radial-gradient(ellipse at 50% 30%, rgba(0, 212, 170, 0.06) 0%, transparent 60%); }
+        .hero h1 { font-family: 'Cormorant Garamond', serif; font-size: clamp(2rem, 5vw, 3.5rem); font-weight: 600; margin-bottom: 16px; background: linear-gradient(135deg, var(--text-primary) 0%, var(--accent) 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .hero p { color: var(--text-secondary); font-size: 1.1rem; max-width: 600px; }
+        .badge { display: inline-flex; align-items: center; gap: 8px; margin-top: 20px; padding: 8px 16px; background: rgba(0, 212, 170, 0.1); border: 1px solid rgba(0, 212, 170, 0.3); border-radius: 20px; font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; color: var(--accent); }
+        .content { max-width: 1100px; margin: 0 auto; padding: 60px 40px; }
+        section { margin-bottom: 80px; }
+        h2 { font-family: 'Cormorant Garamond', serif; font-size: 1.8rem; margin-bottom: 16px; display: flex; align-items: center; gap: 12px; }
+        h2 .num { font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; padding: 4px 10px; background: rgba(0, 212, 170, 0.1); border: 1px solid rgba(0, 212, 170, 0.3); border-radius: 6px; color: var(--accent); }
+        .desc { color: var(--text-secondary); margin-bottom: 32px; }
+        .card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 24px; margin-bottom: 24px; }
+        .card h3 { font-family: 'JetBrains Mono', monospace; font-size: 0.9rem; color: var(--accent); margin-bottom: 16px; }
+        pre { font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; line-height: 1.7; background: var(--bg-surface); border-radius: 8px; padding: 16px; overflow-x: auto; margin: 12px 0; }
+        .num { color: #f78c6c; }
+        .cm { color: #546e7a; font-style: italic; }
+        .keyword { color: #c792ea; }
+        .string { color: #c3e88d; }
+        .dim-table { width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 0.85rem; }
+        .dim-table th, .dim-table td { padding: 12px 16px; border: 1px solid var(--border); text-align: left; }
+        .dim-table th { background: var(--bg-card); color: var(--text-secondary); font-family: 'JetBrains Mono', monospace; font-weight: 500; }
+        .dim-table td { background: var(--bg-surface); }
+        footer { border-top: 1px solid var(--border); padding: 40px; text-align: center; color: var(--text-secondary); font-size: 0.9rem; }
+        footer a { color: var(--accent4); text-decoration: none; }
+        footer a:hover { text-decoration: underline; }
+    </style>
+</head>
+<body>
+    <section class="hero">
+        <h1>Minbpe — 最简 BPE 算法实现</h1>
+        <p>Byte Pair Encoding (BPE) 算法和 Tokenizer 实现详解。</p>
+        <div class="badge"><span>📝</span><span>minbpe</span></div>
+    </section>
+
+    <main class="content">
+        <section>
+            <h2><span class="num">01</span>BPE 算法</h2>
+            <div class="card">
+                <h3>算法步骤</h3>
+                <pre><span class="num">1.</span> 初始化：将所有字符作为词汇表
+<span class="num">2.</span> 统计：计算所有字节对的频率
+<span class="num">3.</span> 合并：找到最频繁的对，添加新词到词汇表
+<span class="num">4.</span> 重复：直到达到目标词汇表大小</pre>
+            </div>
+        </section>
+
+        <section>
+            <h2><span class="num">02</span>训练复杂度</h2>
+            <div class="card">
+                <h3>时间复杂度</h3>
+                <pre>时间: O(n * k)
+其中:
+  n = 训练文本长度
+  k = 目标词汇表大小
+
+优化: 使用优先队列（堆）加速</pre>
+            </div>
+        </section>
+
+        <section>
+            <h2><span class="num">03</span>核心类</h2>
+            <div class="card">
+                <h3>类结构</h3>
+                <table class="dim-table">
+                    <tr><th>类</th><th>说明</th></tr>
+                    <tr><td>Base</td><td>基础类，实现 encode/decode 接口</td></tr>
+                    <tr><td>BasicTokenizer</td><td>最简单的 BPE 实现</td></tr>
+                    <tr><td>RegexTokenizer</td><td>带正则化预处理的 BPE</td></tr>
+                    <tr><td>SentencePiece</td><td>更复杂的分词器</td></tr>
+                </table>
+            </div>
+        </section>
+
+        <section>
+            <h2><span class="num">04</span>分词流程</h2>
+            <div class="card">
+                <h3>RegexTokenizer 流程</h3>
+                <pre>输入: <span class="string">"Hello, world!"</span>
+
+<span class="num">1.</span> 正则预处理
+   - 分离标点符号
+   - 分割数字
+   - 处理空白
+
+<span class="num">2.</span> 查找合并
+   - 遍历文本
+   - 贪婪匹配最长词汇
+   - 未知词回退到字节级
+
+<span class="num">3.</span> 输出 token IDs</pre>
+            </div>
+        </section>
+
+        <section>
+            <h2><span class="num">05</span>使用示例</h2>
+            <div class="card">
+                <h3>代码示例</h3>
+                <pre><span class="keyword">from</span> minbpe <span class="keyword">import</span> RegexTokenizer
+
+<span class="cm"># 创建 tokenizer</span>
+tokenizer = RegexTokenizer()
+
+<span class="cm"># 训练（给定文本）</span>
+tokenizer.train(text, vocab_size=<span class="num">1000</span>)
+
+<span class="cm"># 保存</span>
+tokenizer.save(<span class="string">"tokenizer.json"</span>)
+
+<span class="cm"># 编码</span>
+tokens = tokenizer.encode(<span class="string">"Hello"</span>)
+
+<span class="cm"># 解码</span>
+text = tokenizer.decode(tokens)</pre>
+            </div>
+        </section>
+
+        <section>
+            <h2><span class="num">06</span>与 GPT Tokenizer 的区别</h2>
+            <div class="card">
+                <h3>特性对比</h3>
+                <table class="dim-table">
+                    <tr><th>特性</th><th>Minbpe</th><th>GPT Tokenizer</th></tr>
+                    <tr><td>词汇表大小</td><td>可配置</td><td>50,257</td></tr>
+                    <tr><td>正则化</td><td>可选</td><td>必需</td></tr>
+                    <tr><td>训练速度</td><td>快</td><td>慢</td></tr>
+                    <tr><td>用途</td><td>教学</td><td>生产</td></tr>
+                </table>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <p>代码: <a href="https://github.com/karpathy/minbpe" target="_blank">karpathy/minbpe</a></p>
+    </footer>
+</body>
+</html>

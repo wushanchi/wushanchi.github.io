@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Makemore Part 4 — 手写反向传播</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&family=IBM+Plex+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-deep: #080a0e;
+            --bg-surface: #0f1318;
+            --bg-card: #141820;
+            --border: #1e2530;
+            --text-primary: #e8eaed;
+            --text-secondary: #8b919e;
+            --accent: #00d4aa;
+            --accent3: #ffd93d;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'IBM Plex Sans', sans-serif; background: var(--bg-deep); color: var(--text-primary); line-height: 1.7; }
+        .hero { min-height: 50vh; display: flex; flex-direction: column; justify-content: center; padding: 60px 40px; background: radial-gradient(ellipse at 50% 30%, rgba(255, 217, 61, 0.06) 0%, transparent 60%); }
+        .hero h1 { font-family: 'Cormorant Garamond', serif; font-size: clamp(2rem, 5vw, 3.5rem); font-weight: 600; margin-bottom: 16px; background: linear-gradient(135deg, var(--text-primary) 0%, var(--accent3) 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .hero p { color: var(--text-secondary); font-size: 1.1rem; max-width: 600px; }
+        .badge { display: inline-flex; align-items: center; gap: 8px; margin-top: 20px; padding: 8px 16px; background: rgba(255, 217, 61, 0.1); border: 1px solid rgba(255, 217, 61, 0.3); border-radius: 20px; font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; color: var(--accent3); }
+        .content { max-width: 1100px; margin: 0 auto; padding: 60px 40px; }
+        section { margin-bottom: 80px; }
+        h2 { font-family: 'Cormorant Garamond', serif; font-size: 1.8rem; margin-bottom: 16px; display: flex; align-items: center; gap: 12px; }
+        h2 .num { font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; padding: 4px 10px; background: rgba(255, 217, 61, 0.1); border: 1px solid rgba(255, 217, 61, 0.3); border-radius: 6px; color: var(--accent3); }
+        .desc { color: var(--text-secondary); margin-bottom: 32px; }
+        .card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 24px; margin-bottom: 24px; }
+        .card h3 { font-family: 'JetBrains Mono', monospace; font-size: 0.9rem; color: var(--accent); margin-bottom: 16px; }
+        pre { font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; line-height: 1.7; background: var(--bg-surface); border-radius: 8px; padding: 16px; overflow-x: auto; margin: 12px 0; }
+        .kw { color: #c792ea; }
+        .cm { color: #546e7a; font-style: italic; }
+        .dim-flow { display: flex; align-items: center; justify-content: center; gap: 16px; flex-wrap: wrap; padding: 24px; background: var(--bg-surface); border-radius: 8px; margin: 16px 0; }
+        .dim-box { background: var(--bg-card); border: 1px solid var(--border); border-radius: 8px; padding: 16px 24px; text-align: center; min-width: 100px; }
+        .dim-box .label { font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 4px; }
+        .dim-box .shape { font-family: 'JetBrains Mono', monospace; font-size: 1rem; color: var(--accent3); }
+        .dim-arrow { color: var(--accent3); font-size: 1.5rem; }
+        table { width: 100%; border-collapse: collapse; margin: 16px 0; }
+        th, td { padding: 12px 16px; border: 1px solid var(--border); text-align: left; }
+        th { background: var(--bg-card); color: var(--text-secondary); font-family: 'JetBrains Mono', monospace; }
+        td { background: var(--bg-surface); }
+        footer { border-top: 1px solid var(--border); padding: 40px; text-align: center; color: var(--text-secondary); font-size: 0.9rem; }
+        footer a { color: var(--accent3); text-decoration: none; }
+        footer a:hover { text-decoration: underline; }
+    </style>
+</head>
+<body>
+    <section class="hero">
+        <h1>Makemore Part 4 — 手写反向传播</h1>
+        <p>手动实现反向传播，不使用 autograd，理解链式法则和 Cross Entropy 反向传播。</p>
+        <div class="badge"><span>📝</span><span>makemore_part4.py</span></div>
+    </section>
+
+    <main class="content">
+        <section>
+            <h2><span class="num">01</span>链式法则</h2>
+            <div class="card">
+                <h3>基本公式</h3>
+                <pre><span class="cm"># 链式法则</span>
+∂L/∂x = ∂L/∂y * ∂y/∂x
+
+<span class="cm"># 操作梯度表</span>
+<span class="kw">加法:</span>  da = dc,  db = dc
+<span class="kw">乘法:</span>  da = b*dc, db = a*dc
+<span class="kw">ReLU:</span> da = (a>0)*dc
+<span class="kw">Softmax:</span> da = p - y</pre>
+            </div>
+        </section>
+
+        <section>
+            <h2><span class="num">02</span>Cross Entropy 反向传播</h2>
+            <div class="card">
+                <h3>梯度公式</h3>
+                <pre><span class="cm"># Cross Entropy: CE = -log(p_target)</span>
+<span class="cm"># 梯度: ∂CE/∂logit_i = p_i - y_i</span>
+<span class="cm"># 其中 y_i = 1 if i == target else 0</span>
+
+<span class="kw">def</span> cross_entropy_grad(logits, target_idx):
+    probs = softmax(logits)
+    grads = []
+    <span class="kw">for</span> i, p <span class="kw">in</span> <span class="dt">enumerate</span>(probs):
+        y = <span class="num">1</span> <span class="kw">if</span> i == target_idx <span class="kw">else</span> <span class="num">0</span>
+        grads.append(p - y)
+    <span class="kw">return</span> grads</pre>
+            </div>
+        </section>
+
+        <section>
+            <h2><span class="num">03</span>手动反向传播示例</h2>
+            <div class="card">
+                <h3>计算图</h3>
+                <pre><span class="cm"># 计算: loss = (a * b + c) ** 2</span>
+<span class="cm"># 其中 a = 2, b = 3, c = 1</span>
+
+<span class="cm"># 前向:</span>
+ab = a * b        <span class="cm"># 6</span>
+sum_ab_c = ab + c  <span class="cm"># 7</span>
+loss = sum_ab_c ** <span class="num">2</span>  <span class="cm"># 49</span>
+
+<span class="cm"># 反向:</span>
+∂L/∂(a*b+c) = <span class="num">2</span> * (a*b+c) = <span class="num">14</span>
+∂L/∂c = <span class="num">14</span>
+∂L/∂a = b * <span class="num">14</span> = <span class="num">42</span>
+∂L/∂b = a * <span class="num">14</span> = <span class="num">28</span></pre>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <p>📚 视频: <a href="https://www.youtube.com/watch?v=q8SA3rM6ckI" target="_blank">Backprop Ninja</a> | 代码: <a href="https://github.com/karpathy/makemore" target="_blank">karpathy/makemore</a></p>
+    </footer>
+</body>
+</html>
