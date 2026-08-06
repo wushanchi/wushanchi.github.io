@@ -1,0 +1,1096 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="AI 工具、编程助手、开源智能体与学习教程一站式导航。" />
+  <meta name="theme-color" content="#f6f7fb" />
+  <title>AI Stack · 智能工具导航</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #f4f6fb;
+      --bg-elevated: rgba(255,255,255,.84);
+      --panel: rgba(255,255,255,.74);
+      --panel-solid: #ffffff;
+      --text: #151827;
+      --muted: #697086;
+      --line: rgba(34, 42, 68, .11);
+      --line-strong: rgba(34, 42, 68, .18);
+      --primary: #6558f5;
+      --primary-2: #8d5df6;
+      --primary-soft: rgba(101,88,245,.11);
+      --cyan: #24b7c7;
+      --green: #2d9c70;
+      --orange: #e38c3c;
+      --red: #db5c6d;
+      --shadow-sm: 0 8px 28px rgba(47, 52, 84, .08);
+      --shadow-md: 0 18px 60px rgba(47, 52, 84, .13);
+      --radius: 22px;
+      --radius-sm: 15px;
+      --sidebar: 270px;
+      --header: 76px;
+    }
+    [data-theme="dark"] {
+      color-scheme: dark;
+      --bg: #0c0e16;
+      --bg-elevated: rgba(18,21,34,.88);
+      --panel: rgba(23,26,42,.72);
+      --panel-solid: #171a2a;
+      --text: #f3f5ff;
+      --muted: #9ba3ba;
+      --line: rgba(218, 223, 255, .10);
+      --line-strong: rgba(218, 223, 255, .18);
+      --primary: #8c80ff;
+      --primary-2: #b276ff;
+      --primary-soft: rgba(140,128,255,.16);
+      --cyan: #4bd2df;
+      --green: #56c796;
+      --orange: #f4aa5e;
+      --red: #ef7485;
+      --shadow-sm: 0 8px 32px rgba(0,0,0,.20);
+      --shadow-md: 0 24px 72px rgba(0,0,0,.32);
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI",
+        "PingFang SC", "Microsoft YaHei", "Noto Sans CJK SC", sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at 10% -10%, rgba(101,88,245,.18), transparent 31rem),
+        radial-gradient(circle at 98% 8%, rgba(36,183,199,.13), transparent 27rem),
+        var(--bg);
+      transition: background .25s ease, color .25s ease;
+    }
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      opacity: .3;
+      background-image:
+        linear-gradient(var(--line) 1px, transparent 1px),
+        linear-gradient(90deg, var(--line) 1px, transparent 1px);
+      background-size: 42px 42px;
+      mask-image: linear-gradient(to bottom, black, transparent 70%);
+      z-index: -1;
+    }
+    button, input, select { font: inherit; }
+    button { color: inherit; }
+    a { color: inherit; text-decoration: none; }
+    :focus-visible { outline: 3px solid color-mix(in srgb, var(--primary) 55%, transparent); outline-offset: 3px; }
+
+    .app-header {
+      height: var(--header);
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      display: flex;
+      align-items: center;
+      gap: 18px;
+      padding: 0 24px;
+      background: var(--bg-elevated);
+      border-bottom: 1px solid var(--line);
+      backdrop-filter: blur(18px);
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 11px;
+      min-width: calc(var(--sidebar) - 24px);
+      font-weight: 850;
+      letter-spacing: -.03em;
+    }
+    .brand-mark {
+      width: 39px; height: 39px;
+      display: grid; place-items: center;
+      color: white;
+      border-radius: 13px;
+      background: linear-gradient(135deg, var(--primary), var(--primary-2));
+      box-shadow: 0 9px 22px rgba(101,88,245,.28);
+    }
+    .brand-mark svg { width: 23px; height: 23px; }
+    .brand small {
+      display: block;
+      margin-top: 1px;
+      color: var(--muted);
+      font-size: 10px;
+      font-weight: 760;
+      letter-spacing: .15em;
+      text-transform: uppercase;
+    }
+    .top-search {
+      position: relative;
+      max-width: 650px;
+      flex: 1;
+    }
+    .top-search svg {
+      position: absolute; left: 15px; top: 50%;
+      width: 19px; height: 19px;
+      color: var(--muted);
+      transform: translateY(-50%);
+      pointer-events: none;
+    }
+    .top-search input {
+      width: 100%;
+      height: 46px;
+      padding: 0 88px 0 45px;
+      border: 1px solid var(--line);
+      border-radius: 15px;
+      color: var(--text);
+      background: var(--panel);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.12);
+      transition: .2s ease;
+    }
+    .top-search input:hover { border-color: var(--line-strong); }
+    .top-search input:focus {
+      border-color: color-mix(in srgb, var(--primary) 48%, var(--line));
+      background: var(--panel-solid);
+      box-shadow: 0 0 0 4px var(--primary-soft);
+      outline: none;
+    }
+    .shortcut {
+      position: absolute; right: 10px; top: 50%;
+      transform: translateY(-50%);
+      padding: 5px 8px;
+      color: var(--muted);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      font-size: 11px;
+      background: var(--panel-solid);
+    }
+    .header-actions { display: flex; gap: 8px; margin-left: auto; }
+    .icon-btn {
+      width: 42px; height: 42px;
+      display: grid; place-items: center;
+      border: 1px solid var(--line);
+      border-radius: 13px;
+      background: var(--panel);
+      cursor: pointer;
+      transition: .2s ease;
+    }
+    .icon-btn:hover {
+      transform: translateY(-1px);
+      border-color: var(--line-strong);
+      background: var(--panel-solid);
+      box-shadow: var(--shadow-sm);
+    }
+    .icon-btn svg { width: 20px; height: 20px; }
+    .menu-btn { display: none; }
+
+    .layout { display: grid; grid-template-columns: var(--sidebar) minmax(0,1fr); }
+    .sidebar {
+      position: sticky;
+      top: var(--header);
+      height: calc(100vh - var(--header));
+      overflow: auto;
+      padding: 22px 18px 32px;
+      border-right: 1px solid var(--line);
+      scrollbar-width: thin;
+    }
+    .sidebar-label {
+      padding: 0 11px;
+      margin: 7px 0 8px;
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+    }
+    .nav-group { margin-bottom: 20px; }
+    .nav-button {
+      width: 100%;
+      min-height: 41px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 10px;
+      border: 0;
+      border-radius: 12px;
+      background: transparent;
+      cursor: pointer;
+      text-align: left;
+      transition: .18s ease;
+    }
+    .nav-button:hover { background: var(--panel); }
+    .nav-button.active {
+      color: var(--primary);
+      background: var(--primary-soft);
+      font-weight: 760;
+    }
+    .nav-dot {
+      width: 9px; height: 9px;
+      flex: 0 0 auto;
+      border-radius: 50%;
+      background: var(--dot, var(--primary));
+      box-shadow: 0 0 0 4px color-mix(in srgb, var(--dot, var(--primary)) 13%, transparent);
+    }
+    .nav-text {
+      min-width: 0;
+      flex: 1;
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      font-size: 13px;
+    }
+    .nav-count {
+      color: var(--muted);
+      font-size: 11px;
+      font-variant-numeric: tabular-nums;
+    }
+    .nav-sub { padding-left: 14px; }
+    .nav-sub .nav-button { min-height: 36px; }
+    .sidebar-note {
+      margin: 18px 7px 0;
+      padding: 14px;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.65;
+      background: var(--panel);
+    }
+
+    main { min-width: 0; padding: 28px clamp(20px, 4vw, 58px) 64px; }
+    .hero {
+      position: relative;
+      overflow: hidden;
+      padding: clamp(28px, 5vw, 54px);
+      border: 1px solid var(--line);
+      border-radius: 30px;
+      background:
+        linear-gradient(125deg, color-mix(in srgb, var(--panel-solid) 88%, transparent), color-mix(in srgb, var(--primary-soft) 65%, var(--panel-solid))),
+        var(--panel-solid);
+      box-shadow: var(--shadow-md);
+    }
+    .hero::after {
+      content: "";
+      position: absolute;
+      width: 360px; height: 360px;
+      right: -115px; top: -180px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(141,93,246,.30), transparent 65%);
+    }
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 7px 11px;
+      border: 1px solid color-mix(in srgb, var(--primary) 24%, var(--line));
+      border-radius: 999px;
+      color: var(--primary);
+      background: var(--primary-soft);
+      font-size: 12px;
+      font-weight: 800;
+    }
+    .eyebrow::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
+    h1 {
+      max-width: 760px;
+      margin: 19px 0 14px;
+      font-size: clamp(35px, 5.2vw, 66px);
+      line-height: 1.03;
+      letter-spacing: -.055em;
+    }
+    h1 .gradient {
+      color: transparent;
+      background: linear-gradient(100deg, var(--primary), var(--primary-2), var(--cyan));
+      background-clip: text;
+      -webkit-background-clip: text;
+    }
+    .hero-copy {
+      max-width: 670px;
+      margin: 0;
+      color: var(--muted);
+      font-size: clamp(15px, 1.8vw, 18px);
+      line-height: 1.8;
+    }
+    .hero-actions {
+      display: flex; flex-wrap: wrap; gap: 11px;
+      margin-top: 26px;
+    }
+    .primary-btn, .soft-btn {
+      min-height: 45px;
+      display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+      padding: 0 17px;
+      border-radius: 13px;
+      cursor: pointer;
+      font-weight: 760;
+      transition: .2s ease;
+    }
+    .primary-btn {
+      color: white;
+      border: 0;
+      background: linear-gradient(135deg, var(--primary), var(--primary-2));
+      box-shadow: 0 10px 25px rgba(101,88,245,.24);
+    }
+    .primary-btn:hover { transform: translateY(-2px); box-shadow: 0 15px 30px rgba(101,88,245,.3); }
+    .soft-btn { border: 1px solid var(--line); background: var(--panel); }
+    .soft-btn:hover { border-color: var(--line-strong); background: var(--panel-solid); transform: translateY(-1px); }
+    .hero-actions svg { width: 18px; height: 18px; }
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0,1fr));
+      max-width: 620px;
+      gap: 10px;
+      margin-top: 30px;
+    }
+    .stat {
+      padding: 15px 17px;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      background: color-mix(in srgb, var(--panel-solid) 72%, transparent);
+    }
+    .stat strong {
+      display: block;
+      margin-bottom: 4px;
+      font-size: 21px;
+      letter-spacing: -.03em;
+    }
+    .stat span { color: var(--muted); font-size: 12px; }
+
+    .quick-section { margin-top: 34px; }
+    .section-heading {
+      display: flex; align-items: end; justify-content: space-between; gap: 16px;
+      margin: 0 0 16px;
+    }
+    .section-heading h2 { margin: 0; font-size: 21px; letter-spacing: -.03em; }
+    .section-heading p { margin: 5px 0 0; color: var(--muted); font-size: 13px; }
+    .quick-grid {
+      display: grid;
+      grid-template-columns: repeat(8, minmax(0,1fr));
+      gap: 10px;
+    }
+    .quick-card {
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 9px;
+      padding: 15px 8px 12px;
+      border: 1px solid var(--line);
+      border-radius: 17px;
+      background: var(--panel);
+      transition: .2s ease;
+    }
+    .quick-card:hover {
+      transform: translateY(-3px);
+      border-color: color-mix(in srgb, var(--primary) 28%, var(--line));
+      background: var(--panel-solid);
+      box-shadow: var(--shadow-sm);
+    }
+    .quick-card span {
+      width: 100%;
+      overflow: hidden;
+      text-align: center;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      font-size: 12px;
+      font-weight: 760;
+    }
+
+    .favicon-shell {
+      position: relative;
+      width: 45px; height: 45px;
+      flex: 0 0 auto;
+      display: grid; place-items: center;
+      overflow: hidden;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background:
+        linear-gradient(135deg, color-mix(in srgb, var(--primary) 12%, var(--panel-solid)), var(--panel-solid));
+      color: var(--primary);
+      font-weight: 850;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.12);
+    }
+    .favicon-shell img { width: 25px; height: 25px; object-fit: contain; }
+    .favicon-fallback { position: absolute; inset: 0; display: grid; place-items: center; }
+    .favicon-shell img:not([hidden]) + .favicon-fallback { opacity: 0; }
+
+    .toolbar {
+      position: sticky;
+      top: calc(var(--header) + 10px);
+      z-index: 20;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin: 34px 0 21px;
+      padding: 11px;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      background: var(--bg-elevated);
+      backdrop-filter: blur(18px);
+      box-shadow: var(--shadow-sm);
+    }
+    .filter-scroll {
+      min-width: 0;
+      display: flex; gap: 7px;
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+    .filter-scroll::-webkit-scrollbar { display: none; }
+    .chip {
+      flex: 0 0 auto;
+      min-height: 38px;
+      padding: 0 13px;
+      border: 1px solid transparent;
+      border-radius: 11px;
+      background: transparent;
+      cursor: pointer;
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 680;
+    }
+    .chip:hover { color: var(--text); background: var(--panel); }
+    .chip.active {
+      color: var(--primary);
+      border-color: color-mix(in srgb, var(--primary) 20%, var(--line));
+      background: var(--primary-soft);
+    }
+    .result-count {
+      flex: 0 0 auto;
+      padding: 0 8px;
+      color: var(--muted);
+      font-size: 12px;
+      white-space: nowrap;
+    }
+    select {
+      height: 38px;
+      padding: 0 30px 0 11px;
+      border: 1px solid var(--line);
+      border-radius: 11px;
+      color: var(--text);
+      background: var(--panel-solid);
+      cursor: pointer;
+      font-size: 12px;
+    }
+
+    .resource-section { scroll-margin-top: 156px; margin-top: 28px; }
+    .resource-section + .resource-section { margin-top: 40px; }
+    .resource-section-head {
+      display: flex; align-items: center; gap: 12px;
+      margin-bottom: 15px;
+    }
+    .resource-section-icon {
+      width: 38px; height: 38px;
+      display: grid; place-items: center;
+      border-radius: 12px;
+      color: var(--accent);
+      background: color-mix(in srgb, var(--accent) 12%, var(--panel-solid));
+    }
+    .resource-section-icon svg { width: 20px; height: 20px; }
+    .resource-section-head h2 { margin: 0; font-size: 20px; letter-spacing: -.025em; }
+    .resource-section-head span { color: var(--muted); font-size: 12px; }
+    .category-block { scroll-margin-top: 156px; margin-top: 23px; }
+    .category-head {
+      display: flex; align-items: center; gap: 9px;
+      margin: 0 0 11px;
+      font-size: 14px;
+      font-weight: 810;
+    }
+    .category-head::before {
+      content: "";
+      width: 8px; height: 8px; border-radius: 50%;
+      background: var(--accent);
+      box-shadow: 0 0 0 5px color-mix(in srgb, var(--accent) 11%, transparent);
+    }
+    .category-head small { color: var(--muted); font-weight: 600; }
+    .card-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0,1fr));
+      gap: 13px;
+    }
+    .resource-card {
+      position: relative;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      padding: 17px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--panel);
+      box-shadow: 0 1px 0 rgba(255,255,255,.06);
+      transition: transform .2s ease, border-color .2s ease, background .2s ease, box-shadow .2s ease;
+    }
+    .resource-card:hover {
+      transform: translateY(-3px);
+      border-color: color-mix(in srgb, var(--accent) 28%, var(--line));
+      background: var(--panel-solid);
+      box-shadow: var(--shadow-sm);
+    }
+    .card-top { display: flex; align-items: flex-start; gap: 12px; }
+    .card-title-wrap { min-width: 0; flex: 1; padding-top: 1px; }
+    .card-title {
+      display: -webkit-box;
+      overflow: hidden;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      margin: 0 0 6px;
+      font-size: 15px;
+      line-height: 1.38;
+      letter-spacing: -.015em;
+    }
+    .card-host {
+      display: block;
+      overflow: hidden;
+      color: var(--muted);
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      font-size: 11px;
+    }
+    .card-desc {
+      display: -webkit-box;
+      min-height: 60px;
+      overflow: hidden;
+      -webkit-line-clamp: 3;
+      -webkit-box-orient: vertical;
+      margin: 14px 0 16px;
+      color: var(--muted);
+      font-size: 12.5px;
+      line-height: 1.62;
+    }
+    .card-footer {
+      display: flex; align-items: center; gap: 8px;
+      margin-top: auto;
+    }
+    .tag {
+      min-width: 0;
+      max-width: 55%;
+      overflow: hidden;
+      padding: 6px 9px;
+      border-radius: 8px;
+      color: var(--accent);
+      background: color-mix(in srgb, var(--accent) 10%, transparent);
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      font-size: 10.5px;
+      font-weight: 760;
+    }
+    .card-actions { display: flex; gap: 5px; margin-left: auto; }
+    .mini-btn, .visit-btn {
+      height: 32px;
+      display: inline-flex; align-items: center; justify-content: center;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: .18s ease;
+    }
+    .mini-btn {
+      width: 32px;
+      border: 1px solid var(--line);
+      background: transparent;
+      color: var(--muted);
+    }
+    .mini-btn:hover, .mini-btn.active {
+      color: var(--primary);
+      border-color: color-mix(in srgb, var(--primary) 28%, var(--line));
+      background: var(--primary-soft);
+    }
+    .visit-btn {
+      gap: 6px;
+      padding: 0 11px;
+      color: var(--text);
+      border: 1px solid var(--line);
+      background: var(--panel-solid);
+      font-size: 11px;
+      font-weight: 740;
+    }
+    .visit-btn:hover { color: white; border-color: var(--primary); background: var(--primary); }
+    .mini-btn svg, .visit-btn svg { width: 15px; height: 15px; }
+    .empty {
+      display: none;
+      padding: 64px 20px;
+      text-align: center;
+      border: 1px dashed var(--line-strong);
+      border-radius: 24px;
+      color: var(--muted);
+      background: var(--panel);
+    }
+    .empty strong { display: block; margin-bottom: 8px; color: var(--text); font-size: 18px; }
+    .empty.show { display: block; }
+    .toast {
+      position: fixed;
+      left: 50%; bottom: 28px;
+      z-index: 100;
+      padding: 11px 15px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      color: var(--text);
+      background: var(--panel-solid);
+      box-shadow: var(--shadow-md);
+      transform: translate(-50%, 25px);
+      opacity: 0;
+      pointer-events: none;
+      transition: .24s ease;
+      font-size: 13px;
+    }
+    .toast.show { opacity: 1; transform: translate(-50%, 0); }
+    footer {
+      margin-top: 48px;
+      padding: 24px 0 0;
+      border-top: 1px solid var(--line);
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.8;
+      text-align: center;
+    }
+    .overlay { display: none; }
+
+    @media (max-width: 1200px) {
+      .quick-grid { grid-template-columns: repeat(4, minmax(0,1fr)); }
+      .card-grid { grid-template-columns: repeat(2, minmax(0,1fr)); }
+    }
+    @media (max-width: 860px) {
+      :root { --header: 68px; }
+      .app-header { padding: 0 15px; gap: 10px; }
+      .brand { min-width: 0; }
+      .brand-text { display: none; }
+      .menu-btn { display: grid; }
+      .shortcut { display: none; }
+      .top-search input { padding-right: 14px; }
+      .layout { display: block; }
+      .sidebar {
+        position: fixed;
+        top: 0; left: 0; bottom: 0;
+        z-index: 80;
+        width: min(86vw, 310px);
+        height: 100vh;
+        padding-top: 82px;
+        background: var(--bg-elevated);
+        backdrop-filter: blur(22px);
+        transform: translateX(-105%);
+        transition: .25s ease;
+        box-shadow: var(--shadow-md);
+      }
+      body.sidebar-open .sidebar { transform: translateX(0); }
+      .overlay {
+        position: fixed;
+        inset: 0;
+        z-index: 70;
+        display: block;
+        background: rgba(4,5,10,.45);
+        opacity: 0;
+        pointer-events: none;
+        transition: .25s ease;
+      }
+      body.sidebar-open .overlay { opacity: 1; pointer-events: auto; }
+      main { padding: 18px 15px 50px; }
+      .toolbar { top: calc(var(--header) + 7px); }
+    }
+    @media (max-width: 620px) {
+      .hero { padding: 27px 20px; border-radius: 24px; }
+      h1 { font-size: 40px; }
+      .stats { grid-template-columns: 1fr; }
+      .stat { display: flex; align-items: center; justify-content: space-between; }
+      .stat strong { margin: 0; }
+      .quick-grid { grid-template-columns: repeat(4, minmax(0,1fr)); }
+      .quick-card { padding: 12px 4px 10px; }
+      .quick-card .favicon-shell { width: 40px; height: 40px; }
+      .toolbar { align-items: stretch; flex-wrap: wrap; }
+      .filter-scroll { width: 100%; }
+      .result-count { margin-right: auto; align-self: center; }
+      .card-grid { grid-template-columns: 1fr; }
+      .card-desc { min-height: 0; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; animation-duration: .01ms !important; }
+    }
+  </style>
+</head>
+<body>
+  <header class="app-header">
+    <button class="icon-btn menu-btn" id="menuBtn" aria-label="打开分类导航">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+    </button>
+    <a class="brand" href="#" aria-label="AI Stack 首页">
+      <span class="brand-mark" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+          <path d="M12 2 4.5 6.2 12 10.5l7.5-4.3L12 2Z"/><path d="m4.5 11.1 7.5 4.3 7.5-4.3M4.5 16l7.5 4.2 7.5-4.2"/>
+        </svg>
+      </span>
+      <span class="brand-text">AI Stack<small>Resource Navigator</small></span>
+    </a>
+    <label class="top-search">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg>
+      <input id="searchInput" type="search" autocomplete="off" placeholder="搜索工具、项目、教程或域名…" aria-label="搜索资源" />
+      <span class="shortcut">⌘ K</span>
+    </label>
+    <div class="header-actions">
+      <button class="icon-btn" id="favoriteToggle" aria-label="只看收藏" title="只看收藏">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="m12 3 2.8 5.7 6.2.9-4.5 4.4 1.1 6.2L12 17.3l-5.6 2.9 1.1-6.2L3 9.6l6.2-.9L12 3Z"/></svg>
+      </button>
+      <button class="icon-btn" id="themeBtn" aria-label="切换深色模式" title="切换主题">
+        <svg id="themeIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20.8 14.6A8.5 8.5 0 0 1 9.4 3.2 8.5 8.5 0 1 0 20.8 14.6Z"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <div class="layout">
+    <aside class="sidebar" id="sidebar" aria-label="资源分类">
+      <div class="sidebar-label">资源总览</div>
+      <div id="sidebarNav"></div>
+      <div class="sidebar-note">
+        按 <strong>⌘ / Ctrl + K</strong> 快速搜索。收藏与主题设置仅保存在当前浏览器中。
+      </div>
+    </aside>
+    <div class="overlay" id="overlay"></div>
+
+    <main>
+      <section class="hero">
+        <span class="eyebrow">AI 资源聚合导航</span>
+        <h1>发现好用的 <span class="gradient">AI 工具与开源项目</span></h1>
+        <p class="hero-copy">汇集通用 AI 助手、智能编程工具、开源 Agent、推理部署框架和系统化学习资料。搜索、分类、收藏，一页快速抵达。</p>
+        <div class="hero-actions">
+          <button class="primary-btn" id="browseBtn">
+            开始浏览
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M5 12h14m-5-5 5 5-5 5"/></svg>
+          </button>
+          <button class="soft-btn" id="randomBtn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M16 3h5v5M4 20 21 3M21 16v5h-5M15 15l6 6M4 4l5 5"/></svg>
+            随机探索
+          </button>
+        </div>
+        <div class="stats">
+          <div class="stat"><strong id="resourceStat">146</strong><span>精选资源</span></div>
+          <div class="stat"><strong>4</strong><span>一级板块</span></div>
+          <div class="stat"><strong id="categoryStat">19</strong><span>细分方向</span></div>
+        </div>
+      </section>
+
+      <section class="quick-section">
+        <div class="section-heading">
+          <div><h2>快速入口</h2><p>常用模型、编程工具与部署框架</p></div>
+        </div>
+        <div class="quick-grid" id="quickGrid"></div>
+      </section>
+
+      <div class="toolbar" id="resourceStart">
+        <div class="filter-scroll" id="sectionFilters"></div>
+        <span class="result-count" id="resultCount">共 146 项</span>
+        <select id="sortSelect" aria-label="排序方式">
+          <option value="source">默认排序</option>
+          <option value="az">名称 A–Z</option>
+          <option value="za">名称 Z–A</option>
+        </select>
+      </div>
+
+      <div id="resources"></div>
+      <div class="empty" id="emptyState">
+        <strong>没有找到匹配的资源</strong>
+        尝试缩短关键词，或切换到“全部资源”。
+      </div>
+
+      <footer>
+        本页面根据所提供的资源清单整理生成。外部链接、服务可用性及内容可能发生变化，请以目标网站实际信息为准。<br />
+        安全测试相关项目仅应用于已获得明确授权的环境。
+      </footer>
+    </main>
+  </div>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script>
+    const DATA = [{"id": 1, "name": "小艺", "description": "国内通用 AI 助手与模型体验入口。", "url": "https://xiaoyi.huawei.com/chat/", "host": "xiaoyi.huawei.com", "section": "外部AI工具", "sectionKey": "ai-tools", "category": "国内", "region": "国内", "keywords": "小艺 外部AI工具 国内 xiaoyi.huawei.com"}, {"id": 2, "name": "豆包", "description": "国内通用 AI 助手与模型体验入口。", "url": "https://www.doubao.com/chat/", "host": "doubao.com", "section": "外部AI工具", "sectionKey": "ai-tools", "category": "国内", "region": "国内", "keywords": "豆包 外部AI工具 国内 doubao.com"}, {"id": 3, "name": "扣子", "description": "AI办公助手一站式平台 · 扣子提供AI写作|PPT|表格|设计|播客|生图", "url": "https://www.coze.cn/", "host": "coze.cn", "section": "外部AI工具", "sectionKey": "ai-tools", "category": "国内", "region": "国内", "keywords": "扣子 - AI办公助手一站式平台 - 扣子提供AI写作|PPT|表格|设计|播客|生图 外部AI工具 国内 coze.cn"}, {"id": 4, "name": "DeepSeek", "description": "探索未至之境", "url": "https://chat.deepseek.com/", "host": "chat.deepseek.com", "section": "外部AI工具", "sectionKey": "ai-tools", "category": "国内", "region": "国内", "keywords": "DeepSeek - 探索未至之境 外部AI工具 国内 chat.deepseek.com"}, {"id": 5, "name": "通义千问 Qwen", "description": "阿里通义千问最新模型体验入口。", "url": "https://www.qianwen.com/", "host": "qianwen.com", "section": "外部AI工具", "sectionKey": "ai-tools", "category": "国内", "region": "国内", "keywords": "千问-Qwen最新模型体验-通义千问 外部AI工具 国内 qianwen.com"}, {"id": 6, "name": "Kimi", "description": "K2长思考上线", "url": "https://www.kimi.com/?utm_source=ai-bot.cn", "host": "kimi.com", "section": "外部AI工具", "sectionKey": "ai-tools", "category": "国内", "region": "国内", "keywords": "Kimi - K2长思考上线 外部AI工具 国内 kimi.com"}, {"id": 7, "name": "腾讯元宝", "description": "腾讯推出的高效 AI 助手，提供多模型能力体验。", "url": "https://yuanbao.tencent.com/chat/naQivTmsDa", "host": "yuanbao.tencent.com", "section": "外部AI工具", "sectionKey": "ai-tools", "category": "国内", "region": "国内", "keywords": "腾讯元宝-体验DeepSeek全新版-高效AI助手 外部AI工具 国内 yuanbao.tencent.com"}, {"id": 8, "name": "腾讯元器", "description": "AI 智能体创建与分发平台", "url": "https://yuanqi.tencent.com/", "host": "yuanqi.tencent.com", "section": "外部AI工具", "sectionKey": "ai-tools", "category": "国内", "region": "国内", "keywords": "腾讯元器 - AI 智能体创建与分发平台 外部AI工具 国内 yuanqi.tencent.com"}, {"id": 9, "name": "ima.copilot", "description": "腾讯 AI 工作台，面向知识管理、阅读与协作场景。", "url": "https://ima.qq.com/", "host": "ima.qq.com", "section": "外部AI工具", "sectionKey": "ai-tools", "category": "国内", "region": "国内", "keywords": "ima.copilot-腾讯AI工作台 外部AI工具 国内 ima.qq.com"}, {"id": 10, "name": "文心一言", "description": "国内通用 AI 助手与模型体验入口。", "url": "https://yiyan.baidu.com/?utm_source=ai-bot.cn", "host": "yiyan.baidu.com", "section": "外部AI工具", "sectionKey": "ai-tools", "category": "国内", "region": "国内", "keywords": "文心一言 外部AI工具 国内 yiyan.baidu.com"}, {"id": 11, "name": "文心智能体平台AgentBuilder", "description": "想象即现实 · 国内通用 AI 助手与模型体验入口。", "url": "https://agents.baidu.com/center", "host": "agents.baidu.com", "section": "外部AI工具", "sectionKey": "ai-tools", "category": "国内", "region": "国内", "keywords": "文心智能体平台AgentBuilder | 想象即现实 外部AI工具 国内 agents.baidu.com"}, {"id": 12, "name": "MiniMax Agent", "description": "简单指令, 无限可能", "url": "https://agent.minimaxi.com/?utm_source=ai-bot.cn", "host": "agent.minimaxi.com", "section": "外部AI工具", "sectionKey": "ai-tools", "category": "国内", "region": "国内", "keywords": "MiniMax Agent: 简单指令, 无限可能 外部AI工具 国内 agent.minimaxi.com"}, {"id": 13, "name": "天工", "description": "国内通用 AI 助手与模型体验入口。", "url": "https://www.tiangong.cn/", "host": "tiangong.cn", "section": "外部AI工具", "sectionKey": "ai-tools", "category": "国内", "region": "国内", "keywords": "天工 外部AI工具 国内 tiangong.cn"}, {"id": 14, "name": "百灵大模型", "description": "国内通用 AI 助手与模型体验入口。", "url": "https://ling.tbox.cn/chat?utm_source=ai-bot.cn", "host": "ling.tbox.cn", "section": "外部AI工具", "sectionKey": "ai-tools", "category": "国内", "region": "国内", "keywords": "百灵大模型 外部AI工具 国内 ling.tbox.cn"}, {"id": 15, "name": "问小白", "description": "探索世界的AI搭子", "url": "https://www.wenxiaobai.com/?utm_source=ai-bot.cn", "host": "wenxiaobai.com", "section": "外部AI工具", "sectionKey": "ai-tools", "category": "国内", "region": "国内", "keywords": "问小白： 探索世界的AI搭子 外部AI工具 国内 wenxiaobai.com"}, {"id": 16, "name": "书生大模型 Intern", "description": "书生大模型在线体验入口。", "url": "https://chat.intern-ai.org.cn/", "host": "chat.intern-ai.org.cn", "section": "外部AI工具", "sectionKey": "ai-tools", "category": "国内", "region": "国内", "keywords": "书生大模型 - Intern 外部AI工具 国内 chat.intern-ai.org.cn"}, {"id": 17, "name": "智谱清言", "description": "国内通用 AI 助手与模型体验入口。", "url": "https://chatglm.cn/main/alltoolsdetail?utm_source=ai-bot.cn&lang=zh", "host": "chatglm.cn", "section": "外部AI工具", "sectionKey": "ai-tools", "category": "国内", "region": "国内", "keywords": "智谱清言 外部AI工具 国内 chatglm.cn"}, {"id": 18, "name": "Z.ai Chat", "description": "Free AI powered by GLM-4.7 & GLM-4.6", "url": "https://chat.z.ai/", "host": "chat.z.ai", "section": "外部AI工具", "sectionKey": "ai-tools", "category": "国内", "region": "国内", "keywords": "Z.ai Chat - Free AI powered by GLM-4.7 & GLM-4.6 外部AI工具 国内 chat.z.ai"}, {"id": 19, "name": "Google Gemini", "description": "海外通用 AI 助手与模型体验入口。", "url": "https://gemini.google.com/app", "host": "gemini.google.com", "section": "外部AI工具", "sectionKey": "ai-tools", "category": "国外", "region": "海外", "keywords": "Google Gemini 外部AI工具 国外 gemini.google.com"}, {"id": 20, "name": "ChatGPT", "description": "海外通用 AI 助手与模型体验入口。", "url": "https://chatgpt.com/", "host": "chatgpt.com", "section": "外部AI工具", "sectionKey": "ai-tools", "category": "国外", "region": "海外", "keywords": "ChatGPT 外部AI工具 国外 chatgpt.com"}, {"id": 21, "name": "Grok", "description": "海外通用 AI 助手与模型体验入口。", "url": "https://grok.com/", "host": "grok.com", "section": "外部AI工具", "sectionKey": "ai-tools", "category": "国外", "region": "海外", "keywords": "Grok 外部AI工具 国外 grok.com"}, {"id": 22, "name": "Microsoft Copilot", "description": "你的 AI 助手", "url": "https://copilot.microsoft.com/", "host": "copilot.microsoft.com", "section": "外部AI工具", "sectionKey": "ai-tools", "category": "国外", "region": "海外", "keywords": "Microsoft Copilot: 你的 AI 助手 外部AI工具 国外 copilot.microsoft.com"}, {"id": 23, "name": "Claude", "description": "海外通用 AI 助手与模型体验入口。", "url": "https://claude.ai/new", "host": "claude.ai", "section": "外部AI工具", "sectionKey": "ai-tools", "category": "国外", "region": "海外", "keywords": "Claude 外部AI工具 国外 claude.ai"}, {"id": 24, "name": "Poe", "description": "海外通用 AI 助手与模型体验入口。", "url": "https://poe.com/?utm_source=ai-bot.cn", "host": "poe.com", "section": "外部AI工具", "sectionKey": "ai-tools", "category": "国外", "region": "海外", "keywords": "Poe 外部AI工具 国外 poe.com"}, {"id": 25, "name": "Perplexity", "description": "海外通用 AI 助手与模型体验入口。", "url": "https://www.perplexity.ai/", "host": "perplexity.ai", "section": "外部AI工具", "sectionKey": "ai-tools", "category": "国外", "region": "海外", "keywords": "Perplexity 外部AI工具 国外 perplexity.ai"}, {"id": 26, "name": "阿里iFlow CLI", "description": "Interactive Terminal", "url": "https://cli.iflow.cn/", "host": "cli.iflow.cn", "section": "外部AI编程工具", "sectionKey": "coding-tools", "category": "国内", "region": "国内", "keywords": "阿里iFlow CLI - Interactive Terminal 外部AI编程工具 国内 cli.iflow.cn"}, {"id": 27, "name": "通义灵码_你的智能编码助手-阿里云", "description": "国内AI 编程、代码补全或开发代理工具。", "url": "https://lingma.aliyun.com/", "host": "lingma.aliyun.com", "section": "外部AI编程工具", "sectionKey": "coding-tools", "category": "国内", "region": "国内", "keywords": "通义灵码_你的智能编码助手-阿里云 外部AI编程工具 国内 lingma.aliyun.com"}, {"id": 28, "name": "Trae", "description": "字节推出的 AI 编程工具。", "url": "https://www.trae.cn/", "host": "trae.cn", "section": "外部AI编程工具", "sectionKey": "coding-tools", "category": "国内", "region": "国内", "keywords": "字节-Trae 外部AI编程工具 国内 trae.cn"}, {"id": 29, "name": "腾讯云代码助手 CodeBuddy", "description": "AI 时代的智能编程伙伴", "url": "https://copilot.tencent.com/", "host": "copilot.tencent.com", "section": "外部AI编程工具", "sectionKey": "coding-tools", "category": "国内", "region": "国内", "keywords": "腾讯云代码助手 CodeBuddy - AI 时代的智能编程伙伴 外部AI编程工具 国内 copilot.tencent.com"}, {"id": 30, "name": "更懂你的智能代码助手", "description": "文心快码(Baidu Comate)", "url": "https://comate.baidu.com/zh", "host": "comate.baidu.com", "section": "外部AI编程工具", "sectionKey": "coding-tools", "category": "国内", "region": "国内", "keywords": "文心快码(Baidu Comate)·更懂你的智能代码助手 外部AI编程工具 国内 comate.baidu.com"}, {"id": 31, "name": "iFlyCode", "description": "讯飞智能编程助手。", "url": "https://www.xfyun.cn/solutions/iflycode?login=from_csdn", "host": "xfyun.cn", "section": "外部AI编程工具", "sectionKey": "coding-tools", "category": "国内", "region": "国内", "keywords": "讯飞-iflycode 外部AI编程工具 国内 xfyun.cn"}, {"id": 32, "name": "CodeFuse", "description": "让研发变得更简单", "url": "https://codefuse.ai/zh-CN", "host": "codefuse.ai", "section": "外部AI编程工具", "sectionKey": "coding-tools", "category": "国内", "region": "国内", "keywords": "CodeFuse - 让研发变得更简单 外部AI编程工具 国内 codefuse.ai"}, {"id": 33, "name": "Google Antigravity", "description": "海外AI 编程、代码补全或开发代理工具。", "url": "https://antigravity.google/", "host": "antigravity.google", "section": "外部AI编程工具", "sectionKey": "coding-tools", "category": "国外", "region": "海外", "keywords": "Google Antigravity 外部AI编程工具 国外 antigravity.google"}, {"id": 34, "name": "Kiro", "description": "Agentic AI development from prototype to production", "url": "https://kiro.dev/", "host": "kiro.dev", "section": "外部AI编程工具", "sectionKey": "coding-tools", "category": "国外", "region": "海外", "keywords": "Kiro: Agentic AI development from prototype to production 外部AI编程工具 国外 kiro.dev"}, {"id": 35, "name": "Windsurf", "description": "The best AI for Coding", "url": "https://windsurf.com/", "host": "windsurf.com", "section": "外部AI编程工具", "sectionKey": "coding-tools", "category": "国外", "region": "海外", "keywords": "Windsurf - The best AI for Coding 外部AI编程工具 国外 windsurf.com"}, {"id": 36, "name": "anthropics/claude-code", "description": "Claude Code is an agentic coding tool that lives in your terminal, understands your codebase, and helps you code faster by executing routine tasks, explaining compl…", "url": "https://github.com/anthropics/claude-code", "host": "github.com", "section": "外部AI编程工具", "sectionKey": "coding-tools", "category": "国外", "region": "海外", "keywords": "GitHub - anthropics/claude-code: Claude Code is an agentic coding tool that lives in your terminal, understands your codebase, and helps you code faster by executing routine tasks, explaining complex code, and handling git workflows - all through natural language commands. 外部AI编程工具 国外 github.com"}, {"id": 37, "name": "GitHub", "description": "GitHub Copilot · Your AI pair programmer", "url": "https://github.com/features/copilot", "host": "github.com", "section": "外部AI编程工具", "sectionKey": "coding-tools", "category": "国外", "region": "海外", "keywords": "GitHub Copilot · Your AI pair programmer · GitHub 外部AI编程工具 国外 github.com"}, {"id": 38, "name": "github/copilot-cli", "description": "GitHub Copilot CLI brings the power of Copilot coding agent directly to your terminal.", "url": "https://github.com/github/copilot-cli", "host": "github.com", "section": "外部AI编程工具", "sectionKey": "coding-tools", "category": "国外", "region": "海外", "keywords": "GitHub - github/copilot-cli: GitHub Copilot CLI brings the power of Copilot coding agent directly to your terminal. 外部AI编程工具 国外 github.com"}, {"id": 39, "name": "Cursor", "description": "海外AI 编程、代码补全或开发代理工具。", "url": "https://cursor.com/cn", "host": "cursor.com", "section": "外部AI编程工具", "sectionKey": "coding-tools", "category": "国外", "region": "海外", "keywords": "Cursor 外部AI编程工具 国外 cursor.com"}, {"id": 40, "name": "Replit AI", "description": "海外AI 编程、代码补全或开发代理工具。", "url": "https://replit.com/ai", "host": "replit.com", "section": "外部AI编程工具", "sectionKey": "coding-tools", "category": "国外", "region": "海外", "keywords": "Replit AI – Turn natural language into apps and websites 外部AI编程工具 国外 replit.com"}, {"id": 41, "name": "JetBrains AI", "description": "海外AI 编程、代码补全或开发代理工具。", "url": "https://www.jetbrains.com/ai/", "host": "jetbrains.com", "section": "外部AI编程工具", "sectionKey": "coding-tools", "category": "国外", "region": "海外", "keywords": "JetBrains AI | Intelligent Coding Assistance, AI Solutions, and More 外部AI编程工具 国外 jetbrains.com"}, {"id": 42, "name": "Tabnine AI Code Assistant", "description": "海外AI 编程、代码补全或开发代理工具。", "url": "https://www.tabnine.com/", "host": "tabnine.com", "section": "外部AI编程工具", "sectionKey": "coding-tools", "category": "国外", "region": "海外", "keywords": "Tabnine AI Code Assistant | Smarter AI Coding Agents. Total Enterprise Control. 外部AI编程工具 国外 tabnine.com"}, {"id": 43, "name": "cline/cline", "description": "Autonomous coding agent right in your IDE, capable of creating/editing files, executing commands, using the browser, and more with your permission every step of the…", "url": "https://github.com/cline/cline", "host": "github.com", "section": "外部AI编程工具", "sectionKey": "coding-tools", "category": "国外", "region": "海外", "keywords": "GitHub - cline/cline: Autonomous coding agent right in your IDE, capable of creating/editing files, executing commands, using the browser, and more with your permission every step of the way. 外部AI编程工具 国外 github.com"}, {"id": 44, "name": "crewAIInc/crewAI", "description": "Framework for orchestrating role-playing, autonomous AI agents. By fostering collaborative intelligence, CrewAI empowers agents to work together seamlessly, tacklin…", "url": "https://github.com/crewAIInc/crewAI", "host": "github.com", "section": "外部开源项目", "sectionKey": "open-source", "category": "通用智能体", "region": "", "keywords": "GitHub - crewAIInc/crewAI: Framework for orchestrating role-playing, autonomous AI agents. By fostering collaborative intelligence, CrewAI empowers agents to work together seamlessly, tackling complex tasks. 外部开源项目 通用智能体 github.com"}, {"id": 45, "name": "FoundationAgents/MetaGPT", "description": "🌟 The Multi-Agent Framework: First AI Software Company, Towards Natural Language Programming", "url": "https://github.com/FoundationAgents/MetaGPT", "host": "github.com", "section": "外部开源项目", "sectionKey": "open-source", "category": "通用智能体", "region": "", "keywords": "GitHub - FoundationAgents/MetaGPT: 🌟 The Multi-Agent Framework: First AI Software Company, Towards Natural Language Programming 外部开源项目 通用智能体 github.com"}, {"id": 46, "name": "Significant-Gravitas/AutoGPT", "description": "AutoGPT is the vision of accessible AI for everyone, to use and to build on. Our mission is to provide the tools, so that you can focus on what matters.", "url": "https://github.com/Significant-Gravitas/AutoGPT", "host": "github.com", "section": "外部开源项目", "sectionKey": "open-source", "category": "通用智能体", "region": "", "keywords": "GitHub - Significant-Gravitas/AutoGPT: AutoGPT is the vision of accessible AI for everyone, to use and to build on. Our mission is to provide the tools, so that you can focus on what matters. 外部开源项目 通用智能体 github.com"}, {"id": 47, "name": "alishangtian/proteus-ai", "description": "一个强大的、可扩展的多智能体工作流引擎，支持Multi-Agent系统、auto-workflow、MCP-SERVER接入等功能，支持多种工具和资源，提供智能代理和自动化服务执行。", "url": "https://github.com/alishangtian/proteus-ai", "host": "github.com", "section": "外部开源项目", "sectionKey": "open-source", "category": "通用智能体", "region": "", "keywords": "GitHub - alishangtian/proteus-ai: 一个强大的、可扩展的多智能体工作流引擎，支持Multi-Agent系统、auto-workflow、MCP-SERVER接入等功能，支持多种工具和资源，提供智能代理和自动化服务执行。 外部开源项目 通用智能体 github.com"}, {"id": 48, "name": "Mintplex-Labs/anything-llm", "description": "The all-in-one Desktop & Docker AI application with built-in RAG, AI agents, No-code agent builder, MCP compatibility, and more.", "url": "https://github.com/Mintplex-Labs/anything-llm", "host": "github.com", "section": "外部开源项目", "sectionKey": "open-source", "category": "通用智能体", "region": "", "keywords": "GitHub - Mintplex-Labs/anything-llm: The all-in-one Desktop & Docker AI application with built-in RAG, AI agents, No-code agent builder, MCP compatibility, and more. 外部开源项目 通用智能体 github.com"}, {"id": 49, "name": "Forethought-Technologies/AutoChain", "description": "AutoChain: Build lightweight, extensible, and testable LLM Agents", "url": "https://github.com/Forethought-Technologies/AutoChain", "host": "github.com", "section": "外部开源项目", "sectionKey": "open-source", "category": "通用智能体", "region": "", "keywords": "GitHub - Forethought-Technologies/AutoChain: AutoChain: Build lightweight, extensible, and testable LLM Agents 外部开源项目 通用智能体 github.com"}, {"id": 50, "name": "InternLM/MindSearch", "description": "🔍 An LLM-based Multi-agent Framework of Web Search Engine (like Perplexity.ai Pro and SearchGPT)", "url": "https://github.com/InternLM/MindSearch", "host": "github.com", "section": "外部开源项目", "sectionKey": "open-source", "category": "搜索引擎智能体", "region": "", "keywords": "GitHub - InternLM/MindSearch: 🔍 An LLM-based Multi-agent Framework of Web Search Engine (like Perplexity.ai Pro and SearchGPT) 外部开源项目 搜索引擎智能体 github.com"}, {"id": 51, "name": "supermemoryai/opensearch-ai", "description": "SearchGPT / Perplexity clone, but personalised for you.", "url": "https://github.com/supermemoryai/opensearch-ai", "host": "github.com", "section": "外部开源项目", "sectionKey": "open-source", "category": "搜索引擎智能体", "region": "", "keywords": "GitHub - supermemoryai/opensearch-ai: SearchGPT / Perplexity clone, but personalised for you. 外部开源项目 搜索引擎智能体 github.com"}, {"id": 52, "name": "eigent-ai/eigent", "description": "Eigent: The Open Source Cowork Desktop to Unlock Your Exceptional Productivity.", "url": "https://github.com/eigent-ai/eigent", "host": "github.com", "section": "外部开源项目", "sectionKey": "open-source", "category": "办公智能体", "region": "", "keywords": "GitHub - eigent-ai/eigent: Eigent: The Open Source Cowork Desktop to Unlock Your Exceptional Productivity. 外部开源项目 办公智能体 github.com"}, {"id": 53, "name": "DevAgentForge/Claude-Cowork", "description": "OpenSource Claude Cowork. A desktop AI assistant that helps you with programming, file management, and any task you can describe.", "url": "https://github.com/DevAgentForge/Claude-Cowork", "host": "github.com", "section": "外部开源项目", "sectionKey": "open-source", "category": "办公智能体", "region": "", "keywords": "GitHub - DevAgentForge/Claude-Cowork: OpenSource Claude Cowork. A desktop AI assistant that helps you with programming, file management, and any task you can describe. 外部开源项目 办公智能体 github.com"}, {"id": 54, "name": "ComposioHQ/open-claude-cowork", "description": "Open Source version of Claude Cowork with 500+ SaaS app integrations", "url": "https://github.com/ComposioHQ/open-claude-cowork", "host": "github.com", "section": "外部开源项目", "sectionKey": "open-source", "category": "办公智能体", "region": "", "keywords": "GitHub - ComposioHQ/open-claude-cowork: Open Source version of Claude Cowork with 500+ SaaS app integrations 外部开源项目 办公智能体 github.com"}, {"id": 55, "name": "clawdbot/clawdbot", "description": "Your own personal AI assistant. Any OS. Any Platform. The lobster way. 🦞", "url": "https://github.com/clawdbot/clawdbot", "host": "github.com", "section": "外部开源项目", "sectionKey": "open-source", "category": "办公智能体", "region": "", "keywords": "GitHub - clawdbot/clawdbot: Your own personal AI assistant. Any OS. Any Platform. The lobster way. 🦞 外部开源项目 办公智能体 github.com"}, {"id": 56, "name": "plandex-ai/plandex", "description": "Open source AI coding agent. Designed for large projects and real world tasks.", "url": "https://github.com/plandex-ai/plandex", "host": "github.com", "section": "外部开源项目", "sectionKey": "open-source", "category": "编程智能体", "region": "", "keywords": "GitHub - plandex-ai/plandex: Open source AI coding agent. Designed for large projects and real world tasks. 外部开源项目 编程智能体 github.com"}, {"id": 57, "name": "google-gemini/gemini-cli", "description": "An open-source AI agent that brings the power of Gemini directly into your terminal.", "url": "https://github.com/google-gemini/gemini-cli", "host": "github.com", "section": "外部开源项目", "sectionKey": "open-source", "category": "编程智能体", "region": "", "keywords": "GitHub - google-gemini/gemini-cli: An open-source AI agent that brings the power of Gemini directly into your terminal. 外部开源项目 编程智能体 github.com"}, {"id": 58, "name": "openai/codex", "description": "Lightweight coding agent that runs in your terminal", "url": "https://github.com/openai/codex", "host": "github.com", "section": "外部开源项目", "sectionKey": "open-source", "category": "编程智能体", "region": "", "keywords": "GitHub - openai/codex: Lightweight coding agent that runs in your terminal 外部开源项目 编程智能体 github.com"}, {"id": 59, "name": "QwenLM/qwen-code", "description": "An open-source AI agent that lives in your terminal.", "url": "https://github.com/QwenLM/qwen-code", "host": "github.com", "section": "外部开源项目", "sectionKey": "open-source", "category": "编程智能体", "region": "", "keywords": "GitHub - QwenLM/qwen-code: An open-source AI agent that lives in your terminal. 外部开源项目 编程智能体 github.com"}, {"id": 60, "name": "EuniAI/Prometheus", "description": "🧠 Prometheus: A Knowledge-Graph-Driven 🤖 AI Agent that maps 🗺, understands 🧩, and repairs 🛠 complex codebases — not by guessing, but by reasoning. ⚡", "url": "https://github.com/EuniAI/Prometheus", "host": "github.com", "section": "外部开源项目", "sectionKey": "open-source", "category": "编程智能体", "region": "", "keywords": "GitHub - EuniAI/Prometheus: 🧠 Prometheus: A Knowledge-Graph-Driven 🤖 AI Agent that maps 🗺, understands 🧩, and repairs 🛠 complex codebases — not by guessing, but by reasoning. ⚡ 外部开源项目 编程智能体 github.com"}, {"id": 61, "name": "SWE-agent/SWE-agent", "description": "SWE-agent takes a GitHub issue and tries to automatically fix it, using your LM of choice. It can also be employed for offensive cybersecurity or competitive coding…", "url": "https://github.com/SWE-agent/SWE-agent", "host": "github.com", "section": "外部开源项目", "sectionKey": "open-source", "category": "编程智能体", "region": "", "keywords": "GitHub - SWE-agent/SWE-agent: SWE-agent takes a GitHub issue and tries to automatically fix it, using your LM of choice. It can also be employed for offensive cybersecurity or competitive coding challenges. [NeurIPS 2024] 外部开源项目 编程智能体 github.com"}, {"id": 62, "name": "anomalyco/opencode", "description": "The open source coding agent.", "url": "https://github.com/anomalyco/opencode", "host": "github.com", "section": "外部开源项目", "sectionKey": "open-source", "category": "编程智能体", "region": "", "keywords": "GitHub - anomalyco/opencode: The open source coding agent. 外部开源项目 编程智能体 github.com"}, {"id": 63, "name": "code-yeongyu/oh-my-opencode", "description": "The Best Agent Harness. Meet Sisyphus: The Batteries-Included Agent that codes like you.", "url": "https://github.com/code-yeongyu/oh-my-opencode", "host": "github.com", "section": "外部开源项目", "sectionKey": "open-source", "category": "编程智能体", "region": "", "keywords": "GitHub - code-yeongyu/oh-my-opencode: The Best Agent Harness. Meet Sisyphus: The Batteries-Included Agent that codes like you. 外部开源项目 编程智能体 github.com"}, {"id": 64, "name": "AsyncFuncAI/deepwiki-open", "description": "Open Source DeepWiki: AI-Powered Wiki Generator for GitHub/Gitlab/Bitbucket Repositories.", "url": "https://github.com/AsyncFuncAI/deepwiki-open", "host": "github.com", "section": "外部开源项目", "sectionKey": "open-source", "category": "编程智能体", "region": "", "keywords": "GitHub - AsyncFuncAI/deepwiki-open: Open Source DeepWiki: AI-Powered Wiki Generator for GitHub/Gitlab/Bitbucket Repositories. 外部开源项目 编程智能体 github.com"}, {"id": 65, "name": "HKUDS/DeepCode", "description": "\"DeepCode: Open Agentic Coding (Paper2Code & Text2Web & Text2Backend)\"", "url": "https://github.com/HKUDS/DeepCode", "host": "github.com", "section": "外部开源项目", "sectionKey": "open-source", "category": "编程智能体", "region": "", "keywords": "GitHub - HKUDS/DeepCode: \"DeepCode: Open Agentic Coding (Paper2Code & Text2Web & Text2Backend)\" 外部开源项目 编程智能体 github.com"}, {"id": 66, "name": "block/goose", "description": "an open source, extensible AI agent that goes beyond code suggestions - install, execute, edit, and test with any LLM", "url": "https://github.com/block/goose", "host": "github.com", "section": "外部开源项目", "sectionKey": "open-source", "category": "编程智能体", "region": "", "keywords": "GitHub - block/goose: an open source, extensible AI agent that goes beyond code suggestions - install, execute, edit, and test with any LLM 外部开源项目 编程智能体 github.com"}, {"id": 67, "name": "OpenBMB/ChatDev", "description": "ChatDev 2.0: Dev All through LLM-powered Multi-Agent Collaboration", "url": "https://github.com/OpenBMB/ChatDev", "host": "github.com", "section": "外部开源项目", "sectionKey": "open-source", "category": "编程智能体", "region": "", "keywords": "GitHub - OpenBMB/ChatDev: ChatDev 2.0: Dev All through LLM-powered Multi-Agent Collaboration 外部开源项目 编程智能体 github.com"}, {"id": 68, "name": "codefuse-ai/codefuse-chatbot", "description": "An intelligent assistant serving the entire software development lifecycle, powered by a Multi-Agent Framework, working with DevOps Toolkits, Code&Doc Repo RAG, etc.", "url": "https://github.com/codefuse-ai/codefuse-chatbot", "host": "github.com", "section": "外部开源项目", "sectionKey": "open-source", "category": "编程智能体", "region": "", "keywords": "GitHub - codefuse-ai/codefuse-chatbot: An intelligent assistant serving the entire software development lifecycle, powered by a Multi-Agent Framework, working with DevOps Toolkits, Code&Doc Repo RAG, etc. 外部开源项目 编程智能体 github.com"}, {"id": 69, "name": "bytedance/trae-agent", "description": "Trae Agent is an LLM-based agent for general purpose software engineering tasks.", "url": "https://github.com/bytedance/trae-agent", "host": "github.com", "section": "外部开源项目", "sectionKey": "open-source", "category": "编程智能体", "region": "", "keywords": "GitHub - bytedance/trae-agent: Trae Agent is an LLM-based agent for general purpose software engineering tasks. 外部开源项目 编程智能体 github.com"}, {"id": 70, "name": "qodo-ai/pr-agent", "description": "🚀 PR Agent - The Original Open-Source PR Reviewer, This repo is not the Qodo free tier! Try the free version on our website.", "url": "https://github.com/qodo-ai/pr-agent", "host": "github.com", "section": "外部开源项目", "sectionKey": "open-source", "category": "编程智能体", "region": "", "keywords": "GitHub - qodo-ai/pr-agent: 🚀 PR Agent - The Original Open-Source PR Reviewer, This repo is not the Qodo free tier! Try the free version on our website. 外部开源项目 编程智能体 github.com"}, {"id": 71, "name": "Pythagora-io/pythagora", "description": "Generate automated tests for your Node.js app via LLMs without developers having to write a single line of code.", "url": "https://github.com/Pythagora-io/pythagora", "host": "github.com", "section": "外部开源项目", "sectionKey": "open-source", "category": "测试agent", "region": "", "keywords": "GitHub - Pythagora-io/pythagora: Generate automated tests for your Node.js app via LLMs without developers having to write a single line of code. 外部开源项目 测试agent github.com"}, {"id": 72, "name": "usestrix/strix", "description": "Open-source AI agents for penetration testing", "url": "https://github.com/usestrix/strix", "host": "github.com", "section": "外部开源项目", "sectionKey": "open-source", "category": "渗透测试智能体", "region": "", "keywords": "GitHub - usestrix/strix: Open-source AI agents for penetration testing 外部开源项目 渗透测试智能体 github.com"}, {"id": 73, "name": "metersphere/metersphere", "description": "🔥 MeterSphere 是新一代的开源持续测试工具，内置 AI 助手，让软件测试工作更简单、更高效，不再成为持续交付的瓶颈。", "url": "https://github.com/metersphere/metersphere", "host": "github.com", "section": "外部开源项目", "sectionKey": "open-source", "category": "渗透测试智能体", "region": "", "keywords": "GitHub - metersphere/metersphere: 🔥 MeterSphere 是新一代的开源持续测试工具，内置 AI 助手，让软件测试工作更简单、更高效，不再成为持续交付的瓶颈。 外部开源项目 渗透测试智能体 github.com"}, {"id": 74, "name": "GreyDGL/PentestGPT", "description": "由大型语言模型驱动的自动化渗透测试代理框架", "url": "https://github.com/GreyDGL/PentestGPT", "host": "github.com", "section": "外部开源项目", "sectionKey": "open-source", "category": "渗透测试智能体", "region": "", "keywords": "GitHub - GreyDGL/PentestGPT：由大型语言模型驱动的自动化渗透测试代理框架 --- GitHub - GreyDGL/PentestGPT: Automated Penetration Testing Agentic Framework Powered by Large Language Models 外部开源项目 渗透测试智能体 github.com"}, {"id": 75, "name": "GH05TCREW/pentestagent", "description": "PentestAgent is an AI agent framework for black-box security testing, supporting bug bounty, red-team, and penetration testing workflows.", "url": "https://github.com/GH05TCREW/pentestagent", "host": "github.com", "section": "外部开源项目", "sectionKey": "open-source", "category": "渗透测试智能体", "region": "", "keywords": "GitHub - GH05TCREW/pentestagent: PentestAgent is an AI agent framework for black-box security testing, supporting bug bounty, red-team, and penetration testing workflows. 外部开源项目 渗透测试智能体 github.com"}, {"id": 76, "name": "CyberSecurityUP/NeuroSploit", "description": "NeuroSploit 是一款先进的 AI 驱动渗透测试框架，旨在自动化和增强进攻性安全行动的各个方面。利用大型语言模型（LLM）的能力。", "url": "https://github.com/CyberSecurityUP/NeuroSploit", "host": "github.com", "section": "外部开源项目", "sectionKey": "open-source", "category": "渗透测试智能体", "region": "", "keywords": "GitHub - CyberSecurityUP/NeuroSploit：NeuroSploit 是一款先进的 AI 驱动渗透测试框架，旨在自动化和增强进攻性安全行动的各个方面。利用大型语言模型（LLM）的能力。 --- GitHub - CyberSecurityUP/NeuroSploit: NeuroSploit is an advanced, AI-powered penetration testing framework designed to automate and augment various aspects of offensive security operations. Leveraging the capabilities of large language models (LLMs). 外部开源项目 渗透测试智能体 github.com"}, {"id": 77, "name": "Alibaba-NLP/DeepResearch", "description": "Tongyi Deep Research, the Leading Open-source Deep Research Agent", "url": "https://github.com/Alibaba-NLP/DeepResearch", "host": "github.com", "section": "外部开源项目", "sectionKey": "open-source", "category": "研究智能体", "region": "", "keywords": "GitHub - Alibaba-NLP/DeepResearch: Tongyi Deep Research, the Leading Open-source Deep Research Agent 外部开源项目 研究智能体 github.com"}, {"id": 78, "name": "assafelovic/gpt-researcher", "description": "An autonomous agent that conducts deep research on any data using any LLM providers.", "url": "https://github.com/assafelovic/gpt-researcher", "host": "github.com", "section": "外部开源项目", "sectionKey": "open-source", "category": "研究智能体", "region": "", "keywords": "GitHub - assafelovic/gpt-researcher: An autonomous agent that conducts deep research on any data using any LLM providers. 外部开源项目 研究智能体 github.com"}, {"id": 79, "name": "stanford-oval/storm", "description": "An LLM-powered knowledge curation system that researches a topic and generates a full-length report with citations.", "url": "https://github.com/stanford-oval/storm", "host": "github.com", "section": "外部开源项目", "sectionKey": "open-source", "category": "研究智能体", "region": "", "keywords": "GitHub - stanford-oval/storm: An LLM-powered knowledge curation system that researches a topic and generates a full-length report with citations. 外部开源项目 研究智能体 github.com"}, {"id": 80, "name": "SkyworkAI/DeepResearchAgent", "description": "DeepResearchAgent is a hierarchical multi-agent system designed not only for deep research tasks but also for general-purpose task solving. The framework leverages…", "url": "https://github.com/SkyworkAI/DeepResearchAgent", "host": "github.com", "section": "外部开源项目", "sectionKey": "open-source", "category": "研究智能体", "region": "", "keywords": "GitHub - SkyworkAI/DeepResearchAgent: DeepResearchAgent is a hierarchical multi-agent system designed not only for deep research tasks but also for general-purpose task solving. The framework leverages a top-level planning agent to coordinate multiple specialized lower-level agents, enabling automated task decomposition and efficient execution across diverse and complex domains. 外部开源项目 研究智能体 github.com"}, {"id": 81, "name": "bytedance/deer-flow", "description": "DeerFlow is a community-driven Deep Research framework, combining language models with tools like web search, crawling, and Python execution, while contributing bac…", "url": "https://github.com/bytedance/deer-flow", "host": "github.com", "section": "外部开源项目", "sectionKey": "open-source", "category": "研究智能体", "region": "", "keywords": "GitHub - bytedance/deer-flow: DeerFlow is a community-driven Deep Research framework, combining language models with tools like web search, crawling, and Python execution, while contributing back to the open-source community. 外部开源项目 研究智能体 github.com"}, {"id": 82, "name": "AIDC-AI/Pixelle-Video", "description": "🚀 AI 全自动短视频引擎 | AI Fully Automated Short Video Engine", "url": "https://github.com/AIDC-AI/Pixelle-Video", "host": "github.com", "section": "外部开源项目", "sectionKey": "open-source", "category": "自媒体智能体", "region": "", "keywords": "GitHub - AIDC-AI/Pixelle-Video: 🚀 AI 全自动短视频引擎 | AI Fully Automated Short Video Engine 外部开源项目 自媒体智能体 github.com"}, {"id": 83, "name": "RanFeng/clipsketch-ai", "description": "将视频瞬间转化为手绘故事 Turn Video Moments into Hand-Drawn Stories", "url": "https://github.com/RanFeng/clipsketch-ai", "host": "github.com", "section": "外部开源项目", "sectionKey": "open-source", "category": "自媒体智能体", "region": "", "keywords": "GitHub - RanFeng/clipsketch-ai: 将视频瞬间转化为手绘故事 Turn Video Moments into Hand-Drawn Stories 外部开源项目 自媒体智能体 github.com"}, {"id": 84, "name": "hanshuaikang/AI-Media2Doc", "description": "一键将音视频转化为小红书/公众号/知识笔记/思维导图/视频字幕等各种风格的文档。", "url": "https://github.com/hanshuaikang/AI-Media2Doc", "host": "github.com", "section": "外部开源项目", "sectionKey": "open-source", "category": "自媒体智能体", "region": "", "keywords": "GitHub - hanshuaikang/AI-Media2Doc: 一键将音视频转化为小红书/公众号/知识笔记/思维导图/视频字幕等各种风格的文档。 外部开源项目 自媒体智能体 github.com"}, {"id": 85, "name": "corvo007/Gemini-Subtitle-Pro", "description": "一站式全自动字幕生成软件，下载、转录、翻译、压制全流程覆盖，无需人工介入 / One-stop automated subtitle generator. Handles downloading, transcription, translation, and hardcoding—zero human interventio…", "url": "https://github.com/corvo007/Gemini-Subtitle-Pro", "host": "github.com", "section": "外部开源项目", "sectionKey": "open-source", "category": "自媒体智能体", "region": "", "keywords": "GitHub - corvo007/Gemini-Subtitle-Pro: 一站式全自动字幕生成软件，下载、转录、翻译、压制全流程覆盖，无需人工介入 / One-stop automated subtitle generator. Handles downloading, transcription, translation, and hardcoding—zero human intervention required. 外部开源项目 自媒体智能体 github.com"}, {"id": 86, "name": "harry0703/MoneyPrinterTurbo", "description": "利用AI大模型，一键生成高清短视频 Generate short videos with one click using AI LLM.", "url": "https://github.com/harry0703/MoneyPrinterTurbo", "host": "github.com", "section": "外部开源项目", "sectionKey": "open-source", "category": "自媒体智能体", "region": "", "keywords": "GitHub - harry0703/MoneyPrinterTurbo: 利用AI大模型，一键生成高清短视频 Generate short videos with one click using AI LLM. 外部开源项目 自媒体智能体 github.com"}, {"id": 87, "name": "codefuse-ai/Test-Agent", "description": "Agent that empowers software testing with LLMs; industrial-first in China", "url": "https://github.com/codefuse-ai/Test-Agent", "host": "github.com", "section": "外部开源项目", "sectionKey": "open-source", "category": "软件测试智能体", "region": "", "keywords": "GitHub - codefuse-ai/Test-Agent: Agent that empowers software testing with LLMs; industrial-first in China 外部开源项目 软件测试智能体 github.com"}, {"id": 88, "name": "OpenBMB/AgentCPM-GUI", "description": "AgentCPM-GUI: An on-device GUI agent for operating Android apps, enhancing reasoning ability with reinforcement fine-tuning for efficient task execution.", "url": "https://github.com/OpenBMB/AgentCPM-GUI", "host": "github.com", "section": "外部开源项目", "sectionKey": "open-source", "category": "GUI 自动化智能体", "region": "", "keywords": "GitHub - OpenBMB/AgentCPM-GUI: AgentCPM-GUI: An on-device GUI agent for operating Android apps, enhancing reasoning ability with reinforcement fine-tuning for efficient task execution. 外部开源项目 GUI 自动化智能体 github.com"}, {"id": 89, "name": "bytedance/UI-TARS", "description": "Pioneering Automated GUI Interaction with Native Agents", "url": "https://github.com/bytedance/UI-TARS", "host": "github.com", "section": "外部开源项目", "sectionKey": "open-source", "category": "GUI 自动化智能体", "region": "", "keywords": "GitHub - bytedance/UI-TARS: Pioneering Automated GUI Interaction with Native Agents 外部开源项目 GUI 自动化智能体 github.com"}, {"id": 90, "name": "bytedance/UI-TARS-desktop", "description": "The Open-Source Multimodal AI Agent Stack: Connecting Cutting-Edge AI Models and Agent Infra", "url": "https://github.com/bytedance/UI-TARS-desktop", "host": "github.com", "section": "外部开源项目", "sectionKey": "open-source", "category": "GUI 自动化智能体", "region": "", "keywords": "GitHub - bytedance/UI-TARS-desktop: The Open-Source Multimodal AI Agent Stack: Connecting Cutting-Edge AI Models and Agent Infra 外部开源项目 GUI 自动化智能体 github.com"}, {"id": 91, "name": "showlab/ShowUI", "description": "[CVPR 2025] Open-source, End-to-end, Vision-Language-Action model for GUI Agent & Computer Use.", "url": "https://github.com/showlab/ShowUI", "host": "github.com", "section": "外部开源项目", "sectionKey": "open-source", "category": "GUI 自动化智能体", "region": "", "keywords": "GitHub - showlab/ShowUI: [CVPR 2025] Open-source, End-to-end, Vision-Language-Action model for GUI Agent & Computer Use. 外部开源项目 GUI 自动化智能体 github.com"}, {"id": 92, "name": "X-PLUG/MobileAgent", "description": "Mobile-Agent: The Powerful GUI Agent Family", "url": "https://github.com/X-PLUG/MobileAgent", "host": "github.com", "section": "外部开源项目", "sectionKey": "open-source", "category": "GUI 自动化智能体", "region": "", "keywords": "GitHub - X-PLUG/MobileAgent: Mobile-Agent: The Powerful GUI Agent Family 外部开源项目 GUI 自动化智能体 github.com"}, {"id": 93, "name": "OS-Copilot/OS-Copilot", "description": "An self-improving embodied conversational agent seamlessly integrated into the operating system to automate our daily tasks.", "url": "https://github.com/OS-Copilot/OS-Copilot", "host": "github.com", "section": "外部开源项目", "sectionKey": "open-source", "category": "GUI 自动化智能体", "region": "", "keywords": "GitHub - OS-Copilot/OS-Copilot: An self-improving embodied conversational agent seamlessly integrated into the operating system to automate our daily tasks. 外部开源项目 GUI 自动化智能体 github.com"}, {"id": 94, "name": "microsoft/UFO", "description": "UFO³: Weaving the Digital Agent Galaxy", "url": "https://github.com/microsoft/UFO", "host": "github.com", "section": "外部开源项目", "sectionKey": "open-source", "category": "GUI 自动化智能体", "region": "", "keywords": "GitHub - microsoft/UFO: UFO³: Weaving the Digital Agent Galaxy 外部开源项目 GUI 自动化智能体 github.com"}, {"id": 95, "name": "BAAI-Agents/Cradle", "description": "The Cradle framework is a first attempt at General Computer Control (GCC). Cradle supports agents to ace any computer task by enabling strong reasoning abilities, s…", "url": "https://github.com/BAAI-Agents/Cradle", "host": "github.com", "section": "外部开源项目", "sectionKey": "open-source", "category": "GUI 自动化智能体", "region": "", "keywords": "GitHub - BAAI-Agents/Cradle: The Cradle framework is a first attempt at General Computer Control (GCC). Cradle supports agents to ace any computer task by enabling strong reasoning abilities, self-improvment, and skill curation, in a standardized general environment with minimal requirements. 外部开源项目 GUI 自动化智能体 github.com"}, {"id": 96, "name": "simular-ai/Agent-S", "description": "Agent S: an open agentic framework that uses computers like a human", "url": "https://github.com/simular-ai/Agent-S", "host": "github.com", "section": "外部开源项目", "sectionKey": "open-source", "category": "GUI 自动化智能体", "region": "", "keywords": "GitHub - simular-ai/Agent-S: Agent S: an open agentic framework that uses computers like a human 外部开源项目 GUI 自动化智能体 github.com"}, {"id": 97, "name": "OthersideAI/self-operating-computer", "description": "A framework to enable multimodal models to operate a computer.", "url": "https://github.com/OthersideAI/self-operating-computer", "host": "github.com", "section": "外部开源项目", "sectionKey": "open-source", "category": "GUI 自动化智能体", "region": "", "keywords": "GitHub - OthersideAI/self-operating-computer: A framework to enable multimodal models to operate a computer. 外部开源项目 GUI 自动化智能体 github.com"}, {"id": 98, "name": "openinterpreter/open-interpreter", "description": "A natural language interface for computers", "url": "https://github.com/openinterpreter/open-interpreter", "host": "github.com", "section": "外部开源项目", "sectionKey": "open-source", "category": "GUI 自动化智能体", "region": "", "keywords": "GitHub - openinterpreter/open-interpreter: A natural language interface for computers 外部开源项目 GUI 自动化智能体 github.com"}, {"id": 99, "name": "jd-opensource/joyagent-jdgenie", "description": "开源的端到端产品级通用智能体", "url": "https://github.com/jd-opensource/joyagent-jdgenie", "host": "github.com", "section": "外部开源项目", "sectionKey": "open-source", "category": "GUI 自动化智能体", "region": "", "keywords": "GitHub - jd-opensource/joyagent-jdgenie: 开源的端到端产品级通用智能体 外部开源项目 GUI 自动化智能体 github.com"}, {"id": 100, "name": "mobile-dev-inc/Maestro", "description": "移动和网页端到端自动化的无痛化", "url": "https://github.com/mobile-dev-inc/Maestro", "host": "github.com", "section": "外部开源项目", "sectionKey": "open-source", "category": "GUI 自动化智能体", "region": "", "keywords": "GitHub - mobile-dev-inc/Maestro：移动和网页端到端自动化的无痛化 --- GitHub - mobile-dev-inc/Maestro: Painless E2E Automation for Mobile and Web 外部开源项目 GUI 自动化智能体 github.com"}, {"id": 101, "name": "hkust-zhiyao/RTLLM", "description": "An open-source benchmark for generating design RTL with natural language", "url": "https://github.com/hkust-zhiyao/RTLLM", "host": "github.com", "section": "外部开源项目", "sectionKey": "open-source", "category": "芯片设计/验证智能体", "region": "", "keywords": "GitHub - hkust-zhiyao/RTLLM: An open-source benchmark for generating design RTL with natural language 外部开源项目 芯片设计/验证智能体 github.com"}, {"id": 102, "name": "XS-MLVP/UCAgent", "description": "UnityChip Verification AI-Agent", "url": "https://github.com/XS-MLVP/UCAgent", "host": "github.com", "section": "外部开源项目", "sectionKey": "open-source", "category": "芯片设计/验证智能体", "region": "", "keywords": "GitHub - XS-MLVP/UCAgent: UnityChip Verification AI-Agent 外部开源项目 芯片设计/验证智能体 github.com"}, {"id": 103, "name": "hkust-zhiyao/AssertLLM", "description": "Generating Hardware Verification Assertions from Design Specifications via Multi-LLMs", "url": "https://github.com/hkust-zhiyao/AssertLLM", "host": "github.com", "section": "外部开源项目", "sectionKey": "open-source", "category": "芯片设计/验证智能体", "region": "", "keywords": "GitHub - hkust-zhiyao/AssertLLM: Generating Hardware Verification Assertions from Design Specifications via Multi-LLMs 外部开源项目 芯片设计/验证智能体 github.com"}, {"id": 104, "name": "NVlabs/FVEval", "description": "LLM Evaluation Benchmark on Hardware Formal Verification", "url": "https://github.com/NVlabs/FVEval", "host": "github.com", "section": "外部开源项目", "sectionKey": "open-source", "category": "芯片设计/验证智能体", "region": "", "keywords": "GitHub - NVlabs/FVEval: LLM Evaluation Benchmark on Hardware Formal Verification 外部开源项目 芯片设计/验证智能体 github.com"}, {"id": 105, "name": "NVlabs/verilog-eval", "description": "Verilog evaluation benchmark for large language model", "url": "https://github.com/NVlabs/verilog-eval", "host": "github.com", "section": "外部开源项目", "sectionKey": "open-source", "category": "芯片设计/验证智能体", "region": "", "keywords": "GitHub - NVlabs/verilog-eval: Verilog evaluation benchmark for large language model 外部开源项目 芯片设计/验证智能体 github.com"}, {"id": 106, "name": "vllm-project/vllm", "description": "一个高吞吐量且内存高效的大型语言模型推理与服务引擎", "url": "https://github.com/vllm-project/vllm", "host": "github.com", "section": "外部开源项目", "sectionKey": "open-source", "category": "推理部署库", "region": "", "keywords": "GitHub - vllm-project/vllm：一个高吞吐量且内存高效的大型语言模型推理与服务引擎 --- GitHub - vllm-project/vllm: A high-throughput and memory-efficient inference and serving engine for LLMs 外部开源项目 推理部署库 github.com"}, {"id": 107, "name": "ggml-org/llama.cpp", "description": "C/C++ 中的 LLM 推理", "url": "https://github.com/ggml-org/llama.cpp", "host": "github.com", "section": "外部开源项目", "sectionKey": "open-source", "category": "推理部署库", "region": "", "keywords": "GitHub - ggml-org/llama.cpp：C/C++ 中的 LLM 推理 --- GitHub - ggml-org/llama.cpp: LLM inference in C/C++ 外部开源项目 推理部署库 github.com"}, {"id": 108, "name": "lyogavin/airllm", "description": "用单个 4GB GPU 进行的 AirLLM 70B 推理", "url": "https://github.com/lyogavin/airllm", "host": "github.com", "section": "外部开源项目", "sectionKey": "open-source", "category": "推理部署库", "region": "", "keywords": "GitHub - lyogavin/airllm：用单个 4GB GPU 进行的 AirLLM 70B 推理 --- GitHub - lyogavin/airllm: AirLLM 70B inference with single 4GB GPU 外部开源项目 推理部署库 github.com"}, {"id": 109, "name": "Michael-A-Kuykendall/shimmy", "description": "⚡ Python-free Rust inference server — OpenAI-API 兼容。GGUF + SafeTensor、热模型交换、自动发现、单一二进制。现在自由，永远自由。", "url": "https://github.com/Michael-A-Kuykendall/shimmy", "host": "github.com", "section": "外部开源项目", "sectionKey": "open-source", "category": "推理部署库", "region": "", "keywords": "GitHub - Michael-A-Kuykendall/shimmy： ⚡ Python-free Rust inference server — OpenAI-API 兼容。GGUF + SafeTensor、热模型交换、自动发现、单一二进制。现在自由，永远自由。 --- GitHub - Michael-A-Kuykendall/shimmy: ⚡ Python-free Rust inference server — OpenAI-API compatible. GGUF + SafeTensors, hot model swap, auto-discovery, single binary. FREE now, FREE forever. 外部开源项目 推理部署库 github.com"}, {"id": 110, "name": "mlc-ai/mlc-llm", "description": "通用 LLM 部署引擎，支持 ML 编译", "url": "https://github.com/mlc-ai/mlc-llm", "host": "github.com", "section": "外部开源项目", "sectionKey": "open-source", "category": "推理部署库", "region": "", "keywords": "GitHub - mlc-ai/mlc-llm：通用 LLM 部署引擎，支持 ML 编译 --- GitHub - mlc-ai/mlc-llm: Universal LLM Deployment Engine with ML Compilation 外部开源项目 推理部署库 github.com"}, {"id": 111, "name": "sgl-project/sglang", "description": "SGLang 是一个高性能的大型语言模型和多模态模型服务框架。", "url": "https://github.com/sgl-project/sglang", "host": "github.com", "section": "外部开源项目", "sectionKey": "open-source", "category": "推理部署库", "region": "", "keywords": "GitHub - sgl-project/sglang：SGLang 是一个高性能的大型语言模型和多模态模型服务框架。 --- GitHub - sgl-project/sglang: SGLang is a high-performance serving framework for large language models and multimodal models. 外部开源项目 推理部署库 github.com"}, {"id": 112, "name": "NVIDIA/TensorRT-LLM", "description": "TensorRT LLM 为用户提供了一个易用的 Python API，用于定义大型语言模型（LLM），并支持最先进的优化，以高效地在 NVIDIA GPU 上进行推理。TensorRT LLM 还包含创建 Python 和 C++ 运行时的组件，以高效的方式编排推理执行。", "url": "https://github.com/NVIDIA/TensorRT-LLM", "host": "github.com", "section": "外部开源项目", "sectionKey": "open-source", "category": "推理部署库", "region": "", "keywords": "GitHub - NVIDIA/TensorRT-LLM：TensorRT LLM 为用户提供了一个易用的 Python API，用于定义大型语言模型（LLM），并支持最先进的优化，以高效地在 NVIDIA GPU 上进行推理。TensorRT LLM 还包含创建 Python 和 C++ 运行时的组件，以高效的方式编排推理执行。 --- GitHub - NVIDIA/TensorRT-LLM: TensorRT LLM provides users with an easy-to-use Python API to define Large Language Models (LLMs) and supports state-of-the-art optimizations to perform inference efficiently on NVIDIA GPUs. TensorRT LLM also contains components to create Python and C++ runtimes that orchestrate the inference execution in a performant way. 外部开源项目 推理部署库 github.com"}, {"id": 113, "name": "Transformers 快速入门", "description": "大模型方向的学习资料与实践教程。", "url": "https://transformers.run/", "host": "transformers.run", "section": "教程", "sectionKey": "tutorials", "category": "大模型", "region": "", "keywords": "Hello! · Transformers快速入门 教程 大模型 transformers.run"}, {"id": 114, "name": "datawhalechina/llm-cookbook", "description": "面向开发者的 LLM 入门教程，吴恩达大模型系列课程中文版", "url": "https://github.com/datawhalechina/llm-cookbook", "host": "github.com", "section": "教程", "sectionKey": "tutorials", "category": "大模型", "region": "", "keywords": "GitHub - datawhalechina/llm-cookbook: 面向开发者的 LLM 入门教程，吴恩达大模型系列课程中文版 教程 大模型 github.com"}, {"id": 115, "name": "datawhalechina/self-llm", "description": "《开源大模型食用指南》针对中国宝宝量身打造的基于Linux环境快速微调（全参数/Lora）、部署国内外开源大模型（LLM）/多模态大模型（MLLM）教程", "url": "https://github.com/datawhalechina/self-llm", "host": "github.com", "section": "教程", "sectionKey": "tutorials", "category": "大模型", "region": "", "keywords": "GitHub - datawhalechina/self-llm: 《开源大模型食用指南》针对中国宝宝量身打造的基于Linux环境快速微调（全参数/Lora）、部署国内外开源大模型（LLM）/多模态大模型（MLLM）教程 教程 大模型 github.com"}, {"id": 116, "name": "datawhalechina/happy-llm", "description": "📚 从零开始的大语言模型原理与实践教程", "url": "https://github.com/datawhalechina/happy-llm", "host": "github.com", "section": "教程", "sectionKey": "tutorials", "category": "大模型", "region": "", "keywords": "GitHub - datawhalechina/happy-llm: 📚 从零开始的大语言模型原理与实践教程 教程 大模型 github.com"}, {"id": 117, "name": "Lordog/dive-into-llms", "description": "《动手学大模型Dive into LLMs》系列编程实践教程", "url": "https://github.com/Lordog/dive-into-llms", "host": "github.com", "section": "教程", "sectionKey": "tutorials", "category": "大模型", "region": "", "keywords": "GitHub - Lordog/dive-into-llms: 《动手学大模型Dive into LLMs》系列编程实践教程 教程 大模型 github.com"}, {"id": 118, "name": "动手学大模型应用开发", "description": "大模型方向的学习资料与实践教程。", "url": "https://datawhalechina.github.io/llm-universe/#/", "host": "datawhalechina.github.io", "section": "教程", "sectionKey": "tutorials", "category": "大模型", "region": "", "keywords": "动手学大模型应用开发 教程 大模型 datawhalechina.github.io"}, {"id": 119, "name": "liguodongiot/llm-action", "description": "本项目旨在分享大模型相关技术原理以及实战经验（大模型工程化、大模型应用落地）", "url": "https://github.com/liguodongiot/llm-action", "host": "github.com", "section": "教程", "sectionKey": "tutorials", "category": "大模型", "region": "", "keywords": "GitHub - liguodongiot/llm-action: 本项目旨在分享大模型相关技术原理以及实战经验（大模型工程化、大模型应用落地） 教程 大模型 github.com"}, {"id": 120, "name": "从零训练 mini_Qwen_1B", "description": "大模型方向的学习资料与实践教程。", "url": "https://zhuanlan.zhihu.com/p/28458152707", "host": "zhuanlan.zhihu.com", "section": "教程", "sectionKey": "tutorials", "category": "大模型", "region": "", "keywords": "(99+ 封私信 / 1 条消息) 从零开始训练大模型：小白也能搞定的完整教程——mini_Qwen_1B - 知乎 教程 大模型 zhuanlan.zhihu.com"}, {"id": 121, "name": "patchy631/ai-engineering-hub", "description": "In-depth tutorials on LLMs, RAGs and real-world AI agent applications.", "url": "https://github.com/patchy631/ai-engineering-hub", "host": "github.com", "section": "教程", "sectionKey": "tutorials", "category": "大模型", "region": "", "keywords": "GitHub - patchy631/ai-engineering-hub: In-depth tutorials on LLMs, RAGs and real-world AI agent applications. 教程 大模型 github.com"}, {"id": 122, "name": "AI Agent(智能体) 教程", "description": "菜鸟教程 · Agent方向的学习资料与实践教程。", "url": "https://www.runoob.com/ai-agent/ai-agent-tutorial.html", "host": "runoob.com", "section": "教程", "sectionKey": "tutorials", "category": "Agent", "region": "", "keywords": "AI Agent(智能体) 教程 | 菜鸟教程 教程 Agent runoob.com"}, {"id": 123, "name": "datawhalechina/hello-agents", "description": "📚 《从零开始构建智能体》——从零开始的智能体原理与实践教程", "url": "https://github.com/datawhalechina/hello-agents", "host": "github.com", "section": "教程", "sectionKey": "tutorials", "category": "Agent", "region": "", "keywords": "GitHub - datawhalechina/hello-agents: 📚 《从零开始构建智能体》——从零开始的智能体原理与实践教程 教程 Agent github.com"}, {"id": 124, "name": "zjunlp/LLMAgentPapers", "description": "关于 LLM 代理的必读论文。", "url": "https://github.com/zjunlp/LLMAgentPapers", "host": "github.com", "section": "教程", "sectionKey": "tutorials", "category": "Agent", "region": "", "keywords": "GitHub - zjunlp/LLMAgentPapers：关于 LLM 代理的必读论文。 --- GitHub - zjunlp/LLMAgentPapers: Must-read Papers on LLM Agents. 教程 Agent github.com"}, {"id": 125, "name": "WooooDyy/LLM-Agent-Paper-List", "description": "Zhiheng 习等人撰写的 86 页 SCIS 封面论文《基于大型语言模型代理的兴起与潜力：一项综述》的论文列表。", "url": "https://github.com/WooooDyy/LLM-Agent-Paper-List", "host": "github.com", "section": "教程", "sectionKey": "tutorials", "category": "Agent", "region": "", "keywords": "GitHub - WooooDyy/LLM-Agent-Paper-List：Zhiheng 习等人撰写的 86 页 SCIS 封面论文《基于大型语言模型代理的兴起与潜力：一项综述》的论文列表。 --- GitHub - WooooDyy/LLM-Agent-Paper-List: The paper list of the 86-page SCIS cover paper \"The Rise and Potential of Large Language Model Based Agents: A Survey\" by Zhiheng Xi et al. 教程 Agent github.com"}, {"id": 126, "name": "Claude Skills 入门", "description": "Skills方向的学习资料与实践教程。", "url": "https://platform.claude.com/cookbook/skills-notebooks-01-skills-introduction", "host": "platform.claude.com", "section": "教程", "sectionKey": "tutorials", "category": "Skills", "region": "", "keywords": "platform.claude.com/cookbook/skills-notebooks-01-skills-introduction 教程 Skills platform.claude.com"}, {"id": 127, "name": "ComposioHQ/awesome-claude-skills", "description": "A curated list of awesome Claude Skills, resources, and tools for customizing Claude AI workflows", "url": "https://github.com/ComposioHQ/awesome-claude-skills", "host": "github.com", "section": "教程", "sectionKey": "tutorials", "category": "Skills", "region": "", "keywords": "GitHub - ComposioHQ/awesome-claude-skills: A curated list of awesome Claude Skills, resources, and tools for customizing Claude AI workflows 教程 Skills github.com"}, {"id": 128, "name": "travisvn/awesome-claude-skills", "description": "A curated list of awesome Claude Skills, resources, and tools for customizing Claude AI workflows — particularly Claude Code", "url": "https://github.com/travisvn/awesome-claude-skills", "host": "github.com", "section": "教程", "sectionKey": "tutorials", "category": "Skills", "region": "", "keywords": "GitHub - travisvn/awesome-claude-skills: A curated list of awesome Claude Skills, resources, and tools for customizing Claude AI workflows — particularly Claude Code 教程 Skills github.com"}, {"id": 129, "name": "BehiSecc/awesome-claude-skills", "description": "A curated list of Claude Skills.", "url": "https://github.com/BehiSecc/awesome-claude-skills", "host": "github.com", "section": "教程", "sectionKey": "tutorials", "category": "Skills", "region": "", "keywords": "GitHub - BehiSecc/awesome-claude-skills: A curated list of Claude Skills. 教程 Skills github.com"}, {"id": 130, "name": "anthropics/claude-cookbooks", "description": "A collection of notebooks/recipes showcasing some fun and effective ways of using Claude.", "url": "https://github.com/anthropics/claude-cookbooks", "host": "github.com", "section": "教程", "sectionKey": "tutorials", "category": "Skills", "region": "", "keywords": "GitHub - anthropics/claude-cookbooks: A collection of notebooks/recipes showcasing some fun and effective ways of using Claude. 教程 Skills github.com"}, {"id": 131, "name": "Agent 技能目录", "description": "The Agent Skills Directory · Skills方向的学习资料与实践教程。", "url": "https://skills.sh/", "host": "skills.sh", "section": "教程", "sectionKey": "tutorials", "category": "Skills", "region": "", "keywords": "Agent 技能目录 --- The Agent Skills Directory 教程 Skills skills.sh"}, {"id": 132, "name": "Ollama 教程", "description": "菜鸟教程 · 推理部署方向的学习资料与实践教程。", "url": "https://www.runoob.com/ollama/ollama-tutorial.html", "host": "runoob.com", "section": "教程", "sectionKey": "tutorials", "category": "推理部署", "region": "", "keywords": "Ollama 教程 | 菜鸟教程 教程 推理部署 runoob.com"}, {"id": 133, "name": "欢迎来到 vLLM！", "description": "vLLM 中文站 · 推理部署方向的学习资料与实践教程。", "url": "https://vllm.hyper.ai/docs/", "host": "vllm.hyper.ai", "section": "教程", "sectionKey": "tutorials", "category": "推理部署", "region": "", "keywords": "欢迎来到 vLLM！ | vLLM 中文站 教程 推理部署 vllm.hyper.ai"}, {"id": 134, "name": "vLLM", "description": "推理部署方向的学习资料与实践教程。", "url": "https://docs.vllm.ai/en/latest/", "host": "docs.vllm.ai", "section": "教程", "sectionKey": "tutorials", "category": "推理部署", "region": "", "keywords": "vLLM 教程 推理部署 docs.vllm.ai"}, {"id": 135, "name": "安装", "description": "vLLM 中文站 · 推理部署方向的学习资料与实践教程。", "url": "https://vllm.hyper.ai/docs/getting-started/installation/", "host": "vllm.hyper.ai", "section": "教程", "sectionKey": "tutorials", "category": "推理部署", "region": "", "keywords": "安装 | vLLM 中文站 教程 推理部署 vllm.hyper.ai"}, {"id": 136, "name": "vbgate/learn-opencode", "description": "OpenCode 中文实战课源码与内容仓库：一课一页，覆盖入门到实战工作流。", "url": "https://github.com/vbgate/learn-opencode", "host": "github.com", "section": "教程", "sectionKey": "tutorials", "category": "编程工具", "region": "", "keywords": "GitHub - vbgate/learn-opencode: OpenCode 中文实战课源码与内容仓库：一课一页，覆盖入门到实战工作流。 教程 编程工具 github.com"}, {"id": 137, "name": "ZeroZ-lab/learn-opencode", "description": "编程工具方向的学习资料与实践教程。", "url": "https://github.com/ZeroZ-lab/learn-opencode", "host": "github.com", "section": "教程", "sectionKey": "tutorials", "category": "编程工具", "region": "", "keywords": "GitHub - ZeroZ-lab/learn-opencode 教程 编程工具 github.com"}, {"id": 138, "name": "hesreallyhim/awesome-claude-code", "description": "A curated list of awesome skills, hooks, slash-commands, agent orchestrators, applications, and plugins for Claude Code by Anthropic", "url": "https://github.com/hesreallyhim/awesome-claude-code", "host": "github.com", "section": "教程", "sectionKey": "tutorials", "category": "编程工具", "region": "", "keywords": "GitHub - hesreallyhim/awesome-claude-code: A curated list of awesome skills, hooks, slash-commands, agent orchestrators, applications, and plugins for Claude Code by Anthropic 教程 编程工具 github.com"}, {"id": 139, "name": "ykdojo/claude-code-tips", "description": "40+ tips for getting the most out of Claude Code, from basics to advanced - includes a custom status line script, cutting the system prompt in half, using Gemini CL…", "url": "https://github.com/ykdojo/claude-code-tips", "host": "github.com", "section": "教程", "sectionKey": "tutorials", "category": "编程工具", "region": "", "keywords": "GitHub - ykdojo/claude-code-tips: 40+ tips for getting the most out of Claude Code, from basics to advanced - includes a custom status line script, cutting the system prompt in half, using Gemini CLI as Claude Code's minion, and Claude Code running itself in a container. Also includes the dx plugin. 教程 编程工具 github.com"}, {"id": 140, "name": "shareAI-lab/learn-claude-code", "description": "Bash is all you need！write a claude code with only 16 line code", "url": "https://github.com/shareAI-lab/learn-claude-code", "host": "github.com", "section": "教程", "sectionKey": "tutorials", "category": "编程工具", "region": "", "keywords": "GitHub - shareAI-lab/learn-claude-code: Bash is all you need！write a claude code with only 16 line code 教程 编程工具 github.com"}, {"id": 141, "name": "wesammustafa/Claude-Code-Everything-You-Need-to-Know", "description": "The ultimate all-in-one guide to mastering Claude Code. From setup, prompt engineering, commands, hooks, workflows, automation, and integrations, to MCP servers, to…", "url": "https://github.com/wesammustafa/Claude-Code-Everything-You-Need-to-Know", "host": "github.com", "section": "教程", "sectionKey": "tutorials", "category": "编程工具", "region": "", "keywords": "GitHub - wesammustafa/Claude-Code-Everything-You-Need-to-Know: The ultimate all-in-one guide to mastering Claude Code. From setup, prompt engineering, commands, hooks, workflows, automation, and integrations, to MCP servers, tools, and the BMAD method—packed with step-by-step tutorials, real-world examples, and expert strategies to make this the global go-to repo for Claude mastery. 教程 编程工具 github.com"}, {"id": 142, "name": "travisvn/awesome-claude-skills", "description": "A curated list of awesome Claude Skills, resources, and tools for customizing Claude AI workflows — particularly Claude Code", "url": "https://github.com/travisvn/awesome-claude-skills", "host": "github.com", "section": "教程", "sectionKey": "tutorials", "category": "编程工具", "region": "", "keywords": "GitHub - travisvn/awesome-claude-skills: A curated list of awesome Claude Skills, resources, and tools for customizing Claude AI workflows — particularly Claude Code 教程 编程工具 github.com"}, {"id": 143, "name": "karminski/one-small-step", "description": "这是一个简单的技术科普教程项目，主要聚焦于解释一些有趣的，前沿的技术概念和原理。每篇文章都力求在 5 分钟内阅读完成。", "url": "https://github.com/karminski/one-small-step", "host": "github.com", "section": "教程", "sectionKey": "tutorials", "category": "面试", "region": "", "keywords": "GitHub - karminski/one-small-step: 这是一个简单的技术科普教程项目，主要聚焦于解释一些有趣的，前沿的技术概念和原理。每篇文章都力求在 5 分钟内阅读完成。 教程 面试 github.com"}, {"id": 144, "name": "KalyanKS-NLP/LLM-面试问答-中心", "description": "100+ 个带有答案的 LLM 面试问题。", "url": "https://github.com/KalyanKS-NLP/LLM-Interview-Questions-and-Answers-Hub", "host": "github.com", "section": "教程", "sectionKey": "tutorials", "category": "面试", "region": "", "keywords": "GitHub - KalyanKS-NLP/LLM-面试问答-中心：100+ 个带有答案的 LLM 面试问题。 --- GitHub - KalyanKS-NLP/LLM-Interview-Questions-and-Answers-Hub: 100+ LLM interview questions with answers. 教程 面试 github.com"}, {"id": 145, "name": "llmgenai/LLMInterview 问题", "description": "本仓库包含谷歌、英伟达、Meta、Microsoft 及财富 500 强等顶级公司提出的大型语言模型（LLM）面试问题。", "url": "https://github.com/llmgenai/LLMInterviewQuestions", "host": "github.com", "section": "教程", "sectionKey": "tutorials", "category": "面试", "region": "", "keywords": "GitHub - llmgenai/LLMInterview 问题：本仓库包含谷歌、英伟达、Meta、Microsoft 及财富 500 强等顶级公司提出的大型语言模型（LLM）面试问题。 --- GitHub - llmgenai/LLMInterviewQuestions: This repository contains LLM (Large language model) interview question asked in top companies like Google, Nvidia , Meta , Microsoft & fortune 500 companies. 教程 面试 github.com"}, {"id": 146, "name": "luhengshiwo/LLMForEverybody", "description": "每个人都能看懂的大模型知识分享，LLMs春/秋招大模型面试前必看，让你和面试官侃侃而谈", "url": "https://github.com/luhengshiwo/LLMForEverybody", "host": "github.com", "section": "教程", "sectionKey": "tutorials", "category": "面试", "region": "", "keywords": "GitHub - luhengshiwo/LLMForEverybody: 每个人都能看懂的大模型知识分享，LLMs春/秋招大模型面试前必看，让你和面试官侃侃而谈 教程 面试 github.com"}];
+    const SECTION_META = {
+      "外部AI工具": { key: "ai-tools", label: "AI 工具", color: "#6558f5", icon: "spark" },
+      "外部AI编程工具": { key: "coding-tools", label: "AI 编程工具", color: "#24a5b5", icon: "code" },
+      "外部开源项目": { key: "open-source", label: "开源项目", color: "#2d9c70", icon: "branch" },
+      "教程": { key: "tutorials", label: "教程与学习", color: "#e38c3c", icon: "book" }
+    };
+    const ICONS = {
+      spark: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="m12 3 1.4 4.1L17.5 8.5l-4.1 1.4L12 14l-1.4-4.1-4.1-1.4 4.1-1.4L12 3Z"/><path d="m18 14 .8 2.2L21 17l-2.2.8L18 20l-.8-2.2L15 17l2.2-.8L18 14Z"/></svg>',
+      code: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="m8 9-3 3 3 3M16 9l3 3-3 3M14 5l-4 14"/></svg>',
+      branch: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="6" cy="5" r="2"/><circle cx="18" cy="7" r="2"/><circle cx="6" cy="19" r="2"/><path d="M6 7v10M8 10c4 0 4-3 8-3"/></svg>',
+      book: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H11v17H6.5A2.5 2.5 0 0 0 4 22V5.5ZM20 5.5A2.5 2.5 0 0 0 17.5 3H13v17h4.5A2.5 2.5 0 0 1 20 22V5.5Z"/></svg>'
+    };
+    const HEART = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1.1-1.1a5.5 5.5 0 0 0-7.8 7.8l1.1 1.1L12 21l7.7-7.5 1.1-1.1a5.5 5.5 0 0 0 0-7.8Z"/></svg>';
+    const COPY = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M15 9V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h3"/></svg>';
+    const EXTERNAL = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14 5h5v5M19 5l-8 8"/><path d="M18 13v5a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg>';
+
+    const state = { section: "all", category: "all", query: "", favoritesOnly: false, sort: "source" };
+    const memoryStore = new Map();
+    const storage = {
+      get(key) {
+        try { return localStorage.getItem(key); }
+        catch (_) { return memoryStore.get(key) || null; }
+      },
+      set(key, value) {
+        try { localStorage.setItem(key, value); }
+        catch (_) { memoryStore.set(key, value); }
+      }
+    };
+    let storedFavorites = [];
+    try { storedFavorites = JSON.parse(storage.get("ai-nav-favorites") || "[]"); } catch (_) {}
+    const favorites = new Set(storedFavorites);
+    const searchInput = document.getElementById("searchInput");
+    const resourcesEl = document.getElementById("resources");
+    const emptyState = document.getElementById("emptyState");
+    const resultCount = document.getElementById("resultCount");
+    const toast = document.getElementById("toast");
+    let toastTimer;
+
+    function escapeHTML(value) {
+      return String(value).replace(/[&<>"']/g, s => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[s]));
+    }
+    function initialOf(name) {
+      const clean = name.replace(/GitHub\s*-\s*/i, "").trim();
+      return (clean[0] || "A").toUpperCase();
+    }
+    function faviconMarkup(item, size = 25) {
+      const domain = encodeURIComponent(item.host);
+      return `<span class="favicon-shell"><img src="https://icons.duckduckgo.com/ip3/${domain}.ico" width="${size}" height="${size}" loading="lazy" alt="" onerror="this.hidden=true"><span class="favicon-fallback">${escapeHTML(initialOf(item.name))}</span></span>`;
+    }
+    function showToast(message) {
+      clearTimeout(toastTimer);
+      toast.textContent = message;
+      toast.classList.add("show");
+      toastTimer = setTimeout(() => toast.classList.remove("show"), 1700);
+    }
+    function copyText(text) {
+      if (navigator.clipboard && window.isSecureContext) {
+        return navigator.clipboard.writeText(text);
+      }
+      const area = document.createElement("textarea");
+      area.value = text;
+      area.style.position = "fixed";
+      area.style.opacity = "0";
+      document.body.appendChild(area);
+      area.select();
+      document.execCommand("copy");
+      area.remove();
+      return Promise.resolve();
+    }
+    function saveFavorites() {
+      storage.set("ai-nav-favorites", JSON.stringify([...favorites]));
+    }
+    function normalize(s) { return String(s || "").toLowerCase().replace(/\s+/g, " "); }
+    function categoryId(section, category) {
+      return "cat-" + encodeURIComponent(section + "-" + category).replace(/%/g, "");
+    }
+
+    function renderQuickLinks() {
+      const needles = ["DeepSeek", "ChatGPT", "Claude", "Google Gemini", "Kimi", "Cursor", "openai/codex", "vllm-project/vllm"];
+      const selected = needles.map(n => DATA.find(x => normalize(x.name).includes(normalize(n)))).filter(Boolean);
+      document.getElementById("quickGrid").innerHTML = selected.map(item => `
+        <a class="quick-card" href="${escapeHTML(item.url)}" target="_blank" rel="noopener noreferrer" title="${escapeHTML(item.name)}">
+          ${faviconMarkup(item)}
+          <span>${escapeHTML(item.name.replace(/^.*\//, ""))}</span>
+        </a>`).join("");
+    }
+
+    function sectionCount(section) { return DATA.filter(x => x.section === section).length; }
+    function renderSidebar() {
+      let html = `<div class="nav-group">
+        <button class="nav-button active" data-section="all" data-category="all">
+          <span class="nav-dot" style="--dot:var(--primary)"></span>
+          <span class="nav-text">全部资源</span><span class="nav-count">${DATA.length}</span>
+        </button>
+      </div>`;
+      Object.entries(SECTION_META).forEach(([section, meta]) => {
+        const cats = [...new Set(DATA.filter(x => x.section === section).map(x => x.category))];
+        html += `<div class="nav-group">
+          <button class="nav-button" data-section="${escapeHTML(section)}" data-category="all">
+            <span class="nav-dot" style="--dot:${meta.color}"></span>
+            <span class="nav-text">${meta.label}</span><span class="nav-count">${sectionCount(section)}</span>
+          </button>
+          <div class="nav-sub">`;
+        cats.forEach(cat => {
+          const count = DATA.filter(x => x.section === section && x.category === cat).length;
+          html += `<button class="nav-button" data-section="${escapeHTML(section)}" data-category="${escapeHTML(cat)}">
+            <span class="nav-text">${escapeHTML(cat === "国外" ? "海外" : cat)}</span><span class="nav-count">${count}</span>
+          </button>`;
+        });
+        html += `</div></div>`;
+      });
+      document.getElementById("sidebarNav").innerHTML = html;
+      document.getElementById("sidebarNav").addEventListener("click", event => {
+        const btn = event.target.closest("[data-section]");
+        if (!btn) return;
+        state.section = btn.dataset.section;
+        state.category = btn.dataset.category;
+        state.favoritesOnly = false;
+        document.getElementById("favoriteToggle").classList.remove("active");
+        render();
+        closeSidebar();
+        document.getElementById("resourceStart").scrollIntoView({behavior:"smooth", block:"start"});
+      });
+    }
+
+    function renderFilters() {
+      const entries = [["all","全部资源"], ...Object.entries(SECTION_META).map(([k,v]) => [k,v.label])];
+      document.getElementById("sectionFilters").innerHTML = entries.map(([key,label]) =>
+        `<button class="chip ${state.section === key && state.category === "all" && !state.favoritesOnly ? "active" : ""}" data-filter="${escapeHTML(key)}">${escapeHTML(label)}</button>`
+      ).join("");
+      document.getElementById("sectionFilters").onclick = e => {
+        const button = e.target.closest("[data-filter]");
+        if (!button) return;
+        state.section = button.dataset.filter;
+        state.category = "all";
+        state.favoritesOnly = false;
+        document.getElementById("favoriteToggle").classList.remove("active");
+        render();
+      };
+    }
+
+    function filteredData() {
+      const q = normalize(state.query);
+      let list = DATA.filter(item => {
+        if (state.section !== "all" && item.section !== state.section) return false;
+        if (state.category !== "all" && item.category !== state.category) return false;
+        if (state.favoritesOnly && !favorites.has(item.id)) return false;
+        if (q && !normalize([item.name,item.description,item.url,item.section,item.category,item.keywords].join(" ")).includes(q)) return false;
+        return true;
+      });
+      if (state.sort === "az") list.sort((a,b) => a.name.localeCompare(b.name, "zh-CN"));
+      if (state.sort === "za") list.sort((a,b) => b.name.localeCompare(a.name, "zh-CN"));
+      return list;
+    }
+
+    function cardMarkup(item) {
+      const meta = SECTION_META[item.section];
+      const active = favorites.has(item.id);
+      return `<article class="resource-card" style="--accent:${meta.color}">
+        <div class="card-top">
+          ${faviconMarkup(item)}
+          <div class="card-title-wrap">
+            <h3 class="card-title">${escapeHTML(item.name)}</h3>
+            <span class="card-host">${escapeHTML(item.host)}</span>
+          </div>
+        </div>
+        <p class="card-desc">${escapeHTML(item.description)}</p>
+        <div class="card-footer">
+          <span class="tag">${escapeHTML(item.category === "国外" ? "海外" : item.category)}</span>
+          <div class="card-actions">
+            <button class="mini-btn ${active ? "active" : ""}" data-favorite="${item.id}" aria-label="${active ? "取消收藏" : "收藏"} ${escapeHTML(item.name)}" title="${active ? "取消收藏" : "收藏"}">${HEART}</button>
+            <button class="mini-btn" data-copy="${escapeHTML(item.url)}" aria-label="复制链接" title="复制链接">${COPY}</button>
+            <a class="visit-btn" href="${escapeHTML(item.url)}" target="_blank" rel="noopener noreferrer">访问 ${EXTERNAL}</a>
+          </div>
+        </div>
+      </article>`;
+    }
+
+    function renderResources() {
+      const list = filteredData();
+      resultCount.textContent = `共 ${list.length} 项`;
+      emptyState.classList.toggle("show", list.length === 0);
+      if (!list.length) { resourcesEl.innerHTML = ""; return; }
+
+      const grouped = new Map();
+      list.forEach(item => {
+        if (!grouped.has(item.section)) grouped.set(item.section, new Map());
+        const categories = grouped.get(item.section);
+        if (!categories.has(item.category)) categories.set(item.category, []);
+        categories.get(item.category).push(item);
+      });
+
+      resourcesEl.innerHTML = [...grouped.entries()].map(([section, categories]) => {
+        const meta = SECTION_META[section];
+        const sectionTotal = [...categories.values()].reduce((n,arr) => n + arr.length, 0);
+        return `<section class="resource-section" id="sec-${meta.key}" style="--accent:${meta.color}">
+          <div class="resource-section-head">
+            <span class="resource-section-icon">${ICONS[meta.icon]}</span>
+            <div><h2>${meta.label}</h2><span>${sectionTotal} 个资源</span></div>
+          </div>
+          ${[...categories.entries()].map(([category, arr]) => `
+            <div class="category-block" id="${categoryId(section,category)}">
+              <div class="category-head">${escapeHTML(category === "国外" ? "海外" : category)} <small>${arr.length}</small></div>
+              <div class="card-grid">${arr.map(cardMarkup).join("")}</div>
+            </div>`).join("")}
+        </section>`;
+      }).join("");
+    }
+
+    function syncNavigation() {
+      document.querySelectorAll(".nav-button").forEach(btn => {
+        const sectionMatch = btn.dataset.section === state.section;
+        const categoryMatch = btn.dataset.category === state.category;
+        btn.classList.toggle("active", sectionMatch && categoryMatch && !state.favoritesOnly);
+      });
+      renderFilters();
+    }
+
+    function render() {
+      syncNavigation();
+      renderResources();
+    }
+
+    resourcesEl.addEventListener("click", event => {
+      const fav = event.target.closest("[data-favorite]");
+      if (fav) {
+        const id = Number(fav.dataset.favorite);
+        favorites.has(id) ? favorites.delete(id) : favorites.add(id);
+        saveFavorites();
+        renderResources();
+        showToast(favorites.has(id) ? "已加入收藏" : "已取消收藏");
+        return;
+      }
+      const copy = event.target.closest("[data-copy]");
+      if (copy) {
+        copyText(copy.dataset.copy).then(() => showToast("链接已复制"));
+      }
+    });
+
+    searchInput.addEventListener("input", () => {
+      state.query = searchInput.value;
+      renderResources();
+    });
+    document.getElementById("sortSelect").addEventListener("change", e => {
+      state.sort = e.target.value;
+      renderResources();
+    });
+    document.getElementById("favoriteToggle").addEventListener("click", e => {
+      state.favoritesOnly = !state.favoritesOnly;
+      e.currentTarget.classList.toggle("active", state.favoritesOnly);
+      state.section = "all";
+      state.category = "all";
+      render();
+      document.getElementById("resourceStart").scrollIntoView({behavior:"smooth", block:"start"});
+    });
+    document.getElementById("browseBtn").addEventListener("click", () =>
+      document.getElementById("resourceStart").scrollIntoView({behavior:"smooth", block:"start"})
+    );
+    document.getElementById("randomBtn").addEventListener("click", () => {
+      const list = filteredData().length ? filteredData() : DATA;
+      const item = list[Math.floor(Math.random() * list.length)];
+      window.open(item.url, "_blank", "noopener,noreferrer");
+      showToast(`随机打开：${item.name}`);
+    });
+
+    function applyTheme(theme) {
+      document.documentElement.dataset.theme = theme;
+      storage.set("ai-nav-theme", theme);
+      document.querySelector('meta[name="theme-color"]').setAttribute("content", theme === "dark" ? "#0c0e16" : "#f4f6fb");
+      document.getElementById("themeIcon").innerHTML = theme === "dark"
+        ? '<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>'
+        : '<path d="M20.8 14.6A8.5 8.5 0 0 1 9.4 3.2 8.5 8.5 0 1 0 20.8 14.6Z"/>';
+    }
+    const savedTheme = storage.get("ai-nav-theme");
+    applyTheme(savedTheme || (matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light"));
+    document.getElementById("themeBtn").addEventListener("click", () =>
+      applyTheme(document.documentElement.dataset.theme === "dark" ? "light" : "dark")
+    );
+
+    function openSidebar() { document.body.classList.add("sidebar-open"); }
+    function closeSidebar() { document.body.classList.remove("sidebar-open"); }
+    document.getElementById("menuBtn").addEventListener("click", openSidebar);
+    document.getElementById("overlay").addEventListener("click", closeSidebar);
+    window.addEventListener("keydown", event => {
+      if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "k") {
+        event.preventDefault();
+        searchInput.focus();
+      }
+      if (event.key === "Escape") {
+        closeSidebar();
+        searchInput.blur();
+      }
+    });
+
+    document.getElementById("resourceStat").textContent = DATA.length;
+    document.getElementById("categoryStat").textContent = new Set(DATA.map(x => `${x.section}|${x.category}`)).size;
+    renderQuickLinks();
+    renderSidebar();
+    render();
+  </script>
+</body>
+</html>

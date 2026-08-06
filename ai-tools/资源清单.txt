@@ -1,0 +1,325 @@
+外部AI工具
+国内
+小艺
+https://xiaoyi.huawei.com/chat/
+豆包
+https://www.doubao.com/chat/
+扣子 - AI办公助手一站式平台 - 扣子提供AI写作|PPT|表格|设计|播客|生图
+https://www.coze.cn/
+DeepSeek - 探索未至之境
+https://chat.deepseek.com/
+千问-Qwen最新模型体验-通义千问
+https://www.qianwen.com/
+Kimi - K2长思考上线
+https://www.kimi.com/?utm_source=ai-bot.cn
+腾讯元宝-体验DeepSeek全新版-高效AI助手
+https://yuanbao.tencent.com/chat/naQivTmsDa
+腾讯元器 - AI 智能体创建与分发平台
+https://yuanqi.tencent.com/
+ima.copilot-腾讯AI工作台
+https://ima.qq.com/
+文心一言
+https://yiyan.baidu.com/?utm_source=ai-bot.cn
+文心智能体平台AgentBuilder | 想象即现实
+https://agents.baidu.com/center
+MiniMax Agent: 简单指令, 无限可能
+https://agent.minimaxi.com/?utm_source=ai-bot.cn
+天工
+https://www.tiangong.cn/
+百灵大模型
+https://ling.tbox.cn/chat?utm_source=ai-bot.cn
+问小白： 探索世界的AI搭子
+https://www.wenxiaobai.com/?utm_source=ai-bot.cn
+书生大模型 - Intern
+https://chat.intern-ai.org.cn/
+智谱清言
+https://chatglm.cn/main/alltoolsdetail?utm_source=ai-bot.cn&lang=zh
+Z.ai Chat - Free AI powered by GLM-4.7 & GLM-4.6
+https://chat.z.ai/
+国外
+Google Gemini
+https://gemini.google.com/app
+ChatGPT
+https://chatgpt.com/
+Grok
+https://grok.com/
+Microsoft Copilot: 你的 AI 助手
+https://copilot.microsoft.com/
+Claude
+https://claude.ai/new
+Poe
+https://poe.com/?utm_source=ai-bot.cn
+Perplexity
+https://www.perplexity.ai/
+外部AI编程工具
+国内
+阿里iFlow CLI - Interactive Terminal
+https://cli.iflow.cn/
+通义灵码_你的智能编码助手-阿里云
+https://lingma.aliyun.com/
+字节-Trae
+https://www.trae.cn/
+腾讯云代码助手 CodeBuddy - AI 时代的智能编程伙伴
+https://copilot.tencent.com/
+文心快码(Baidu Comate)·更懂你的智能代码助手
+https://comate.baidu.com/zh
+讯飞-iflycode
+https://www.xfyun.cn/solutions/iflycode?login=from_csdn
+CodeFuse - 让研发变得更简单
+https://codefuse.ai/zh-CN
+国外
+Google Antigravity
+https://antigravity.google/
+Kiro: Agentic AI development from prototype to production
+https://kiro.dev/
+Windsurf - The best AI for Coding
+https://windsurf.com/
+GitHub - anthropics/claude-code: Claude Code is an agentic coding tool that lives in your terminal, understands your codebase, and helps you code faster by executing routine tasks, explaining complex code, and handling git workflows - all through natural language commands.
+https://github.com/anthropics/claude-code
+GitHub Copilot · Your AI pair programmer · GitHub
+https://github.com/features/copilot
+GitHub - github/copilot-cli: GitHub Copilot CLI brings the power of Copilot coding agent directly to your terminal.
+https://github.com/github/copilot-cli
+Cursor
+https://cursor.com/cn
+Replit AI – Turn natural language into apps and websites
+https://replit.com/ai
+JetBrains AI | Intelligent Coding Assistance, AI Solutions, and More
+https://www.jetbrains.com/ai/
+Tabnine AI Code Assistant | Smarter AI Coding Agents. Total Enterprise Control.
+https://www.tabnine.com/
+GitHub - cline/cline: Autonomous coding agent right in your IDE, capable of creating/editing files, executing commands, using the browser, and more with your permission every step of the way.
+https://github.com/cline/cline
+外部开源项目
+通用智能体
+GitHub - crewAIInc/crewAI: Framework for orchestrating role-playing, autonomous AI agents. By fostering collaborative intelligence, CrewAI empowers agents to work together seamlessly, tackling complex tasks.
+https://github.com/crewAIInc/crewAI
+GitHub - FoundationAgents/MetaGPT: 🌟 The Multi-Agent Framework: First AI Software Company, Towards Natural Language Programming
+https://github.com/FoundationAgents/MetaGPT
+GitHub - Significant-Gravitas/AutoGPT: AutoGPT is the vision of accessible AI for everyone, to use and to build on. Our mission is to provide the tools, so that you can focus on what matters.
+https://github.com/Significant-Gravitas/AutoGPT
+GitHub - alishangtian/proteus-ai: 一个强大的、可扩展的多智能体工作流引擎，支持Multi-Agent系统、auto-workflow、MCP-SERVER接入等功能，支持多种工具和资源，提供智能代理和自动化服务执行。
+https://github.com/alishangtian/proteus-ai
+GitHub - Mintplex-Labs/anything-llm: The all-in-one Desktop & Docker AI application with built-in RAG, AI agents, No-code agent builder, MCP compatibility, and more.
+https://github.com/Mintplex-Labs/anything-llm
+GitHub - Forethought-Technologies/AutoChain: AutoChain: Build lightweight, extensible, and testable LLM Agents
+https://github.com/Forethought-Technologies/AutoChain
+搜索引擎智能体
+GitHub - InternLM/MindSearch: 🔍 An LLM-based Multi-agent Framework of Web Search Engine (like Perplexity.ai Pro and SearchGPT)
+https://github.com/InternLM/MindSearch
+
+GitHub - supermemoryai/opensearch-ai: SearchGPT / Perplexity clone, but personalised for you.
+https://github.com/supermemoryai/opensearch-ai
+
+办公智能体
+GitHub - eigent-ai/eigent: Eigent: The Open Source Cowork Desktop to Unlock Your Exceptional Productivity.
+https://github.com/eigent-ai/eigent
+GitHub - DevAgentForge/Claude-Cowork: OpenSource Claude Cowork. A desktop AI assistant that helps you with programming, file management, and any task you can describe.
+https://github.com/DevAgentForge/Claude-Cowork
+GitHub - ComposioHQ/open-claude-cowork: Open Source version of Claude Cowork with 500+ SaaS app integrations
+https://github.com/ComposioHQ/open-claude-cowork
+GitHub - clawdbot/clawdbot: Your own personal AI assistant. Any OS. Any Platform. The lobster way. 🦞
+https://github.com/clawdbot/clawdbot
+编程智能体
+GitHub - plandex-ai/plandex: Open source AI coding agent. Designed for large projects and real world tasks.
+https://github.com/plandex-ai/plandex
+GitHub - google-gemini/gemini-cli: An open-source AI agent that brings the power of Gemini directly into your terminal.
+https://github.com/google-gemini/gemini-cli
+GitHub - openai/codex: Lightweight coding agent that runs in your terminal
+https://github.com/openai/codex
+GitHub - QwenLM/qwen-code: An open-source AI agent that lives in your terminal.
+https://github.com/QwenLM/qwen-code
+GitHub - EuniAI/Prometheus: 🧠 Prometheus: A Knowledge-Graph-Driven 🤖 AI Agent that maps 🗺, understands 🧩, and repairs 🛠 complex codebases — not by guessing, but by reasoning. ⚡
+https://github.com/EuniAI/Prometheus
+GitHub - SWE-agent/SWE-agent: SWE-agent takes a GitHub issue and tries to automatically fix it, using your LM of choice. It can also be employed for offensive cybersecurity or competitive coding challenges. [NeurIPS 2024]
+https://github.com/SWE-agent/SWE-agent
+GitHub - anomalyco/opencode: The open source coding agent.
+https://github.com/anomalyco/opencode
+GitHub - code-yeongyu/oh-my-opencode: The Best Agent Harness. Meet Sisyphus: The Batteries-Included Agent that codes like you.
+https://github.com/code-yeongyu/oh-my-opencode
+GitHub - AsyncFuncAI/deepwiki-open: Open Source DeepWiki: AI-Powered Wiki Generator for GitHub/Gitlab/Bitbucket Repositories.
+https://github.com/AsyncFuncAI/deepwiki-open
+GitHub - HKUDS/DeepCode: "DeepCode: Open Agentic Coding (Paper2Code & Text2Web & Text2Backend)"
+https://github.com/HKUDS/DeepCode
+GitHub - block/goose: an open source, extensible AI agent that goes beyond code suggestions - install, execute, edit, and test with any LLM
+https://github.com/block/goose
+GitHub - OpenBMB/ChatDev: ChatDev 2.0: Dev All through LLM-powered Multi-Agent Collaboration
+https://github.com/OpenBMB/ChatDev
+GitHub - codefuse-ai/codefuse-chatbot: An intelligent assistant serving the entire software development lifecycle, powered by a Multi-Agent Framework, working with DevOps Toolkits, Code&Doc Repo RAG, etc.
+https://github.com/codefuse-ai/codefuse-chatbot
+GitHub - bytedance/trae-agent: Trae Agent is an LLM-based agent for general purpose software engineering tasks.
+https://github.com/bytedance/trae-agent
+GitHub - qodo-ai/pr-agent: 🚀 PR Agent - The Original Open-Source PR Reviewer, This repo is not the Qodo free tier! Try the free version on our website.
+https://github.com/qodo-ai/pr-agent
+测试agent
+GitHub - Pythagora-io/pythagora: Generate automated tests for your Node.js app via LLMs without developers having to write a single line of code.
+https://github.com/Pythagora-io/pythagora
+渗透测试智能体
+GitHub - usestrix/strix: Open-source AI agents for penetration testing
+https://github.com/usestrix/strix
+GitHub - metersphere/metersphere: 🔥 MeterSphere 是新一代的开源持续测试工具，内置 AI 助手，让软件测试工作更简单、更高效，不再成为持续交付的瓶颈。
+https://github.com/metersphere/metersphere
+GitHub - GreyDGL/PentestGPT：由大型语言模型驱动的自动化渗透测试代理框架 --- GitHub - GreyDGL/PentestGPT: Automated Penetration Testing Agentic Framework Powered by Large Language Models
+https://github.com/GreyDGL/PentestGPT
+GitHub - GH05TCREW/pentestagent: PentestAgent is an AI agent framework for black-box security testing, supporting bug bounty, red-team, and penetration testing workflows.
+https://github.com/GH05TCREW/pentestagent
+GitHub - CyberSecurityUP/NeuroSploit：NeuroSploit 是一款先进的 AI 驱动渗透测试框架，旨在自动化和增强进攻性安全行动的各个方面。利用大型语言模型（LLM）的能力。 --- GitHub - CyberSecurityUP/NeuroSploit: NeuroSploit is an advanced, AI-powered penetration testing framework designed to automate and augment various aspects of offensive security operations. Leveraging the capabilities of large language models (LLMs).
+https://github.com/CyberSecurityUP/NeuroSploit
+研究智能体
+GitHub - Alibaba-NLP/DeepResearch: Tongyi Deep Research, the Leading Open-source Deep Research Agent
+https://github.com/Alibaba-NLP/DeepResearch
+GitHub - assafelovic/gpt-researcher: An autonomous agent that conducts deep research on any data using any LLM providers.
+https://github.com/assafelovic/gpt-researcher
+GitHub - stanford-oval/storm: An LLM-powered knowledge curation system that researches a topic and generates a full-length report with citations.
+https://github.com/stanford-oval/storm
+GitHub - SkyworkAI/DeepResearchAgent: DeepResearchAgent is a hierarchical multi-agent system designed not only for deep research tasks but also for general-purpose task solving. The framework leverages a top-level planning agent to coordinate multiple specialized lower-level agents, enabling automated task decomposition and efficient execution across diverse and complex domains.
+https://github.com/SkyworkAI/DeepResearchAgent
+GitHub - bytedance/deer-flow: DeerFlow is a community-driven Deep Research framework, combining language models with tools like web search, crawling, and Python execution, while contributing back to the open-source community.
+https://github.com/bytedance/deer-flow
+自媒体智能体
+GitHub - AIDC-AI/Pixelle-Video: 🚀 AI 全自动短视频引擎 | AI Fully Automated Short Video Engine
+https://github.com/AIDC-AI/Pixelle-Video
+
+GitHub - RanFeng/clipsketch-ai: 将视频瞬间转化为手绘故事 Turn Video Moments into Hand-Drawn Stories
+https://github.com/RanFeng/clipsketch-ai
+
+GitHub - hanshuaikang/AI-Media2Doc: 一键将音视频转化为小红书/公众号/知识笔记/思维导图/视频字幕等各种风格的文档。
+https://github.com/hanshuaikang/AI-Media2Doc
+
+GitHub - corvo007/Gemini-Subtitle-Pro: 一站式全自动字幕生成软件，下载、转录、翻译、压制全流程覆盖，无需人工介入 / One-stop automated subtitle generator. Handles downloading, transcription, translation, and hardcoding—zero human intervention required.
+https://github.com/corvo007/Gemini-Subtitle-Pro
+
+GitHub - harry0703/MoneyPrinterTurbo: 利用AI大模型，一键生成高清短视频 Generate short videos with one click using AI LLM.
+https://github.com/harry0703/MoneyPrinterTurbo
+
+软件测试智能体
+GitHub - codefuse-ai/Test-Agent: Agent that empowers software testing with LLMs; industrial-first in China
+https://github.com/codefuse-ai/Test-Agent
+GUI 自动化智能体
+GitHub - OpenBMB/AgentCPM-GUI: AgentCPM-GUI: An on-device GUI agent for operating Android apps, enhancing reasoning ability with reinforcement fine-tuning for efficient task execution.
+https://github.com/OpenBMB/AgentCPM-GUI
+GitHub - bytedance/UI-TARS: Pioneering Automated GUI Interaction with Native Agents
+https://github.com/bytedance/UI-TARS
+GitHub - bytedance/UI-TARS-desktop: The Open-Source Multimodal AI Agent Stack: Connecting Cutting-Edge AI Models and Agent Infra
+https://github.com/bytedance/UI-TARS-desktop
+GitHub - showlab/ShowUI: [CVPR 2025] Open-source, End-to-end, Vision-Language-Action model for GUI Agent & Computer Use.
+https://github.com/showlab/ShowUI
+GitHub - X-PLUG/MobileAgent: Mobile-Agent: The Powerful GUI Agent Family
+https://github.com/X-PLUG/MobileAgent
+GitHub - OS-Copilot/OS-Copilot: An self-improving embodied conversational agent seamlessly integrated into the operating system to automate our daily tasks.
+https://github.com/OS-Copilot/OS-Copilot
+GitHub - microsoft/UFO: UFO³: Weaving the Digital Agent Galaxy
+https://github.com/microsoft/UFO
+GitHub - BAAI-Agents/Cradle: The Cradle framework is a first attempt at General Computer Control (GCC). Cradle supports agents to ace any computer task by enabling strong reasoning abilities, self-improvment, and skill curation, in a standardized general environment with minimal requirements.
+https://github.com/BAAI-Agents/Cradle
+GitHub - simular-ai/Agent-S: Agent S: an open agentic framework that uses computers like a human
+https://github.com/simular-ai/Agent-S
+GitHub - OthersideAI/self-operating-computer: A framework to enable multimodal models to operate a computer.
+https://github.com/OthersideAI/self-operating-computer
+GitHub - openinterpreter/open-interpreter: A natural language interface for computers
+https://github.com/openinterpreter/open-interpreter
+GitHub - jd-opensource/joyagent-jdgenie: 开源的端到端产品级通用智能体
+https://github.com/jd-opensource/joyagent-jdgenie
+GitHub - mobile-dev-inc/Maestro：移动和网页端到端自动化的无痛化 --- GitHub - mobile-dev-inc/Maestro: Painless E2E Automation for Mobile and Web
+https://github.com/mobile-dev-inc/Maestro
+芯片设计/验证智能体
+GitHub - hkust-zhiyao/RTLLM: An open-source benchmark for generating design RTL with natural language
+https://github.com/hkust-zhiyao/RTLLM
+GitHub - XS-MLVP/UCAgent: UnityChip Verification AI-Agent
+https://github.com/XS-MLVP/UCAgent
+GitHub - hkust-zhiyao/AssertLLM: Generating Hardware Verification Assertions from Design Specifications via Multi-LLMs
+https://github.com/hkust-zhiyao/AssertLLM
+GitHub - NVlabs/FVEval: LLM Evaluation Benchmark on Hardware Formal Verification
+https://github.com/NVlabs/FVEval
+GitHub - NVlabs/verilog-eval: Verilog evaluation benchmark for large language model
+https://github.com/NVlabs/verilog-eval
+推理部署库
+GitHub - vllm-project/vllm：一个高吞吐量且内存高效的大型语言模型推理与服务引擎 --- GitHub - vllm-project/vllm: A high-throughput and memory-efficient inference and serving engine for LLMs
+https://github.com/vllm-project/vllm
+GitHub - ggml-org/llama.cpp：C/C++ 中的 LLM 推理 --- GitHub - ggml-org/llama.cpp: LLM inference in C/C++
+https://github.com/ggml-org/llama.cpp
+GitHub - lyogavin/airllm：用单个 4GB GPU 进行的 AirLLM 70B 推理 --- GitHub - lyogavin/airllm: AirLLM 70B inference with single 4GB GPU
+https://github.com/lyogavin/airllm
+GitHub - Michael-A-Kuykendall/shimmy： ⚡ Python-free Rust inference server — OpenAI-API 兼容。GGUF + SafeTensor、热模型交换、自动发现、单一二进制。现在自由，永远自由。 --- GitHub - Michael-A-Kuykendall/shimmy: ⚡ Python-free Rust inference server — OpenAI-API compatible. GGUF + SafeTensors, hot model swap, auto-discovery, single binary. FREE now, FREE forever.
+https://github.com/Michael-A-Kuykendall/shimmy
+GitHub - mlc-ai/mlc-llm：通用 LLM 部署引擎，支持 ML 编译 --- GitHub - mlc-ai/mlc-llm: Universal LLM Deployment Engine with ML Compilation
+https://github.com/mlc-ai/mlc-llm
+GitHub - sgl-project/sglang：SGLang 是一个高性能的大型语言模型和多模态模型服务框架。 --- GitHub - sgl-project/sglang: SGLang is a high-performance serving framework for large language models and multimodal models.
+https://github.com/sgl-project/sglang
+GitHub - NVIDIA/TensorRT-LLM：TensorRT LLM 为用户提供了一个易用的 Python API，用于定义大型语言模型（LLM），并支持最先进的优化，以高效地在 NVIDIA GPU 上进行推理。TensorRT LLM 还包含创建 Python 和 C++ 运行时的组件，以高效的方式编排推理执行。 --- GitHub - NVIDIA/TensorRT-LLM: TensorRT LLM provides users with an easy-to-use Python API to define Large Language Models (LLMs) and supports state-of-the-art optimizations to perform inference efficiently on NVIDIA GPUs. TensorRT LLM also contains components to create Python and C++ runtimes that orchestrate the inference execution in a performant way.
+https://github.com/NVIDIA/TensorRT-LLM
+教程
+大模型
+Hello! · Transformers快速入门
+https://transformers.run/
+GitHub - datawhalechina/llm-cookbook: 面向开发者的 LLM 入门教程，吴恩达大模型系列课程中文版
+https://github.com/datawhalechina/llm-cookbook
+GitHub - datawhalechina/self-llm: 《开源大模型食用指南》针对中国宝宝量身打造的基于Linux环境快速微调（全参数/Lora）、部署国内外开源大模型（LLM）/多模态大模型（MLLM）教程
+https://github.com/datawhalechina/self-llm
+GitHub - datawhalechina/happy-llm: 📚 从零开始的大语言模型原理与实践教程
+https://github.com/datawhalechina/happy-llm
+GitHub - Lordog/dive-into-llms: 《动手学大模型Dive into LLMs》系列编程实践教程
+https://github.com/Lordog/dive-into-llms
+动手学大模型应用开发
+https://datawhalechina.github.io/llm-universe/#/
+GitHub - liguodongiot/llm-action: 本项目旨在分享大模型相关技术原理以及实战经验（大模型工程化、大模型应用落地）
+https://github.com/liguodongiot/llm-action
+(99+ 封私信 / 1 条消息) 从零开始训练大模型：小白也能搞定的完整教程——mini_Qwen_1B - 知乎
+https://zhuanlan.zhihu.com/p/28458152707
+GitHub - patchy631/ai-engineering-hub: In-depth tutorials on LLMs, RAGs and real-world AI agent applications.
+https://github.com/patchy631/ai-engineering-hub
+Agent
+AI Agent(智能体) 教程 | 菜鸟教程
+https://www.runoob.com/ai-agent/ai-agent-tutorial.html
+GitHub - datawhalechina/hello-agents: 📚 《从零开始构建智能体》——从零开始的智能体原理与实践教程
+https://github.com/datawhalechina/hello-agents
+GitHub - zjunlp/LLMAgentPapers：关于 LLM 代理的必读论文。 --- GitHub - zjunlp/LLMAgentPapers: Must-read Papers on LLM Agents.
+https://github.com/zjunlp/LLMAgentPapers
+GitHub - WooooDyy/LLM-Agent-Paper-List：Zhiheng 习等人撰写的 86 页 SCIS 封面论文《基于大型语言模型代理的兴起与潜力：一项综述》的论文列表。 --- GitHub - WooooDyy/LLM-Agent-Paper-List: The paper list of the 86-page SCIS cover paper "The Rise and Potential of Large Language Model Based Agents: A Survey" by Zhiheng Xi et al.
+https://github.com/WooooDyy/LLM-Agent-Paper-List
+Skills
+platform.claude.com/cookbook/skills-notebooks-01-skills-introduction
+https://platform.claude.com/cookbook/skills-notebooks-01-skills-introduction
+GitHub - ComposioHQ/awesome-claude-skills: A curated list of awesome Claude Skills, resources, and tools for customizing Claude AI workflows
+https://github.com/ComposioHQ/awesome-claude-skills
+GitHub - travisvn/awesome-claude-skills: A curated list of awesome Claude Skills, resources, and tools for customizing Claude AI workflows — particularly Claude Code
+https://github.com/travisvn/awesome-claude-skills
+GitHub - BehiSecc/awesome-claude-skills: A curated list of Claude Skills.
+https://github.com/BehiSecc/awesome-claude-skills
+GitHub - anthropics/claude-cookbooks: A collection of notebooks/recipes showcasing some fun and effective ways of using Claude.
+https://github.com/anthropics/claude-cookbooks
+Agent 技能目录 --- The Agent Skills Directory
+https://skills.sh/
+推理部署
+Ollama 教程 | 菜鸟教程
+https://www.runoob.com/ollama/ollama-tutorial.html
+欢迎来到 vLLM！ | vLLM 中文站
+https://vllm.hyper.ai/docs/
+vLLM
+https://docs.vllm.ai/en/latest/
+安装 | vLLM 中文站
+https://vllm.hyper.ai/docs/getting-started/installation/
+编程工具
+GitHub - vbgate/learn-opencode: OpenCode 中文实战课源码与内容仓库：一课一页，覆盖入门到实战工作流。
+https://github.com/vbgate/learn-opencode
+GitHub - ZeroZ-lab/learn-opencode
+https://github.com/ZeroZ-lab/learn-opencode
+GitHub - hesreallyhim/awesome-claude-code: A curated list of awesome skills, hooks, slash-commands, agent orchestrators, applications, and plugins for Claude Code by Anthropic
+https://github.com/hesreallyhim/awesome-claude-code
+GitHub - ykdojo/claude-code-tips: 40+ tips for getting the most out of Claude Code, from basics to advanced - includes a custom status line script, cutting the system prompt in half, using Gemini CLI as Claude Code's minion, and Claude Code running itself in a container. Also includes the dx plugin.
+https://github.com/ykdojo/claude-code-tips
+GitHub - shareAI-lab/learn-claude-code: Bash is all you need！write a claude code with only 16 line code
+https://github.com/shareAI-lab/learn-claude-code
+GitHub - wesammustafa/Claude-Code-Everything-You-Need-to-Know: The ultimate all-in-one guide to mastering Claude Code. From setup, prompt engineering, commands, hooks, workflows, automation, and integrations, to MCP servers, tools, and the BMAD method—packed with step-by-step tutorials, real-world examples, and expert strategies to make this the global go-to repo for Claude mastery.
+https://github.com/wesammustafa/Claude-Code-Everything-You-Need-to-Know
+GitHub - travisvn/awesome-claude-skills: A curated list of awesome Claude Skills, resources, and tools for customizing Claude AI workflows — particularly Claude Code
+https://github.com/travisvn/awesome-claude-skills
+面试
+GitHub - karminski/one-small-step: 这是一个简单的技术科普教程项目，主要聚焦于解释一些有趣的，前沿的技术概念和原理。每篇文章都力求在 5 分钟内阅读完成。
+https://github.com/karminski/one-small-step
+GitHub - KalyanKS-NLP/LLM-面试问答-中心：100+ 个带有答案的 LLM 面试问题。 --- GitHub - KalyanKS-NLP/LLM-Interview-Questions-and-Answers-Hub: 100+ LLM interview questions with answers.
+https://github.com/KalyanKS-NLP/LLM-Interview-Questions-and-Answers-Hub
+GitHub - llmgenai/LLMInterview 问题：本仓库包含谷歌、英伟达、Meta、Microsoft 及财富 500 强等顶级公司提出的大型语言模型（LLM）面试问题。 --- GitHub - llmgenai/LLMInterviewQuestions: This repository contains LLM (Large language model) interview question asked in top companies like Google, Nvidia , Meta , Microsoft & fortune 500 companies.
+https://github.com/llmgenai/LLMInterviewQuestions
+GitHub - luhengshiwo/LLMForEverybody: 每个人都能看懂的大模型知识分享，LLMs春/秋招大模型面试前必看，让你和面试官侃侃而谈
+https://github.com/luhengshiwo/LLMForEverybody
