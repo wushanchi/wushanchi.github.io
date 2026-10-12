@@ -1,5 +1,5 @@
 # wushanchi.github.io
 
-GitHub Pages root site for [Server Board](https://github.com/wushanchi/server_board).
+GitHub Pages root site. The root page redirects to [Server Board](https://wushanchi.github.io/server_board/).
 
-The root `index.html` and `assets/` are the production build of the `server_board` dashboard. The collector, tests, and deployment instructions live in the source repository. The existing `karpathy-gpt-roadmap/` directory is retained.
+The dashboard, collector, tests, and Pages deployment files live in [wushanchi/server_board](https://github.com/wushanchi/server_board). The existing `karpathy-gpt-roadmap/` directory is retained.
